@@ -2,7 +2,12 @@ import SwiftUI
 
 struct DashboardView: View {
     @State private var animationAmount = 1.0
-    @State private var showingResetAlert = false
+    @State private var showingPledgeModal = false
+    @State private var showingMeditationModal = false
+    @State private var showingResetModal = false
+    @State private var showingPanicModal = false
+    @State private var showingCelebration = false
+    @State private var celebrationMilestone = 0
     @State private var timer: Timer?
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
@@ -35,6 +40,9 @@ struct DashboardView: View {
                         actionButtons
                             .padding(.horizontal)
                             .padding(.bottom, isCompact ? 20 : 30)
+                        
+                        quickStatsCards
+                            .padding(.horizontal)
                     }
                 }
             }
@@ -47,13 +55,20 @@ struct DashboardView: View {
         .onDisappear {
             stopTimer()
         }
-        .alert("Reset Progress", isPresented: $showingResetAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Reset", role: .destructive) {
-                dataService.recordRelapse()
-            }
-        } message: {
-            Text("Recording a relapse will reset your current streak. Are you sure?")
+        .sheet(isPresented: $showingPledgeModal) {
+            PledgeModal(isPresented: $showingPledgeModal)
+        }
+        .sheet(isPresented: $showingMeditationModal) {
+            MeditationModal(isPresented: $showingMeditationModal)
+        }
+        .sheet(isPresented: $showingResetModal) {
+            ResetModal(isPresented: $showingResetModal)
+        }
+        .fullScreenCover(isPresented: $showingPanicModal) {
+            PanicButtonModal(isPresented: $showingPanicModal)
+        }
+        .fullScreenCover(isPresented: $showingCelebration) {
+            CelebrationView(isPresented: $showingCelebration, milestone: celebrationMilestone)
         }
     }
     
@@ -185,16 +200,77 @@ struct DashboardView: View {
     func handleActionButton(title: String) {
         switch title {
         case "Pledge":
-            dataService.completePledge()
+            showingPledgeModal = true
         case "Meditate":
-            dataService.incrementMeditationCount()
+            showingMeditationModal = true
         case "Reset":
-            showingResetAlert = true
+            showingResetModal = true
         case "Panic":
-            print("Panic button tapped")
+            showingPanicModal = true
         default:
             break
         }
+    }
+    
+    var quickStatsCards: some View {
+        VStack(spacing: 15) {
+            Text("Today's Progress")
+                .font(.system(size: isCompact ? 18 : 20, weight: .bold))
+                .foregroundColor(ColorTheme.textPrimary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            HStack(spacing: isCompact ? 10 : 15) {
+                quickStatCard(
+                    title: "Money Saved",
+                    value: "$\(Int(dataService.sobrietyData?.moneySaved ?? 0))",
+                    icon: "dollarsign.circle.fill",
+                    color: ColorTheme.successGreen
+                )
+                
+                quickStatCard(
+                    title: "Days Strong",
+                    value: "\(dataService.sobrietyData?.currentStreak ?? 0)",
+                    icon: "flame.fill",
+                    color: ColorTheme.accentCyan
+                )
+            }
+            
+            HStack(spacing: isCompact ? 10 : 15) {
+                quickStatCard(
+                    title: "Drinks Avoided",
+                    value: "\(dataService.sobrietyData?.drinksAvoided ?? 0)",
+                    icon: "wineglass",
+                    color: ColorTheme.accentPurple
+                )
+                
+                quickStatCard(
+                    title: "Pledges Made",
+                    value: "\(AppSettings.shared.totalPledges)",
+                    icon: "hand.raised.fill",
+                    color: ColorTheme.accentPink
+                )
+            }
+        }
+    }
+    
+    func quickStatCard(title: String, value: String, icon: String, color: Color) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: isCompact ? 20 : 24))
+                .foregroundColor(color)
+            
+            Text(value)
+                .font(.system(size: isCompact ? 18 : 22, weight: .bold, design: .monospaced))
+                .foregroundColor(ColorTheme.textPrimary)
+            
+            Text(title)
+                .font(.system(size: isCompact ? 10 : 12))
+                .foregroundColor(ColorTheme.textSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(isCompact ? 12 : 15)
+        .futuristicCard()
     }
     
     func startTimer() {
@@ -210,7 +286,23 @@ struct DashboardView: View {
     }
     
     func updateTimeComponents() {
+        let previousStreak = timeComponents.days
         timeComponents = dataService.getTimeComponents()
+        
+        let currentStreak = timeComponents.days
+        if currentStreak > previousStreak {
+            checkForMilestone(currentStreak)
+        }
+    }
+    
+    func checkForMilestone(_ streak: Int) {
+        let milestones = [1, 7, 14, 30, 60, 90, 180, 365]
+        if milestones.contains(streak) {
+            celebrationMilestone = streak
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                showingCelebration = true
+            }
+        }
     }
 }
 
