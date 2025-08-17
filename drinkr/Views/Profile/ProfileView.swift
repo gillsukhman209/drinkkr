@@ -3,6 +3,7 @@ import SwiftUI
 struct ProfileView: View {
     @State private var selectedTimeFrame = "Today"
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @EnvironmentObject var dataService: DataService
     
     let timeFrames = ["Today", "This Week", "This Month"]
     
@@ -55,14 +56,14 @@ struct ProfileView: View {
                     .font(.system(size: isCompact ? 14 : 16))
                     .foregroundColor(ColorTheme.textSecondary)
                 
-                Text("John Doe")
+                Text(dataService.currentUser?.name ?? "Anonymous")
                     .font(.system(size: isCompact ? 22 : 26, weight: .bold))
                     .foregroundColor(ColorTheme.textPrimary)
                 
                 HStack {
                     Image(systemName: "flame.fill")
                         .foregroundColor(.orange)
-                    Text("3 Day Streak")
+                    Text("\(dataService.sobrietyData?.currentStreak ?? 0) Day Streak")
                         .font(.system(size: isCompact ? 14 : 16, weight: .semibold))
                         .foregroundColor(.orange)
                 }
@@ -76,8 +77,8 @@ struct ProfileView: View {
     
     var streakCards: some View {
         HStack(spacing: isCompact ? 12 : 15) {
-            streakCard(title: "Current", value: "3", unit: "days", color: ColorTheme.successGreen)
-            streakCard(title: "Best", value: "90", unit: "days", color: ColorTheme.accentPurple)
+            streakCard(title: "Current", value: "\(dataService.sobrietyData?.currentStreak ?? 0)", unit: "days", color: ColorTheme.successGreen)
+            streakCard(title: "Best", value: "\(dataService.sobrietyData?.longestStreak ?? 0)", unit: "days", color: ColorTheme.accentPurple)
         }
     }
     
@@ -133,10 +134,10 @@ struct ProfileView: View {
     
     var statsView: some View {
         VStack(spacing: isCompact ? 15 : 20) {
-            statRow(label: "Money Saved", value: "$150", icon: "dollarsign.circle.fill", color: ColorTheme.successGreen)
-            statRow(label: "Drinks Avoided", value: "45", icon: "wineglass", color: ColorTheme.accentPurple)
-            statRow(label: "Calories Saved", value: "6,750", icon: "flame.fill", color: .orange)
-            statRow(label: "Time Reclaimed", value: "18 hrs", icon: "clock.fill", color: ColorTheme.accentCyan)
+            statRow(label: "Money Saved", value: "$\(Int(dataService.sobrietyData?.moneySaved ?? 0))", icon: "dollarsign.circle.fill", color: ColorTheme.successGreen)
+            statRow(label: "Drinks Avoided", value: "\(dataService.sobrietyData?.drinksAvoided ?? 0)", icon: "wineglass", color: ColorTheme.accentPurple)
+            statRow(label: "Calories Saved", value: "\(dataService.sobrietyData?.caloriesSaved ?? 0)", icon: "flame.fill", color: .orange)
+            statRow(label: "Time Reclaimed", value: "\(Int(dataService.sobrietyData?.timeReclaimed ?? 0)) hrs", icon: "clock.fill", color: ColorTheme.accentCyan)
         }
         .padding(isCompact ? 20 : 25)
         .futuristicCard()
@@ -167,10 +168,10 @@ struct ProfileView: View {
                 .font(.system(size: isCompact ? 14 : 16))
                 .foregroundColor(ColorTheme.textSecondary)
             
-            Text("0")
+            Text("\(dataService.sobrietyData?.getTodayRelapseCount() ?? 0)")
                 .font(.system(size: isCompact ? 48 : 60, weight: .bold, design: .monospaced))
-                .foregroundColor(ColorTheme.successGreen)
-                .glowEffect(color: ColorTheme.successGreen, radius: 10)
+                .foregroundColor((dataService.sobrietyData?.getTodayRelapseCount() ?? 0) == 0 ? ColorTheme.successGreen : ColorTheme.warningOrange)
+                .glowEffect(color: (dataService.sobrietyData?.getTodayRelapseCount() ?? 0) == 0 ? ColorTheme.successGreen : ColorTheme.warningOrange, radius: 10)
             
             Text("Keep it up!")
                 .font(.system(size: isCompact ? 16 : 18, weight: .medium))
@@ -184,4 +185,5 @@ struct ProfileView: View {
 
 #Preview {
     ProfileView()
+        .environmentObject(DataService())
 }

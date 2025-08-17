@@ -1,18 +1,14 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @State private var sobrietyDate = Date().addingTimeInterval(-86400 * 3)
     @State private var animationAmount = 1.0
+    @State private var showingResetAlert = false
+    @State private var timer: Timer?
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
+    @EnvironmentObject var dataService: DataService
     
-    var timeComponents: (days: Int, hours: Int, minutes: Int) {
-        let interval = Date().timeIntervalSince(sobrietyDate)
-        let days = Int(interval) / 86400
-        let hours = Int(interval) % 86400 / 3600
-        let minutes = Int(interval) % 3600 / 60
-        return (days, hours, minutes)
-    }
+    @State private var timeComponents: (days: Int, hours: Int, minutes: Int, seconds: Int) = (0, 0, 0, 0)
     
     var isCompact: Bool {
         horizontalSizeClass == .compact || verticalSizeClass == .compact
@@ -45,20 +41,35 @@ struct DashboardView: View {
             .navigationBarHidden(true)
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            startTimer()
+        }
+        .onDisappear {
+            stopTimer()
+        }
+        .alert("Reset Progress", isPresented: $showingResetAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset", role: .destructive) {
+                dataService.recordRelapse()
+            }
+        } message: {
+            Text("Recording a relapse will reset your current streak. Are you sure?")
+        }
     }
     
     var weekProgressIndicator: some View {
         HStack(spacing: isCompact ? 8 : 12) {
             ForEach(0..<7) { day in
+                let progress = dataService.getWeekProgress()
                 Circle()
-                    .fill(day < 3 ? ColorTheme.accentCyan : Color.gray.opacity(0.3))
+                    .fill(progress[day] ? ColorTheme.accentCyan : Color.gray.opacity(0.3))
                     .frame(width: isCompact ? 35 : 40, height: isCompact ? 35 : 40)
                     .overlay(
                         Text(dayLabel(for: day))
                             .font(.system(size: isCompact ? 10 : 12, weight: .bold))
-                            .foregroundColor(day < 3 ? .black : .gray)
+                            .foregroundColor(progress[day] ? .black : .gray)
                     )
-                    .glowEffect(color: day < 3 ? ColorTheme.accentCyan : .clear, radius: 5)
+                    .glowEffect(color: progress[day] ? ColorTheme.accentCyan : .clear, radius: 5)
             }
         }
         .padding(.horizontal)
@@ -75,10 +86,11 @@ struct DashboardView: View {
                 .font(.system(size: isCompact ? 16 : 18, weight: .medium))
                 .foregroundColor(ColorTheme.textSecondary)
             
-            HStack(spacing: isCompact ? 15 : 20) {
+            HStack(spacing: isCompact ? 10 : 15) {
                 timeComponent(value: timeComponents.days, unit: "days")
                 timeComponent(value: timeComponents.hours, unit: "hours")
                 timeComponent(value: timeComponents.minutes, unit: "mins")
+                timeComponent(value: timeComponents.seconds, unit: "secs")
             }
         }
         .padding(isCompact ? 20 : 25)
@@ -147,7 +159,7 @@ struct DashboardView: View {
     
     func actionButton(title: String, icon: String, color: Color) -> some View {
         Button(action: {
-            print("\(title) button tapped")
+            handleActionButton(title: title)
         }) {
             VStack(spacing: 8) {
                 Image(systemName: icon)
@@ -169,8 +181,40 @@ struct DashboardView: View {
             }
         }
     }
+    
+    func handleActionButton(title: String) {
+        switch title {
+        case "Pledge":
+            dataService.completePledge()
+        case "Meditate":
+            dataService.incrementMeditationCount()
+        case "Reset":
+            showingResetAlert = true
+        case "Panic":
+            print("Panic button tapped")
+        default:
+            break
+        }
+    }
+    
+    func startTimer() {
+        updateTimeComponents()
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            updateTimeComponents()
+        }
+    }
+    
+    func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    func updateTimeComponents() {
+        timeComponents = dataService.getTimeComponents()
+    }
 }
 
 #Preview {
     DashboardView()
+        .environmentObject(DataService())
 }

@@ -6,10 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     @State private var selectedTab = 0
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.modelContext) private var modelContext
+    @StateObject private var dataService = DataService()
     
     init() {
         UITabBar.appearance().backgroundColor = UIColor.black.withAlphaComponent(0.3)
@@ -50,6 +53,10 @@ struct ContentView: View {
         }
         .accentColor(.cyan)
         .preferredColorScheme(.dark)
+        .environmentObject(dataService)
+        .onAppear {
+            dataService.initialize(with: modelContext)
+        }
     }
 }
 

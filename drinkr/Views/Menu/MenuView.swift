@@ -5,6 +5,7 @@ struct MenuView: View {
     @State private var darkModeEnabled = true
     @State private var showingResetAlert = false
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @EnvironmentObject var dataService: DataService
     
     var isCompact: Bool {
         horizontalSizeClass == .compact
@@ -210,10 +211,11 @@ struct MenuView: View {
     }
     
     func resetProgress() {
-        print("Progress reset")
+        dataService.resetProgress()
     }
 }
 
 #Preview {
     MenuView()
+        .environmentObject(DataService())
 }

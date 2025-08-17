@@ -12,7 +12,10 @@ import SwiftData
 struct drinkrApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            User.self,
+            SobrietyData.self,
+            Achievement.self,
+            Relapse.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
