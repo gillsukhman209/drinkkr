@@ -76,11 +76,14 @@ class NotificationService: ObservableObject {
                 
                 let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
                 
+                let identifier = "daily-checkin-\(Date().timeIntervalSince1970)"
                 let request = UNNotificationRequest(
-                    identifier: "daily-checkin-\(Date().timeIntervalSince1970)",
+                    identifier: identifier,
                     content: content,
                     trigger: trigger
                 )
+                
+                print("📅 Creating notification with identifier: \(identifier)")
                 
                 UNUserNotificationCenter.current().add(request) { error in
                     DispatchQueue.main.async {

@@ -7,9 +7,12 @@
 
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 @main
 struct drinkrApp: App {
+    @StateObject private var appStateManager = AppStateManager.shared
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             User.self,
@@ -29,6 +32,7 @@ struct drinkrApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(appStateManager)
         }
         .modelContainer(sharedModelContainer)
     }

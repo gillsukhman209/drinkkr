@@ -11,6 +11,7 @@ final class User {
     var notificationsEnabled: Bool
     var notificationTime: Date
     var darkModeEnabled: Bool
+    var lastCheckInDate: Date?
     
     init(
         name: String = "Anonymous",
@@ -19,7 +20,8 @@ final class User {
         joinedDate: Date = Date(),
         notificationsEnabled: Bool = true,
         notificationTime: Date = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date()) ?? Date(),
-        darkModeEnabled: Bool = true
+        darkModeEnabled: Bool = true,
+        lastCheckInDate: Date? = nil
     ) {
         self.id = UUID()
         self.name = name
@@ -29,5 +31,6 @@ final class User {
         self.notificationsEnabled = notificationsEnabled
         self.notificationTime = notificationTime
         self.darkModeEnabled = darkModeEnabled
+        self.lastCheckInDate = lastCheckInDate
     }
 }

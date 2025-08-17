@@ -163,6 +163,17 @@ class DataService: ObservableObject {
         saveContext()
     }
     
+    func logCheckIn(mood: Int, notes: String) {
+        // Log the check-in (you can expand this to save detailed data)
+        print("Check-in logged: Mood \(mood)/5, Notes: \(notes)")
+        
+        // Update last check-in date
+        if let user = currentUser {
+            user.lastCheckInDate = Date()
+            saveContext()
+        }
+    }
+    
     private func saveContext() {
         guard let modelContext = modelContext else { return }
         try? modelContext.save()
