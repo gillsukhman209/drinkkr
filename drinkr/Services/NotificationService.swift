@@ -13,35 +13,92 @@ class NotificationService: ObservableObject {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             DispatchQueue.main.async {
                 if granted {
-                    print("Notification permission granted")
+                    print("✅ Notification permission granted")
+                } else if let error = error {
+                    print("❌ Notification permission error: \(error)")
                 } else {
-                    print("Notification permission denied")
+                    print("❌ Notification permission denied")
                 }
             }
         }
     }
     
-    func scheduleCheckInNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "Daily Check-In"
-        content.body = "How are you feeling today? Remember, you're stronger than any craving. 💪"
-        content.sound = .default
-        content.badge = 1
-        
-        // Schedule for 24 hours from now
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 24 * 60 * 60, repeats: false)
-        
-        let request = UNNotificationRequest(
-            identifier: "daily-checkin-\(Date().timeIntervalSince1970)",
-            content: content,
-            trigger: trigger
-        )
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Error scheduling notification: \(error)")
-            } else {
-                print("Check-in notification scheduled for 24 hours from now")
+    func checkPermissionStatus() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                switch settings.authorizationStatus {
+                case .authorized:
+                    print("✅ Notifications authorized")
+                case .denied:
+                    print("❌ Notifications denied")
+                case .notDetermined:
+                    print("⚠️ Notifications not determined")
+                case .provisional:
+                    print("⚠️ Notifications provisional")
+                case .ephemeral:
+                    print("⚠️ Notifications ephemeral")
+                @unknown default:
+                    print("❓ Unknown notification status")
+                }
+                
+                print("Alert setting: \(settings.alertSetting)")
+                print("Sound setting: \(settings.soundSetting)")
+                print("Badge setting: \(settings.badgeSetting)")
+            }
+        }
+    }
+    
+    func scheduleCheckInNotification(for date: Date = Date().addingTimeInterval(24 * 60 * 60)) {
+        // First check if we have permission
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            guard settings.authorizationStatus == .authorized else {
+                print("❌ Cannot schedule notification - permission not granted")
+                return
+            }
+            
+            DispatchQueue.main.async {
+                let content = UNMutableNotificationContent()
+                content.title = "Daily Check-In"
+                content.body = "How are you feeling today? Remember, you're stronger than any craving. 💪"
+                content.sound = .default
+                content.badge = 1
+                
+                // Calculate time interval from now to the selected date
+                let timeInterval = date.timeIntervalSince(Date())
+                
+                // Don't schedule if the date is in the past
+                guard timeInterval > 0 else {
+                    print("❌ Cannot schedule notification for past date")
+                    return
+                }
+                
+                print("⏰ Scheduling notification for \(timeInterval) seconds from now")
+                
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
+                
+                let request = UNNotificationRequest(
+                    identifier: "daily-checkin-\(Date().timeIntervalSince1970)",
+                    content: content,
+                    trigger: trigger
+                )
+                
+                UNUserNotificationCenter.current().add(request) { error in
+                    DispatchQueue.main.async {
+                        if let error = error {
+                            print("❌ Error scheduling notification: \(error)")
+                        } else {
+                            let formatter = DateFormatter()
+                            formatter.dateStyle = .medium
+                            formatter.timeStyle = .short
+                            print("✅ Check-in notification scheduled for \(formatter.string(from: date))")
+                            
+                            // Verify the notification was added
+                            self.getPendingNotificationCount { count in
+                                print("📱 Total pending notifications: \(count)")
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -119,6 +176,33 @@ class NotificationService: ObservableObject {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
             DispatchQueue.main.async {
                 completion(requests.count)
+            }
+        }
+    }
+    
+    func scheduleTestNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "Test Notification"
+        content.body = "This is a test to verify notifications are working! 🎉"
+        content.sound = .default
+        content.badge = 1
+        
+        // Schedule for 5 seconds from now
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5.0, repeats: false)
+        
+        let request = UNNotificationRequest(
+            identifier: "test-notification-\(Date().timeIntervalSince1970)",
+            content: content,
+            trigger: trigger
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Error scheduling test notification: \(error)")
+                } else {
+                    print("✅ Test notification scheduled for 5 seconds from now")
+                }
             }
         }
     }

@@ -203,7 +203,11 @@ struct PledgeModal: View {
     }
     
     func scheduleCheckIn() {
-        notificationService.scheduleCheckInNotification()
+        // Check permission status for debugging
+        notificationService.checkPermissionStatus()
+        
+        // Schedule the notification
+        notificationService.scheduleCheckInNotification(for: selectedCheckInTime)
         
         withAnimation(.spring()) {
             showingSuccess = true
