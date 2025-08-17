@@ -6,56 +6,53 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @State private var selectedTab = 0
+    @Environment(\.colorScheme) var colorScheme
+    
+    init() {
+        UITabBar.appearance().backgroundColor = UIColor.black.withAlphaComponent(0.3)
+        UITabBar.appearance().unselectedItemTintColor = UIColor.gray
+    }
+    
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+        TabView(selection: $selectedTab) {
+            DashboardView()
+                .tabItem {
+                    Label("Home", systemImage: "house.fill")
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                .tag(0)
+            
+            LibraryView()
+                .tabItem {
+                    Label("Library", systemImage: "books.vertical.fill")
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+                .tag(1)
+            
+            ProfileView()
+                .tabItem {
+                    Label("Stats", systemImage: "chart.bar.fill")
                 }
-            }
-        } detail: {
-            Text("Select an item")
+                .tag(2)
+            
+            ChatView()
+                .tabItem {
+                    Label("Chat", systemImage: "message.fill")
+                }
+                .tag(3)
+            
+            MenuView()
+                .tabItem {
+                    Label("Menu", systemImage: "line.3.horizontal")
+                }
+                .tag(4)
         }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
+        .accentColor(.cyan)
+        .preferredColorScheme(.dark)
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
