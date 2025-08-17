@@ -30,7 +30,7 @@ struct LibraryView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                ColorTheme.backgroundGradient
+                StarfieldBackground()
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
