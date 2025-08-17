@@ -52,7 +52,7 @@ struct LibraryView: View {
                     }
                 }
             }
-            .navigationTitle("Library")
+            .navigationTitle("Learn")
             .navigationBarTitleDisplayMode(.large)
         }
         .navigationViewStyle(StackNavigationViewStyle())
@@ -63,7 +63,7 @@ struct LibraryView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(ColorTheme.textSecondary)
             
-            TextField("Search library...", text: $searchText)
+            TextField("Search learning content...", text: $searchText)
                 .foregroundColor(ColorTheme.textPrimary)
                 .accentColor(ColorTheme.accentCyan)
         }

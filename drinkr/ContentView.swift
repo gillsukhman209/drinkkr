@@ -29,29 +29,23 @@ struct ContentView: View {
                 }
                 .tag(0)
             
-            LibraryView()
-                .tabItem {
-                    Label("Library", systemImage: "books.vertical.fill")
-                }
-                .tag(1)
-            
             ProfileView()
                 .tabItem {
                     Label("Stats", systemImage: "chart.bar.fill")
                 }
-                .tag(2)
+                .tag(1)
             
-            ChatView()
+            LibraryView()
                 .tabItem {
-                    Label("Chat", systemImage: "message.fill")
+                    Label("Learn", systemImage: "graduationcap.fill")
                 }
-                .tag(3)
+                .tag(2)
             
             MenuView()
                 .tabItem {
                     Label("Menu", systemImage: "line.3.horizontal")
                 }
-                .tag(4)
+                .tag(3)
         }
         .accentColor(.cyan)
         .preferredColorScheme(.dark)
