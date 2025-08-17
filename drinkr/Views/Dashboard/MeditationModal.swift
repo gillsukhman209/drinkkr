@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct MeditationModal: View {
     @Binding var isPresented: Bool
@@ -11,6 +12,7 @@ struct MeditationModal: View {
     @State private var animationAmount = 1.0
     @State private var breathPhase: BreathPhase = .inhale
     @State private var showingCompletion = false
+    @State private var hapticTimer: Timer?
     
     let durations = [3, 5, 10, 15, 20]
     
@@ -32,6 +34,15 @@ struct MeditationModal: View {
             case .hold: return 2.0
             case .exhale: return 6.0
             case .pause: return 2.0
+            }
+        }
+        
+        var animationScale: Double {
+            switch self {
+            case .inhale: return 1.4  // Expand on inhale
+            case .hold: return 1.4    // Stay expanded
+            case .exhale: return 0.8  // Contract on exhale
+            case .pause: return 0.8   // Stay contracted
             }
         }
     }
@@ -61,8 +72,6 @@ struct MeditationModal: View {
             
             durationSelector
             
-            meditationOptions
-            
             actionButtons
         }
         .padding(isCompact ? 20 : 30)
@@ -79,7 +88,7 @@ struct MeditationModal: View {
                 .font(.system(size: isCompact ? 24 : 28, weight: .bold))
                 .foregroundColor(ColorTheme.textPrimary)
             
-            Text("Find your center and stay focused")
+            Text("Guided breathing to help you find calm")
                 .font(.system(size: isCompact ? 14 : 16))
                 .foregroundColor(ColorTheme.textSecondary)
         }
@@ -122,58 +131,6 @@ struct MeditationModal: View {
         .futuristicCard()
     }
     
-    var meditationOptions: some View {
-        VStack(spacing: 15) {
-            meditationOptionCard(
-                title: "Guided Breathing",
-                description: "Follow the breathing animation",
-                icon: "wind",
-                isRecommended: true
-            )
-            
-            meditationOptionCard(
-                title: "Silent Meditation",
-                description: "Quiet reflection time",
-                icon: "moon.fill",
-                isRecommended: false
-            )
-        }
-    }
-    
-    func meditationOptionCard(title: String, description: String, icon: String, isRecommended: Bool) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .font(.system(size: isCompact ? 24 : 28))
-                .foregroundColor(ColorTheme.accentCyan)
-                .frame(width: isCompact ? 40 : 50)
-            
-            VStack(alignment: .leading, spacing: 3) {
-                HStack {
-                    Text(title)
-                        .font(.system(size: isCompact ? 16 : 18, weight: .semibold))
-                        .foregroundColor(ColorTheme.textPrimary)
-                    
-                    if isRecommended {
-                        Text("RECOMMENDED")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
-                            .background(ColorTheme.accentCyan)
-                            .cornerRadius(8)
-                    }
-                }
-                
-                Text(description)
-                    .font(.system(size: isCompact ? 12 : 14))
-                    .foregroundColor(ColorTheme.textSecondary)
-            }
-            
-            Spacer()
-        }
-        .padding(isCompact ? 15 : 20)
-        .futuristicCard()
-    }
     
     var actionButtons: some View {
         VStack(spacing: 15) {
@@ -209,16 +166,28 @@ struct MeditationModal: View {
     }
     
     var meditationActiveView: some View {
-        VStack(spacing: isCompact ? 30 : 40) {
+        VStack(spacing: 0) {
+            // Timer at top with fixed spacing
             timerDisplay
+                .padding(.top, isCompact ? 40 : 60)
             
+            Spacer(minLength: isCompact ? 40 : 60)
+            
+            // Breathing animation in center
             breathingAnimation
+                .frame(height: isCompact ? 280 : 320)
             
+            Spacer(minLength: isCompact ? 20 : 30)
+            
+            // Instruction text below animation
             breathingInstruction
+                .padding(.bottom, isCompact ? 30 : 40)
             
+            // Control buttons at bottom
             controlButtons
+                .padding(.bottom, isCompact ? 40 : 60)
         }
-        .padding(isCompact ? 20 : 30)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     var timerDisplay: some View {
@@ -236,31 +205,80 @@ struct MeditationModal: View {
     
     var breathingAnimation: some View {
         ZStack {
+            // Outer glow effect
             Circle()
                 .fill(
                     RadialGradient(
-                        colors: [ColorTheme.accentPurple.opacity(0.4), ColorTheme.accentCyan.opacity(0.2)],
+                        colors: [
+                            ColorTheme.accentCyan.opacity(0.3),
+                            ColorTheme.accentPurple.opacity(0.2),
+                            Color.clear
+                        ],
                         center: .center,
-                        startRadius: 20,
-                        endRadius: 100
+                        startRadius: 10,
+                        endRadius: 120
                     )
                 )
-                .frame(width: isCompact ? 200 : 250, height: isCompact ? 200 : 250)
+                .frame(width: isCompact ? 240 : 280, height: isCompact ? 240 : 280)
+                .scaleEffect(animationAmount * 0.8)
+                .opacity(0.6)
+            
+            // Main breathing circle
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            ColorTheme.accentCyan.opacity(0.6),
+                            ColorTheme.accentPurple.opacity(0.4)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: isCompact ? 160 : 200, height: isCompact ? 160 : 200)
                 .scaleEffect(animationAmount)
                 .animation(.easeInOut(duration: breathPhase.duration), value: animationAmount)
             
+            // Inner circle for depth
             Circle()
-                .stroke(ColorTheme.accentPurple, lineWidth: 3)
-                .frame(width: isCompact ? 180 : 220, height: isCompact ? 180 : 220)
-                .opacity(0.6)
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            ColorTheme.accentCyan.opacity(0.8),
+                            ColorTheme.accentCyan.opacity(0.3)
+                        ],
+                        center: .center,
+                        startRadius: 5,
+                        endRadius: 50
+                    )
+                )
+                .frame(width: isCompact ? 80 : 100, height: isCompact ? 80 : 100)
+                .scaleEffect(animationAmount * 1.2)
+                .animation(.easeInOut(duration: breathPhase.duration), value: animationAmount)
         }
     }
     
     var breathingInstruction: some View {
-        Text(breathPhase.instruction)
-            .font(.system(size: isCompact ? 24 : 28, weight: .medium))
-            .foregroundColor(ColorTheme.textPrimary)
-            .animation(.easeInOut, value: breathPhase)
+        VStack(spacing: 8) {
+            Text(breathPhase.instruction)
+                .font(.system(size: isCompact ? 28 : 34, weight: .semibold))
+                .foregroundColor(ColorTheme.textPrimary)
+                .animation(.easeInOut(duration: 0.3), value: breathPhase)
+            
+            Text(instructionSubtext)
+                .font(.system(size: isCompact ? 14 : 16))
+                .foregroundColor(ColorTheme.textSecondary)
+                .animation(.easeInOut(duration: 0.3), value: breathPhase)
+        }
+    }
+    
+    var instructionSubtext: String {
+        switch breathPhase {
+        case .inhale: return "Slowly fill your lungs"
+        case .hold: return "Keep the air in"
+        case .exhale: return "Release the air slowly"
+        case .pause: return "Rest and prepare"
+        }
     }
     
     var controlButtons: some View {
@@ -346,37 +364,86 @@ struct MeditationModal: View {
     }
     
     func startBreathingCycle() {
+        // Start with initial animation scale
+        animationAmount = breathPhase.animationScale
         cycleBreathPhase()
     }
     
     func cycleBreathPhase() {
         guard isActive else { return }
         
-        switch breathPhase {
-        case .inhale:
-            animationAmount = 1.4
-            breathPhase = .hold
-        case .hold:
-            breathPhase = .exhale
-        case .exhale:
-            animationAmount = 1.0
-            breathPhase = .pause
-        case .pause:
-            breathPhase = .inhale
+        // Start haptic feedback that syncs with animation
+        startHapticFeedbackForPhase(breathPhase)
+        
+        // Update animation scale based on breath phase
+        withAnimation(.easeInOut(duration: breathPhase.duration)) {
+            animationAmount = breathPhase.animationScale
         }
         
+        // Move to next phase after duration
         DispatchQueue.main.asyncAfter(deadline: .now() + breathPhase.duration) {
-            cycleBreathPhase()
+            guard self.isActive else { return }
+            
+            // Stop current haptic feedback
+            self.stopHapticFeedback()
+            
+            // Cycle through phases
+            switch self.breathPhase {
+            case .inhale:
+                self.breathPhase = .hold
+            case .hold:
+                self.breathPhase = .exhale
+            case .exhale:
+                self.breathPhase = .pause
+            case .pause:
+                self.breathPhase = .inhale
+            }
+            
+            self.cycleBreathPhase()
         }
+    }
+    
+    func startHapticFeedbackForPhase(_ phase: BreathPhase) {
+        // Stop any existing haptic timer
+        stopHapticFeedback()
+        
+        switch phase {
+        case .inhale, .exhale:
+            // Create continuous gentle vibration during movement phases
+            startContinuousHaptic(intensity: 0.3, interval: 0.2)
+        case .hold:
+            // Single gentle pulse for hold
+            let impact = UIImpactFeedbackGenerator(style: .light)
+            impact.impactOccurred()
+        case .pause:
+            // Very gentle pulse for pause
+            let impact = UIImpactFeedbackGenerator(style: .light)
+            impact.impactOccurred(intensity: 0.3)
+        }
+    }
+    
+    func startContinuousHaptic(intensity: CGFloat, interval: TimeInterval) {
+        let impact = UIImpactFeedbackGenerator(style: .light)
+        
+        hapticTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
+            impact.impactOccurred(intensity: intensity)
+        }
+    }
+    
+    func stopHapticFeedback() {
+        hapticTimer?.invalidate()
+        hapticTimer = nil
     }
     
     func pauseMeditation() {
         timer?.invalidate()
+        stopHapticFeedback()
         isActive = false
     }
     
     func stopMeditation() {
         timer?.invalidate()
+        stopHapticFeedback()
         withAnimation(.spring()) {
             isActive = false
             isPresented = false
@@ -385,6 +452,7 @@ struct MeditationModal: View {
     
     func completeMeditation() {
         timer?.invalidate()
+        stopHapticFeedback()
         dataService.incrementMeditationCount()
         withAnimation(.spring()) {
             isActive = false
