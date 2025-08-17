@@ -5,32 +5,8 @@ struct PanicButtonModal: View {
     @EnvironmentObject var dataService: DataService
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var selectedTab = 0
-    @State private var breathingActive = false
-    @State private var breathCount = 0
-    @State private var animationAmount = 1.0
-    @State private var breathPhase: BreathPhase = .inhale
+    @State private var showingMeditation = false
     
-    enum BreathPhase {
-        case inhale, hold, exhale, pause
-        
-        var instruction: String {
-            switch self {
-            case .inhale: return "Breathe In"
-            case .hold: return "Hold"
-            case .exhale: return "Breathe Out"
-            case .pause: return "Pause"
-            }
-        }
-        
-        var duration: Double {
-            switch self {
-            case .inhale: return 4.0
-            case .hold: return 2.0
-            case .exhale: return 6.0
-            case .pause: return 2.0
-            }
-        }
-    }
     
     let affirmations = [
         "This feeling will pass. You are stronger than this craving.",
@@ -79,6 +55,10 @@ struct PanicButtonModal: View {
             .navigationBarHidden(true)
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .sheet(isPresented: $showingMeditation) {
+            MeditationModal(isPresented: $showingMeditation)
+                .environmentObject(dataService)
+        }
     }
     
     var headerView: some View {
@@ -121,9 +101,6 @@ struct PanicButtonModal: View {
                 Button(action: {
                     withAnimation(.spring()) {
                         selectedTab = index
-                        if index != 0 {
-                            breathingActive = false
-                        }
                     }
                 }) {
                     Text(titles[index])
@@ -160,77 +137,52 @@ struct PanicButtonModal: View {
     
     var breathingTab: some View {
         VStack(spacing: isCompact ? 25 : 35) {
-            if !breathingActive {
-                VStack(spacing: 20) {
-                    Text("Guided Breathing")
-                        .font(.system(size: isCompact ? 20 : 24, weight: .bold))
-                        .foregroundColor(ColorTheme.textPrimary)
-                    
-                    Text("Follow the breathing pattern to calm your mind and body")
-                        .font(.system(size: isCompact ? 14 : 16))
-                        .foregroundColor(ColorTheme.textSecondary)
-                        .multilineTextAlignment(.center)
-                    
-                    Button(action: startBreathing) {
-                        Text("Start Breathing Exercise")
-                            .font(.system(size: isCompact ? 18 : 20, weight: .bold))
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity)
-                            .padding(isCompact ? 15 : 18)
-                            .background(ColorTheme.accentCyan)
-                            .cornerRadius(15)
-                            .glowEffect(color: ColorTheme.accentCyan, radius: 10)
-                    }
-                }
-            } else {
-                activeBreathingView
+            Text("Guided Breathing")
+                .font(.system(size: isCompact ? 20 : 24, weight: .bold))
+                .foregroundColor(ColorTheme.textPrimary)
+            
+            Text("Follow our advanced breathing pattern to calm your mind and body with haptic feedback")
+                .font(.system(size: isCompact ? 14 : 16))
+                .foregroundColor(ColorTheme.textSecondary)
+                .multilineTextAlignment(.center)
+            
+            VStack(spacing: 15) {
+                Image(systemName: "wind")
+                    .font(.system(size: isCompact ? 40 : 50))
+                    .foregroundColor(ColorTheme.accentCyan)
+                    .padding(.bottom, 10)
+                
+                Text("• Visual breathing guide")
+                    .font(.system(size: isCompact ? 14 : 16))
+                    .foregroundColor(ColorTheme.textPrimary)
+                
+                Text("• Haptic feedback vibration")
+                    .font(.system(size: isCompact ? 14 : 16))
+                    .foregroundColor(ColorTheme.textPrimary)
+                
+                Text("• Choose your duration")
+                    .font(.system(size: isCompact ? 14 : 16))
+                    .foregroundColor(ColorTheme.textPrimary)
+            }
+            .padding(20)
+            .futuristicCard()
+            
+            Button(action: {
+                showingMeditation = true
+            }) {
+                Text("Start Breathing Exercise")
+                    .font(.system(size: isCompact ? 18 : 20, weight: .bold))
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding(isCompact ? 15 : 18)
+                    .background(ColorTheme.accentCyan)
+                    .cornerRadius(15)
+                    .glowEffect(color: ColorTheme.accentCyan, radius: 10)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
-    var activeBreathingView: some View {
-        VStack(spacing: isCompact ? 30 : 40) {
-            Text("Breath \(breathCount + 1) of 10")
-                .font(.system(size: isCompact ? 16 : 18, weight: .medium))
-                .foregroundColor(ColorTheme.textSecondary)
-            
-            ZStack {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [ColorTheme.accentCyan.opacity(0.4), ColorTheme.accentPurple.opacity(0.2)],
-                            center: .center,
-                            startRadius: 20,
-                            endRadius: 100
-                        )
-                    )
-                    .frame(width: isCompact ? 200 : 250, height: isCompact ? 200 : 250)
-                    .scaleEffect(animationAmount)
-                    .animation(.easeInOut(duration: breathPhase.duration), value: animationAmount)
-                
-                Circle()
-                    .stroke(ColorTheme.accentCyan, lineWidth: 3)
-                    .frame(width: isCompact ? 180 : 220, height: isCompact ? 180 : 220)
-                    .opacity(0.6)
-            }
-            
-            Text(breathPhase.instruction)
-                .font(.system(size: isCompact ? 24 : 28, weight: .medium))
-                .foregroundColor(ColorTheme.textPrimary)
-                .animation(.easeInOut, value: breathPhase)
-            
-            Button(action: stopBreathing) {
-                Text("Stop Exercise")
-                    .font(.system(size: isCompact ? 16 : 18, weight: .medium))
-                    .foregroundColor(ColorTheme.dangerRed)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(ColorTheme.dangerRed.opacity(0.2))
-                    .cornerRadius(20)
-            }
-        }
-    }
     
     var distractionTab: some View {
         ScrollView {
@@ -309,47 +261,6 @@ struct PanicButtonModal: View {
         .futuristicCard()
     }
     
-    func startBreathing() {
-        withAnimation(.spring()) {
-            breathingActive = true
-            breathCount = 0
-        }
-        cycleBreathPhase()
-    }
-    
-    func stopBreathing() {
-        withAnimation(.spring()) {
-            breathingActive = false
-            breathCount = 0
-        }
-    }
-    
-    func cycleBreathPhase() {
-        guard breathingActive else { return }
-        
-        switch breathPhase {
-        case .inhale:
-            animationAmount = 1.4
-            breathPhase = .hold
-        case .hold:
-            breathPhase = .exhale
-        case .exhale:
-            animationAmount = 1.0
-            breathPhase = .pause
-        case .pause:
-            breathPhase = .inhale
-            breathCount += 1
-            
-            if breathCount >= 10 {
-                stopBreathing()
-                return
-            }
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + breathPhase.duration) {
-            cycleBreathPhase()
-        }
-    }
 }
 
 #Preview {

@@ -409,21 +409,21 @@ struct MeditationModal: View {
         
         switch phase {
         case .inhale, .exhale:
-            // Create continuous gentle vibration during movement phases
-            startContinuousHaptic(intensity: 0.3, interval: 0.2)
+            // Create continuous stronger vibration during movement phases
+            startContinuousHaptic(intensity: 0.7, interval: 0.15)
         case .hold:
-            // Single gentle pulse for hold
-            let impact = UIImpactFeedbackGenerator(style: .light)
+            // Single medium pulse for hold
+            let impact = UIImpactFeedbackGenerator(style: .medium)
             impact.impactOccurred()
         case .pause:
-            // Very gentle pulse for pause
+            // Light pulse for pause
             let impact = UIImpactFeedbackGenerator(style: .light)
-            impact.impactOccurred(intensity: 0.3)
+            impact.impactOccurred(intensity: 0.5)
         }
     }
     
     func startContinuousHaptic(intensity: CGFloat, interval: TimeInterval) {
-        let impact = UIImpactFeedbackGenerator(style: .light)
+        let impact = UIImpactFeedbackGenerator(style: .medium)
         
         hapticTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
             impact.impactOccurred(intensity: intensity)
