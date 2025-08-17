@@ -22,7 +22,7 @@ struct DashboardView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                ColorTheme.backgroundGradient
+                StarfieldBackground()
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -96,20 +96,22 @@ struct DashboardView: View {
     }
     
     var sobrietyTimerView: some View {
-        VStack(spacing: 10) {
-            Text("You've been alcohol-free for")
-                .font(.system(size: isCompact ? 16 : 18, weight: .medium))
-                .foregroundColor(ColorTheme.textSecondary)
+        VStack(spacing: isCompact ? 20 : 30) {
+            Text("You've been alcohol-free for:")
+                .font(.system(size: isCompact ? 18 : 22, weight: .medium))
+                .foregroundColor(.white.opacity(0.8))
             
-            HStack(spacing: isCompact ? 10 : 15) {
-                timeComponent(value: timeComponents.days, unit: "days")
-                timeComponent(value: timeComponents.hours, unit: "hours")
-                timeComponent(value: timeComponents.minutes, unit: "mins")
-                timeComponent(value: timeComponents.seconds, unit: "secs")
-            }
+            // Main time display - simplified
+            Text(getMainTimeDisplay())
+                .font(.system(size: isCompact ? 60 : 80, weight: .bold))
+                .foregroundColor(.white)
+            
+            // Detailed timer below
+            Text(getDetailedTimeDisplay())
+                .font(.system(size: isCompact ? 16 : 20, weight: .medium))
+                .foregroundColor(.white.opacity(0.7))
         }
-        .padding(isCompact ? 20 : 25)
-        .futuristicCard()
+        .padding(.vertical, isCompact ? 30 : 40)
     }
     
     func timeComponent(value: Int, unit: String) -> some View {
@@ -160,16 +162,45 @@ struct DashboardView: View {
     }
     
     var actionButtons: some View {
-        let columns = isCompact ? 
-            [GridItem(.flexible()), GridItem(.flexible())] :
-            [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
-        
-        return LazyVGrid(columns: columns, spacing: isCompact ? 15 : 20) {
-            actionButton(title: "Pledge", icon: "hand.raised.fill", color: ColorTheme.accentCyan)
-            actionButton(title: "Meditate", icon: "leaf.fill", color: ColorTheme.accentPurple)
-            actionButton(title: "Reset", icon: "arrow.clockwise", color: ColorTheme.warningOrange)
-            actionButton(title: "Panic", icon: "exclamationmark.triangle.fill", color: ColorTheme.dangerRed)
+        HStack(spacing: isCompact ? 30 : 40) {
+            circularActionButton(title: "Pledge", icon: "hand.raised.fill")
+            circularActionButton(title: "Meditate", icon: "leaf.fill")
+            circularActionButton(title: "Reset", icon: "arrow.clockwise")
+            circularActionButton(title: "More", icon: "ellipsis")
         }
+        .padding(.horizontal, isCompact ? 20 : 40)
+    }
+    
+    func circularActionButton(title: String, icon: String) -> some View {
+        Button(action: {
+            handleActionButton(title: title)
+        }) {
+            VStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(Color.black.opacity(0.3))
+                        .frame(width: isCompact ? 60 : 70, height: isCompact ? 60 : 70)
+                        .blur(radius: 8)
+                    
+                    Circle()
+                        .fill(Color.white.opacity(0.1))
+                        .frame(width: isCompact ? 60 : 70, height: isCompact ? 60 : 70)
+                        .overlay(
+                            Circle()
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+                    
+                    Image(systemName: icon)
+                        .font(.system(size: isCompact ? 20 : 24))
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                
+                Text(title)
+                    .font(.system(size: isCompact ? 12 : 14, weight: .medium))
+                    .foregroundColor(.white.opacity(0.8))
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
     }
     
     func actionButton(title: String, icon: String, color: Color) -> some View {
@@ -205,6 +236,8 @@ struct DashboardView: View {
             showingMeditationModal = true
         case "Reset":
             showingResetModal = true
+        case "More":
+            showingPanicModal = true
         case "Panic":
             showingPanicModal = true
         default:
@@ -271,6 +304,23 @@ struct DashboardView: View {
         .frame(maxWidth: .infinity)
         .padding(isCompact ? 12 : 15)
         .futuristicCard()
+    }
+    
+    func getMainTimeDisplay() -> String {
+        let totalMinutes = timeComponents.days * 24 * 60 + timeComponents.hours * 60 + timeComponents.minutes
+        
+        if totalMinutes < 60 {
+            return "\(totalMinutes) Mins"
+        } else if timeComponents.days < 1 {
+            let hours = totalMinutes / 60
+            return "\(hours) Hours"
+        } else {
+            return "\(timeComponents.days) Days"
+        }
+    }
+    
+    func getDetailedTimeDisplay() -> String {
+        return "\(timeComponents.days)d \(timeComponents.hours)h \(timeComponents.minutes)m \(timeComponents.seconds)s"
     }
     
     func startTimer() {
