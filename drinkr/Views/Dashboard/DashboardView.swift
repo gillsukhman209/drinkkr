@@ -224,7 +224,7 @@ struct DashboardView: View {
             circularActionButton(title: "Pledge", icon: "hand.raised.fill")
             circularActionButton(title: "Meditate", icon: "leaf.fill")
             circularActionButton(title: "Reset", icon: "arrow.clockwise")
-            circularActionButton(title: "More", icon: "ellipsis")
+            panicButton()
         }
         .padding(.horizontal, isCompact ? 20 : 40)
     }
@@ -290,6 +290,67 @@ struct DashboardView: View {
         .buttonStyle(ModernButtonStyle())
     }
     
+    func panicButton() -> some View {
+        Button(action: {
+            showingPanicModal = true
+        }) {
+            VStack(spacing: isCompact ? 10 : 12) {
+                ZStack {
+                    // Pulsing glow effect
+                    Circle()
+                        .fill(ColorTheme.dangerRed.opacity(0.6))
+                        .frame(width: isCompact ? 80 : 90, height: isCompact ? 80 : 90)
+                        .blur(radius: 15)
+                        .scaleEffect(animationAmount)
+                        .animation(
+                            Animation.easeInOut(duration: 1.5)
+                                .repeatForever(autoreverses: true),
+                            value: animationAmount
+                        )
+                    
+                    // Outer ring
+                    Circle()
+                        .stroke(
+                            LinearGradient(
+                                colors: [ColorTheme.dangerRed, ColorTheme.warningOrange],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 3
+                        )
+                        .frame(width: isCompact ? 78 : 88, height: isCompact ? 78 : 88)
+                    
+                    // Main button
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [ColorTheme.dangerRed, ColorTheme.dangerRed.opacity(0.8)],
+                                center: .center,
+                                startRadius: 0,
+                                endRadius: 35
+                            )
+                        )
+                        .frame(width: isCompact ? 68 : 80, height: isCompact ? 68 : 80)
+                        .overlay(
+                            Circle()
+                                .stroke(.white.opacity(0.3), lineWidth: 1)
+                        )
+                    
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: isCompact ? 24 : 28, weight: .bold))
+                        .foregroundColor(.white)
+                        .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
+                }
+                
+                Text("PANIC")
+                    .font(.system(size: isCompact ? 13 : 15, weight: .bold))
+                    .foregroundColor(ColorTheme.dangerRed)
+                    .shadow(color: .black.opacity(0.5), radius: 1, x: 0, y: 1)
+            }
+        }
+        .buttonStyle(ModernButtonStyle())
+    }
+    
     func actionButton(title: String, icon: String, color: Color) -> some View {
         Button(action: {
             handleActionButton(title: title)
@@ -323,8 +384,6 @@ struct DashboardView: View {
             showingMeditationModal = true
         case "Reset":
             showingResetModal = true
-        case "More":
-            showingPanicModal = true
         case "Panic":
             showingPanicModal = true
         default:
