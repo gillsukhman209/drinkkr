@@ -14,7 +14,7 @@ Drinkr is an iOS app designed to help people quit alcohol. It provides a sobriet
 ## Current File Structure
 ```
 drinkr/
-├── ContentView.swift (Tab navigation - 4 tabs)
+├── ContentView.swift (Tab navigation - 3 tabs)
 ├── Views/
 │   ├── Dashboard/
 │   │   └── DashboardView.swift ✅
@@ -22,8 +22,6 @@ drinkr/
 │   │   └── ProfileView.swift ✅
 │   ├── Library/
 │   │   └── LibraryView.swift ✅ (renamed to "Learn")
-│   ├── Menu/
-│   │   └── MenuView.swift ✅
 │   └── Components/
 │       └── (Crystal animation built-in)
 ├── Utilities/
@@ -38,13 +36,12 @@ drinkr/
 ```
 
 ## Completed Features (Phase 1-4)
-- ✅ Tab-based navigation with 4 tabs (Home, Stats, Learn, Menu)
+- ✅ Tab-based navigation with 3 tabs (Home, Stats, Learn)
 - ✅ Modern starfield background with animated twinkling stars
 - ✅ Responsive design for all iOS device sizes  
 - ✅ Dashboard with smart timer display and glassmorphism UI
 - ✅ Profile/Stats view with comprehensive progress tracking
 - ✅ Learn view (formerly Library) with educational content
-- ✅ Menu/Settings view with options
 - ✅ Full data persistence with SwiftData
 - ✅ Achievement system with progress tracking
 - ✅ Functional action buttons with modals

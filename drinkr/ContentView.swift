@@ -40,12 +40,6 @@ struct ContentView: View {
                     Label("Learn", systemImage: "graduationcap.fill")
                 }
                 .tag(2)
-            
-            MenuView()
-                .tabItem {
-                    Label("Menu", systemImage: "line.3.horizontal")
-                }
-                .tag(3)
         }
         .accentColor(.cyan)
         .preferredColorScheme(.dark)
