@@ -56,6 +56,7 @@ struct ContentView: View {
         .environmentObject(dataService)
         .onAppear {
             dataService.initialize(with: modelContext)
+            NotificationService.shared.requestPermission()
         }
     }
 }

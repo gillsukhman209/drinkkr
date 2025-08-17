@@ -4,17 +4,18 @@ struct PledgeModal: View {
     @Binding var isPresented: Bool
     @EnvironmentObject var dataService: DataService
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @State private var selectedPledge = ""
+    @State private var selectedCheckInTime = Date()
     @State private var showingSuccess = false
     @State private var animationAmount = 1.0
+    @StateObject private var notificationService = NotificationService.shared
     
-    let pledgeOptions = [
-        "I will stay strong and alcohol-free today",
-        "I choose my health and well-being over alcohol",
-        "Today I am in control of my choices",
-        "I am committed to my sobriety journey",
-        "I will find joy in sober moments today",
-        "My future self will thank me for today's choices"
+    let checkInMessages = [
+        "How are you feeling today?",
+        "Remember your strength and progress",
+        "Take a moment to reflect on your journey",
+        "You've got this - one day at a time",
+        "Check in with yourself and your goals",
+        "Your sobriety matters - how are you doing?"
     ]
     
     var isCompact: Bool {
@@ -33,7 +34,8 @@ struct PledgeModal: View {
             }
         }
         .onAppear {
-            selectedPledge = pledgeOptions.randomElement() ?? pledgeOptions[0]
+            // Set default check-in time to 24 hours from now
+            selectedCheckInTime = Date().addingTimeInterval(24 * 60 * 60)
         }
     }
     
@@ -55,11 +57,11 @@ struct PledgeModal: View {
                 .foregroundColor(ColorTheme.accentCyan)
                 .glowEffect(radius: 15)
             
-            Text("Daily Pledge")
+            Text("Schedule Check-In")
                 .font(.system(size: isCompact ? 24 : 28, weight: .bold))
                 .foregroundColor(ColorTheme.textPrimary)
             
-            Text("Make your commitment for today")
+            Text("Set a reminder to check on your progress")
                 .font(.system(size: isCompact ? 14 : 16))
                 .foregroundColor(ColorTheme.textSecondary)
         }
@@ -67,40 +69,63 @@ struct PledgeModal: View {
     
     var pledgeContent: some View {
         VStack(spacing: isCompact ? 20 : 25) {
-            Text("Today's Pledge:")
+            Text("When would you like your check-in?")
                 .font(.system(size: isCompact ? 16 : 18, weight: .semibold))
                 .foregroundColor(ColorTheme.textSecondary)
             
-            Text(selectedPledge)
-                .font(.system(size: isCompact ? 20 : 24, weight: .medium))
+            VStack(spacing: 15) {
+                DatePicker(
+                    "Check-in Time",
+                    selection: $selectedCheckInTime,
+                    in: Date()...,
+                    displayedComponents: [.date, .hourAndMinute]
+                )
+                .datePickerStyle(.compact)
+                .accentColor(ColorTheme.accentCyan)
                 .foregroundColor(ColorTheme.textPrimary)
-                .multilineTextAlignment(.center)
-                .padding(isCompact ? 20 : 25)
-                .futuristicCard()
-            
-            Button(action: {
-                withAnimation(.spring()) {
-                    selectedPledge = pledgeOptions.randomElement() ?? pledgeOptions[0]
-                }
-            }) {
-                HStack {
-                    Image(systemName: "arrow.clockwise")
-                    Text("Different Pledge")
-                }
-                .font(.system(size: isCompact ? 14 : 16, weight: .medium))
-                .foregroundColor(ColorTheme.accentPurple)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .background(ColorTheme.accentPurple.opacity(0.2))
-                .cornerRadius(20)
+                
+                Text("You'll receive a gentle reminder at this time")
+                    .font(.system(size: isCompact ? 12 : 14))
+                    .foregroundColor(ColorTheme.textSecondary)
+                    .multilineTextAlignment(.center)
             }
+            .padding(isCompact ? 20 : 25)
+            .futuristicCard()
+            
+            VStack(spacing: 10) {
+                Text("Quick Options:")
+                    .font(.system(size: isCompact ? 14 : 16, weight: .medium))
+                    .foregroundColor(ColorTheme.textSecondary)
+                
+                HStack(spacing: 10) {
+                    quickTimeButton("24 Hours", hours: 24)
+                    quickTimeButton("12 Hours", hours: 12)
+                    quickTimeButton("6 Hours", hours: 6)
+                }
+            }
+        }
+    }
+    
+    func quickTimeButton(_ title: String, hours: Int) -> some View {
+        Button(action: {
+            withAnimation(.spring()) {
+                selectedCheckInTime = Date().addingTimeInterval(TimeInterval(hours * 3600))
+            }
+        }) {
+            Text(title)
+                .font(.system(size: isCompact ? 12 : 14, weight: .medium))
+                .foregroundColor(ColorTheme.accentPurple)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(ColorTheme.accentPurple.opacity(0.2))
+                .cornerRadius(15)
         }
     }
     
     var actionButtons: some View {
         VStack(spacing: 15) {
-            Button(action: completePledge) {
-                Text("Make This Pledge")
+            Button(action: scheduleCheckIn) {
+                Text("Schedule Check-In")
                     .font(.system(size: isCompact ? 18 : 20, weight: .bold))
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity)
@@ -144,21 +169,19 @@ struct PledgeModal: View {
                 }
             
             VStack(spacing: 15) {
-                Text("Pledge Completed!")
+                Text("Check-In Scheduled!")
                     .font(.system(size: isCompact ? 26 : 32, weight: .bold))
                     .foregroundColor(ColorTheme.textPrimary)
                 
-                Text("You've made your commitment for today. Stay strong!")
+                Text("You'll receive a gentle reminder to check in on your progress.")
                     .font(.system(size: isCompact ? 16 : 18))
                     .foregroundColor(ColorTheme.textSecondary)
                     .multilineTextAlignment(.center)
                 
-                if let currentStreak = dataService.sobrietyData?.currentStreak {
-                    Text("Current Streak: \(currentStreak) days")
-                        .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
-                        .foregroundColor(ColorTheme.accentCyan)
-                        .padding(.top, 10)
-                }
+                Text(formatCheckInTime())
+                    .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
+                    .foregroundColor(ColorTheme.accentCyan)
+                    .padding(.top, 10)
             }
             
             Button(action: {
@@ -166,7 +189,7 @@ struct PledgeModal: View {
                     isPresented = false
                 }
             }) {
-                Text("Continue Journey")
+                Text("Continue")
                     .font(.system(size: isCompact ? 18 : 20, weight: .bold))
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity)
@@ -179,9 +202,10 @@ struct PledgeModal: View {
         .padding(isCompact ? 20 : 30)
     }
     
-    func completePledge() {
+    func scheduleCheckIn() {
+        notificationService.scheduleCheckInNotification()
+        
         withAnimation(.spring()) {
-            dataService.completePledge()
             showingSuccess = true
         }
         
@@ -190,6 +214,13 @@ struct PledgeModal: View {
                 isPresented = false
             }
         }
+    }
+    
+    func formatCheckInTime() -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return "Reminder set for \(formatter.string(from: selectedCheckInTime))"
     }
 }
 

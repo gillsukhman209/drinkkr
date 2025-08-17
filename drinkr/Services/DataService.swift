@@ -66,29 +66,26 @@ class DataService: ObservableObject {
     }
     
     func completePledge() {
-        guard let sobrietyData = sobrietyData else { return }
-        
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        
-        if let lastPledge = sobrietyData.lastPledgeDate {
-            if !calendar.isDate(lastPledge, inSameDayAs: today) {
-                sobrietyData.pledgeCompletedToday = true
-                sobrietyData.lastPledgeDate = Date()
-                AppSettings.shared.incrementPledgeCount()
-            }
-        } else {
-            sobrietyData.pledgeCompletedToday = true
-            sobrietyData.lastPledgeDate = Date()
-            AppSettings.shared.incrementPledgeCount()
-        }
-        
+        // This function is now deprecated - keeping for compatibility
+        // Pledge functionality has been changed to check-in notifications
+        AppSettings.shared.incrementPledgeCount()
         saveContext()
         updateAchievementProgress()
     }
     
     func recordRelapse() {
-        sobrietyData?.addRelapse()
+        guard let sobrietyData = sobrietyData else { return }
+        
+        // Add the relapse
+        sobrietyData.addRelapse()
+        
+        // Reset the quit date to now (starting fresh)
+        sobrietyData.quitDate = Date()
+        
+        // Update all calculations
+        sobrietyData.updateStreak()
+        sobrietyData.calculateStats()
+        
         saveContext()
         updateAchievementProgress()
     }

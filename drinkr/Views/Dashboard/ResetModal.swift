@@ -279,12 +279,14 @@ struct ResetModal: View {
     func recordRelapse() {
         let trigger = selectedTrigger == "Other" ? customTrigger : selectedTrigger
         
+        // Record the relapse first
+        dataService.recordRelapse()
+        
+        // Then update the most recent relapse with trigger and notes
         if let relapse = dataService.sobrietyData?.relapses.last {
             relapse.trigger = trigger
             relapse.notes = notes.isEmpty ? nil : notes
         }
-        
-        dataService.recordRelapse()
         
         withAnimation(.spring()) {
             isPresented = false
