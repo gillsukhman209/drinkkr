@@ -1,5 +1,13 @@
 import SwiftUI
 
+struct ModernButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
+            .animation(.spring(response: 0.2, dampingFraction: 0.6), value: configuration.isPressed)
+    }
+}
+
 struct DashboardView: View {
     @State private var animationAmount = 1.0
     @State private var showingPledgeModal = false
@@ -73,20 +81,42 @@ struct DashboardView: View {
     }
     
     var weekProgressIndicator: some View {
-        HStack(spacing: isCompact ? 8 : 12) {
+        HStack(spacing: isCompact ? 10 : 14) {
             ForEach(0..<7) { day in
                 let progress = dataService.getWeekProgress()
-                Circle()
-                    .fill(progress[day] ? ColorTheme.accentCyan : Color.gray.opacity(0.3))
-                    .frame(width: isCompact ? 35 : 40, height: isCompact ? 35 : 40)
-                    .overlay(
-                        Text(dayLabel(for: day))
-                            .font(.system(size: isCompact ? 10 : 12, weight: .bold))
-                            .foregroundColor(progress[day] ? .black : .gray)
-                    )
-                    .glowEffect(color: progress[day] ? ColorTheme.accentCyan : .clear, radius: 5)
+                ZStack {
+                    Circle()
+                        .fill(progress[day] ? 
+                              LinearGradient(colors: [ColorTheme.accentCyan, ColorTheme.accentPurple], 
+                                           startPoint: .topLeading, endPoint: .bottomTrailing) :
+                              LinearGradient(colors: [Color.gray.opacity(0.2), Color.gray.opacity(0.1)], 
+                                           startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .frame(width: isCompact ? 38 : 44, height: isCompact ? 38 : 44)
+                        .overlay(
+                            Circle()
+                                .stroke(progress[day] ? .white.opacity(0.3) : .white.opacity(0.1), lineWidth: 1)
+                        )
+                    
+                    Text(dayLabel(for: day))
+                        .font(.system(size: isCompact ? 11 : 13, weight: .bold))
+                        .foregroundColor(progress[day] ? .white : .white.opacity(0.4))
+                        .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
+                }
+                .scaleEffect(progress[day] ? 1.05 : 1.0)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: progress[day])
+                .glowEffect(color: progress[day] ? ColorTheme.accentCyan : .clear, radius: 6)
             }
         }
+        .padding(.horizontal)
+        .padding(.vertical, isCompact ? 8 : 12)
+        .background(
+            RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                        .stroke(.white.opacity(0.1), lineWidth: 1)
+                )
+        )
         .padding(.horizontal)
     }
     
@@ -96,22 +126,27 @@ struct DashboardView: View {
     }
     
     var sobrietyTimerView: some View {
-        VStack(spacing: isCompact ? 20 : 30) {
-            Text("You've been alcohol-free for:")
-                .font(.system(size: isCompact ? 18 : 22, weight: .medium))
-                .foregroundColor(.white.opacity(0.8))
+        VStack(spacing: isCompact ? 24 : 32) {
+            Text("You've been alcohol-free for")
+                .font(.system(size: isCompact ? 16 : 18, weight: .medium))
+                .foregroundColor(.white.opacity(0.6))
+                .tracking(0.5)
             
-            // Main time display - simplified
-            Text(getMainTimeDisplay())
-                .font(.system(size: isCompact ? 60 : 80, weight: .bold))
-                .foregroundColor(.white)
-            
-            // Detailed timer below
-            Text(getDetailedTimeDisplay())
-                .font(.system(size: isCompact ? 16 : 20, weight: .medium))
-                .foregroundColor(.white.opacity(0.7))
+            // Smart timer display that adapts based on duration
+            Text(getSmartTimeDisplay())
+                .font(.system(size: isCompact ? 72 : 96, weight: .black, design: .rounded))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.white, ColorTheme.accentCyan.opacity(0.8)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .glowEffect(color: ColorTheme.accentCyan, radius: 8)
+                .shadow(color: .black.opacity(0.4), radius: 6, x: 0, y: 3)
+                .animation(.easeInOut(duration: 0.3), value: getSmartTimeDisplay())
         }
-        .padding(.vertical, isCompact ? 30 : 40)
+        .padding(.vertical, isCompact ? 40 : 56)
     }
     
     func timeComponent(value: Int, unit: String) -> some View {
@@ -131,32 +166,55 @@ struct DashboardView: View {
         GeometryReader { geometry in
             ZStack {
                 ForEach(0..<3) { index in
-                    RoundedRectangle(cornerRadius: 20)
+                    RoundedRectangle(cornerRadius: isCompact ? 16 : 24)
                         .fill(
                             LinearGradient(
                                 colors: [
-                                    ColorTheme.accentCyan.opacity(0.3),
+                                    ColorTheme.accentCyan.opacity(0.4),
                                     ColorTheme.accentPurple.opacity(0.3),
-                                    ColorTheme.accentPink.opacity(0.3)
+                                    ColorTheme.accentPink.opacity(0.2)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
-                        .frame(width: geometry.size.width * 0.4, height: geometry.size.width * 0.4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: isCompact ? 16 : 24)
+                                .stroke(.white.opacity(0.2), lineWidth: 1)
+                        )
+                        .frame(width: geometry.size.width * 0.35, height: geometry.size.width * 0.35)
                         .rotationEffect(.degrees(Double(index) * 60))
                         .scaleEffect(animationAmount)
+                        .blur(radius: 0.5)
                         .animation(
-                            Animation.easeInOut(duration: 2)
+                            Animation.easeInOut(duration: 3)
                                 .repeatForever(autoreverses: true)
-                                .delay(Double(index) * 0.2),
+                                .delay(Double(index) * 0.3),
                             value: animationAmount
                         )
+                        .shadow(color: ColorTheme.accentCyan.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
+                
+                // Central glow effect
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [ColorTheme.accentCyan.opacity(0.3), .clear],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: geometry.size.width * 0.3
+                        )
+                    )
+                    .frame(width: geometry.size.width * 0.6, height: geometry.size.width * 0.6)
+                    .animation(
+                        Animation.easeInOut(duration: 4)
+                            .repeatForever(autoreverses: true),
+                        value: animationAmount
+                    )
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             .onAppear {
-                animationAmount = 1.2
+                animationAmount = 1.3
             }
         }
     }
@@ -175,32 +233,61 @@ struct DashboardView: View {
         Button(action: {
             handleActionButton(title: title)
         }) {
-            VStack(spacing: 8) {
+            VStack(spacing: isCompact ? 10 : 12) {
                 ZStack {
+                    // Shadow layer
                     Circle()
-                        .fill(Color.black.opacity(0.3))
-                        .frame(width: isCompact ? 60 : 70, height: isCompact ? 60 : 70)
-                        .blur(radius: 8)
+                        .fill(Color.black.opacity(0.4))
+                        .frame(width: isCompact ? 68 : 80, height: isCompact ? 68 : 80)
+                        .blur(radius: 12)
+                        .offset(y: 2)
                     
+                    // Main button
                     Circle()
-                        .fill(Color.white.opacity(0.1))
-                        .frame(width: isCompact ? 60 : 70, height: isCompact ? 60 : 70)
+                        .fill(.ultraThinMaterial)
+                        .frame(width: isCompact ? 68 : 80, height: isCompact ? 68 : 80)
                         .overlay(
                             Circle()
-                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [.white.opacity(0.3), .white.opacity(0.1)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1.5
+                                )
+                        )
+                        .overlay(
+                            Circle()
+                                .fill(
+                                    RadialGradient(
+                                        colors: [.white.opacity(0.05), .clear],
+                                        center: .topLeading,
+                                        startRadius: 0,
+                                        endRadius: 40
+                                    )
+                                )
                         )
                     
                     Image(systemName: icon)
-                        .font(.system(size: isCompact ? 20 : 24))
-                        .foregroundColor(.white.opacity(0.9))
+                        .font(.system(size: isCompact ? 22 : 26, weight: .medium))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [ColorTheme.accentCyan, .white],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
                 }
                 
                 Text(title)
-                    .font(.system(size: isCompact ? 12 : 14, weight: .medium))
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(.system(size: isCompact ? 13 : 15, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.9))
+                    .shadow(color: .black.opacity(0.5), radius: 1, x: 0, y: 1)
             }
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(ModernButtonStyle())
     }
     
     func actionButton(title: String, icon: String, color: Color) -> some View {
@@ -287,23 +374,45 @@ struct DashboardView: View {
     }
     
     func quickStatCard(title: String, value: String, icon: String, color: Color) -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: isCompact ? 20 : 24))
-                .foregroundColor(color)
+        VStack(spacing: isCompact ? 10 : 12) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.2))
+                    .frame(width: isCompact ? 40 : 48, height: isCompact ? 40 : 48)
+                
+                Image(systemName: icon)
+                    .font(.system(size: isCompact ? 18 : 22, weight: .medium))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [color, color.opacity(0.7)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
             
             Text(value)
-                .font(.system(size: isCompact ? 18 : 22, weight: .bold, design: .monospaced))
-                .foregroundColor(ColorTheme.textPrimary)
+                .font(.system(size: isCompact ? 20 : 24, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+                .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
             
             Text(title)
-                .font(.system(size: isCompact ? 10 : 12))
-                .foregroundColor(ColorTheme.textSecondary)
+                .font(.system(size: isCompact ? 11 : 13, weight: .medium))
+                .foregroundColor(.white.opacity(0.7))
                 .multilineTextAlignment(.center)
+                .lineLimit(2)
         }
         .frame(maxWidth: .infinity)
-        .padding(isCompact ? 12 : 15)
-        .futuristicCard()
+        .padding(isCompact ? 16 : 20)
+        .background(
+            RoundedRectangle(cornerRadius: isCompact ? 16 : 20)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: isCompact ? 16 : 20)
+                        .stroke(.white.opacity(0.1), lineWidth: 1)
+                )
+        )
+        .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
     }
     
     func getMainTimeDisplay() -> String {
@@ -319,9 +428,45 @@ struct DashboardView: View {
         }
     }
     
-    func getDetailedTimeDisplay() -> String {
-        return "\(timeComponents.days)d \(timeComponents.hours)h \(timeComponents.minutes)m \(timeComponents.seconds)s"
+    func getSmartTimeDisplay() -> String {
+        let totalSeconds = timeComponents.days * 24 * 3600 + timeComponents.hours * 3600 + timeComponents.minutes * 60 + timeComponents.seconds
+        
+        // Less than 60 seconds: show seconds
+        if totalSeconds < 60 {
+            return "\(timeComponents.seconds)s"
+        }
+        // Less than 60 minutes: show minutes and seconds
+        else if totalSeconds < 3600 {
+            let totalMinutes = totalSeconds / 60
+            let remainingSeconds = totalSeconds % 60
+            if remainingSeconds == 0 {
+                return "\(totalMinutes)m"
+            } else {
+                return "\(totalMinutes)m \(remainingSeconds)s"
+            }
+        }
+        // Less than 24 hours: show hours and minutes
+        else if totalSeconds < 86400 {
+            let totalHours = totalSeconds / 3600
+            let remainingMinutes = (totalSeconds % 3600) / 60
+            if remainingMinutes == 0 {
+                return "\(totalHours)h"
+            } else {
+                return "\(totalHours)h \(remainingMinutes)m"
+            }
+        }
+        // 24 hours or more: show days and hours
+        else {
+            let days = timeComponents.days
+            let hours = timeComponents.hours
+            if hours == 0 {
+                return "\(days)d"
+            } else {
+                return "\(days)d \(hours)h"
+            }
+        }
     }
+    
     
     func startTimer() {
         updateTimeComponents()
