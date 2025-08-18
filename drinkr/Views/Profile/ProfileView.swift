@@ -4,6 +4,7 @@ struct ProfileView: View {
     @State private var selectedTimeFrame = "All Time"
     @State private var showingAchievements = false
     @State private var showingRelapseHistory = false
+    @State private var hasAppeared = false
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @EnvironmentObject var dataService: DataService
     
@@ -16,7 +17,7 @@ struct ProfileView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                StarfieldBackground()
+                OptimizedBackground()
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -50,6 +51,9 @@ struct ProfileView: View {
             .navigationBarTitleDisplayMode(.large)
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            hasAppeared = true
+        }
         .sheet(isPresented: $showingAchievements) {
             AchievementDetailModal(isPresented: $showingAchievements)
                 .environmentObject(dataService)
@@ -65,7 +69,6 @@ struct ProfileView: View {
             Image(systemName: "person.circle.fill")
                 .font(.system(size: isCompact ? 60 : 80))
                 .foregroundColor(ColorTheme.accentCyan)
-                .glowEffect(radius: 10)
             
             VStack(alignment: .leading, spacing: 5) {
                 Text("Welcome back")
@@ -107,7 +110,6 @@ struct ProfileView: View {
             Text(value)
                 .font(.system(size: isCompact ? 36 : 44, weight: .bold, design: .monospaced))
                 .foregroundColor(color)
-                .glowEffect(color: color, radius: 5)
             
             Text(unit)
                 .font(.system(size: isCompact ? 14 : 16, weight: .medium))
@@ -226,7 +228,6 @@ struct ProfileView: View {
             Image(systemName: achievement.icon)
                 .font(.system(size: isCompact ? 24 : 28))
                 .foregroundColor(achievement.isUnlocked ? ColorTheme.accentCyan : ColorTheme.textSecondary)
-                .glowEffect(color: achievement.isUnlocked ? ColorTheme.accentCyan : Color.clear, radius: 5)
             
             Text(achievement.title)
                 .font(.system(size: isCompact ? 11 : 12, weight: .semibold))

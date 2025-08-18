@@ -6,6 +6,7 @@ struct LibraryView: View {
     @State private var selectedCategory = "All"
     @State private var selectedItem: LibraryItem?
     @State private var showingContent = false
+    @State private var hasAppeared = false
     
     let categories = ["All", "Articles", "Stories", "Tips"]
     
@@ -54,7 +55,7 @@ struct LibraryView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                StarfieldBackground()
+                OptimizedBackground()
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -67,7 +68,7 @@ struct LibraryView: View {
                     
                     ScrollView {
                         LazyVStack(spacing: 15) {
-                            ForEach(filteredItems) { item in
+                            ForEach(filteredItems, id: \.id) { item in
                                 libraryItemCard(item)
                                     .padding(.horizontal)
                                     .onTapGesture {
@@ -84,6 +85,9 @@ struct LibraryView: View {
             .navigationBarTitleDisplayMode(.large)
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            hasAppeared = true
+        }
         .sheet(isPresented: $showingContent) {
             if let item = selectedItem {
                 contentDetailView(item)
@@ -183,7 +187,7 @@ struct LibraryView: View {
     func contentDetailView(_ item: LibraryItem) -> some View {
         NavigationView {
             ZStack {
-                StarfieldBackground()
+                OptimizedBackground()
                     .ignoresSafeArea()
                 
                 ScrollView {

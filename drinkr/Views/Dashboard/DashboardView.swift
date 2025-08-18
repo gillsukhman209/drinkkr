@@ -10,6 +10,7 @@ struct ModernButtonStyle: ButtonStyle {
 
 struct DashboardView: View {
     @State private var animationAmount = 1.0
+    @State private var hasAppeared = false
     @State private var showingPledgeModal = false
     @State private var showingMeditationModal = false
     @State private var showingResetModal = false
@@ -30,7 +31,7 @@ struct DashboardView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                StarfieldBackground()
+                OptimizedBackground()
                     .ignoresSafeArea()
                 
                 ScrollView {
@@ -58,7 +59,10 @@ struct DashboardView: View {
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
-            startTimer()
+            if !hasAppeared {
+                hasAppeared = true
+                startTimer()
+            }
         }
         .onDisappear {
             stopTimer()
@@ -103,8 +107,7 @@ struct DashboardView: View {
                         .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
                 }
                 .scaleEffect(progress[day] ? 1.05 : 1.0)
-                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: progress[day])
-                .glowEffect(color: progress[day] ? ColorTheme.accentCyan : .clear, radius: 6)
+                .animation(hasAppeared ? .spring(response: 0.3, dampingFraction: 0.6) : nil, value: progress[day])
             }
         }
         .padding(.horizontal)
@@ -142,9 +145,7 @@ struct DashboardView: View {
                         endPoint: .bottomTrailing
                     )
                 )
-                .glowEffect(color: ColorTheme.accentCyan, radius: 8)
-                .shadow(color: .black.opacity(0.4), radius: 6, x: 0, y: 3)
-                .animation(.easeInOut(duration: 0.3), value: getSmartTimeDisplay())
+                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
         }
         .padding(.vertical, isCompact ? 40 : 56)
     }
@@ -187,9 +188,9 @@ struct DashboardView: View {
                         .scaleEffect(animationAmount)
                         .blur(radius: 0.5)
                         .animation(
-                            Animation.easeInOut(duration: 3)
+                            hasAppeared ? Animation.easeInOut(duration: 3)
                                 .repeatForever(autoreverses: true)
-                                .delay(Double(index) * 0.3),
+                                .delay(Double(index) * 0.3) : nil,
                             value: animationAmount
                         )
                         .shadow(color: ColorTheme.accentCyan.opacity(0.3), radius: 8, x: 0, y: 4)
@@ -207,14 +208,16 @@ struct DashboardView: View {
                     )
                     .frame(width: geometry.size.width * 0.6, height: geometry.size.width * 0.6)
                     .animation(
-                        Animation.easeInOut(duration: 4)
-                            .repeatForever(autoreverses: true),
+                        hasAppeared ? Animation.easeInOut(duration: 4)
+                            .repeatForever(autoreverses: true) : nil,
                         value: animationAmount
                     )
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             .onAppear {
-                animationAmount = 1.3
+                if hasAppeared {
+                    animationAmount = 1.3
+                }
             }
         }
     }
@@ -303,8 +306,8 @@ struct DashboardView: View {
                         .blur(radius: 15)
                         .scaleEffect(animationAmount)
                         .animation(
-                            Animation.easeInOut(duration: 1.5)
-                                .repeatForever(autoreverses: true),
+                            hasAppeared ? Animation.easeInOut(duration: 1.5)
+                                .repeatForever(autoreverses: true) : nil,
                             value: animationAmount
                         )
                     

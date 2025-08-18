@@ -15,6 +15,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var dataService = DataService()
     @EnvironmentObject var appStateManager: AppStateManager
+    @State private var hasInitialized = false
     
     init() {
         UITabBar.appearance().backgroundColor = UIColor.black.withAlphaComponent(0.3)
@@ -45,8 +46,11 @@ struct ContentView: View {
         .preferredColorScheme(.dark)
         .environmentObject(dataService)
         .onAppear {
-            dataService.initialize(with: modelContext)
-            NotificationService.shared.requestPermission()
+            if !hasInitialized {
+                hasInitialized = true
+                dataService.initialize(with: modelContext)
+                NotificationService.shared.requestPermission()
+            }
         }
         .sheet(isPresented: $appStateManager.showCheckInModal) {
             CheckInModal(isPresented: $appStateManager.showCheckInModal)

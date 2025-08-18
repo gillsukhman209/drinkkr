@@ -16,7 +16,7 @@ struct ChatView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                StarfieldBackground()
+                OptimizedBackground()
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
