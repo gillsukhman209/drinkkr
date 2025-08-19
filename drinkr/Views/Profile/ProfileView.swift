@@ -47,7 +47,7 @@ struct ProfileView: View {
                     }
                 }
             }
-            .navigationTitle("Your Progress")
+            .navigationTitle("\(dataService.currentUser?.name ?? "Your") Progress")
             .navigationBarTitleDisplayMode(.large)
         }
         .navigationViewStyle(StackNavigationViewStyle())
@@ -71,7 +71,7 @@ struct ProfileView: View {
                 .foregroundColor(ColorTheme.accentCyan)
             
             VStack(alignment: .leading, spacing: 5) {
-                Text("Welcome back")
+                Text("Welcome back, \(dataService.currentUser?.name ?? "friend")!")
                     .font(.system(size: isCompact ? 14 : 16))
                     .foregroundColor(ColorTheme.textSecondary)
                 

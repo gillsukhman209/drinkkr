@@ -2,6 +2,7 @@ import SwiftUI
 
 struct LibraryView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @EnvironmentObject var dataService: DataService
     @State private var searchText = ""
     @State private var selectedCategory = "All"
     @State private var showingContent = false
@@ -83,7 +84,7 @@ struct LibraryView: View {
                     }
                 }
             }
-            .navigationTitle("Learn")
+            .navigationTitle("\(dataService.currentUser?.name ?? "Your") Learning")
             .navigationBarTitleDisplayMode(.large)
         }
         .navigationViewStyle(StackNavigationViewStyle())

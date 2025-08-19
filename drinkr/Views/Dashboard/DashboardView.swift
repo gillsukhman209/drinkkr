@@ -130,7 +130,7 @@ struct DashboardView: View {
     
     var sobrietyTimerView: some View {
         VStack(spacing: isCompact ? 24 : 32) {
-            Text("You've been alcohol-free for")
+            Text("\(dataService.currentUser?.name ?? "You")'ve been alcohol-free for")
                 .font(.system(size: isCompact ? 16 : 18, weight: .medium))
                 .foregroundColor(.white.opacity(0.6))
                 .tracking(0.5)
@@ -396,7 +396,7 @@ struct DashboardView: View {
     
     var quickStatsCards: some View {
         VStack(spacing: 15) {
-            Text("Today's Progress")
+            Text("\(dataService.currentUser?.name ?? "Your") Progress")
                 .font(.system(size: isCompact ? 18 : 20, weight: .bold))
                 .foregroundColor(ColorTheme.textPrimary)
                 .frame(maxWidth: .infinity, alignment: .leading)

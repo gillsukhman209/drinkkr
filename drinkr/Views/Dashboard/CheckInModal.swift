@@ -66,7 +66,7 @@ struct CheckInModal: View {
                 .font(.system(size: isCompact ? 24 : 28, weight: .bold))
                 .foregroundColor(ColorTheme.textPrimary)
             
-            Text("How are you feeling today?")
+            Text("How are you feeling today, \(dataService.currentUser?.name ?? "friend")?")
                 .font(.system(size: isCompact ? 14 : 16))
                 .foregroundColor(ColorTheme.textSecondary)
         }

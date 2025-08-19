@@ -98,7 +98,7 @@ struct ContentView: View {
         
         // Create or update user with onboarding data
         if let user = dataService.currentUser {
-            user.name = "User" // Could be enhanced to ask for name in onboarding
+            user.name = profile.userName.isEmpty ? "User" : profile.userName
             // Add other profile updates as needed
         }
         
