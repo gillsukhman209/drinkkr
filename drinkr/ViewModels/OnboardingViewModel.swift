@@ -218,7 +218,7 @@ class OnboardingViewModel: ObservableObject {
         case .permissions:
             canProceed = true
         case .complete:
-            canProceed = false
+            canProceed = true
         }
     }
     
