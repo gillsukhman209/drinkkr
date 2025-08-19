@@ -110,6 +110,191 @@ Phase 2: Data Models & Storage implementation
 - Default to dark navy/purple gradient theme
 - Keep interfaces minimal and accessible
 
+## Onboarding Flow (To Be Implemented)
+
+### Overview
+Emotionally-engaging onboarding that deeply understands user struggles with alcohol, building strong connection and motivation for change.
+
+### Onboarding Structure:
+
+#### 1. Welcome & Hook Screens (3-4 screens)
+- "You're not alone. Let's take this journey together."
+- "Every day without alcohol is a victory worth celebrating"
+- "Join thousands who've reclaimed their lives"
+- "Your personalized recovery path starts here"
+
+#### 2. Emotional Connection Questions
+
+**Q1: Why are you here today?**
+- I want to quit completely
+- I need to cut back
+- Someone asked me to stop
+- I'm just exploring
+- I hit rock bottom
+
+**Q2: How is alcohol affecting your life?** (Multiple select)
+- Damaging my relationships
+- Affecting my work/career
+- Harming my health
+- Causing financial stress
+- Making me anxious/depressed
+- Ruining my sleep
+- Causing shame and guilt
+- Missing important moments
+
+**Q3: What symptoms are you experiencing?** (Multiple select)
+- Morning shakes or tremors
+- Constant fatigue
+- Memory blackouts
+- Anxiety when not drinking
+- Trouble sleeping without alcohol
+- Heart palpitations
+- Sweating or hot flashes
+- Mood swings
+- Brain fog
+
+**Q4: What have you lost to alcohol?** (Multiple select)
+- Trust from loved ones
+- Job opportunities
+- Money and savings
+- Self-respect
+- Physical health
+- Mental clarity
+- Time with family
+- Personal goals
+
+**Q5: What triggers your drinking?** (Multiple select)
+- Stress from work
+- Social pressure
+- Loneliness
+- Boredom
+- Celebrating
+- Anger or frustration
+- Sadness or depression
+- Habit/routine
+- Physical cravings
+
+**Q6: How do you feel after drinking?**
+- Ashamed and guilty
+- Anxious and worried
+- Physically sick
+- Depressed
+- Angry at myself
+- Hopeless
+
+**Q7: What's your biggest fear about quitting?**
+- I'll lose my friends
+- I can't handle stress without it
+- Life will be boring
+- I'll fail and disappoint everyone
+- Withdrawal symptoms
+- I don't know who I am without it
+
+**Q8: Have you tried to quit before?**
+- Never tried
+- Once or twice
+- Several times
+- Many times
+- I've lost count
+
+#### 3. Data Collection Questions
+
+**Q9: Your basics**
+- Age range (18-24, 25-34, 35-44, 45-54, 55+)
+- Gender (Male/Female/Other/Prefer not to say)
+- Relationship status
+
+**Q10: Your drinking pattern**
+- How often do you drink? (Daily/Few times a week/Weekly/Occasionally)
+- How many drinks per session? (1-2/3-4/5-6/7+)
+- Preferred type? (Beer/Wine/Spirits/Mixed)
+
+**Q11: The cost**
+- Weekly spending on alcohol ($0-20/$20-50/$50-100/$100+)
+- Hours per week lost to drinking/hangovers
+
+#### 4. Hope & Motivation Screen
+Personalized message based on answers:
+- "You could save $[amount] per month"
+- "You could reclaim [hours] hours per week"
+- "Join [number] others who felt exactly like you"
+
+#### 5. Goal Setting Screen
+**What do you want to achieve?** (Multiple select)
+- 🧠 Clear mind and better focus
+- ❤️ Rebuild trust with loved ones
+- 💪 Get healthy and fit
+- 😴 Sleep peacefully
+- 💰 Save money for dreams
+- 🎯 Achieve my goals
+- 😊 Find happiness without alcohol
+- 🏆 Prove I can do this
+
+#### 6. Commitment Screen
+- "I'm ready to take control of my life"
+- Set quit date (Today/Tomorrow/Choose date)
+- Daily check-in time preference
+
+#### 7. Support & Permissions
+- Enable notifications
+- Show success story quote
+- "We'll be here every step of the way"
+
+### User Profile Data Structure
+```
+UserProfile:
+  // Emotional data
+  - quittingReason: String
+  - lifeImpacts: [String]
+  - symptoms: [String]
+  - losses: [String]
+  - triggers: [String]
+  - afterFeeling: String
+  - biggestFear: String
+  - previousAttempts: String
+  
+  // Practical data
+  - age: String
+  - gender: String
+  - relationshipStatus: String
+  - drinkingFrequency: String
+  - drinksPerSession: Int
+  - weeklySpending: Double
+  - hoursLostWeekly: Int
+  
+  // Goals & Commitment
+  - selectedGoals: [String]
+  - quitDate: Date
+  - checkInTime: Date
+```
+
+### Implementation Files Needed
+1. OnboardingContainerView.swift - Main navigation with progress
+2. OnboardingWelcomeView.swift - Welcome/hook screens
+3. OnboardingEmotionalQuestions.swift - Emotional questions (Q1-Q8)
+4. OnboardingDataQuestions.swift - Practical data (Q9-Q11)
+5. OnboardingGoalsView.swift - Goal selection
+6. OnboardingCommitmentView.swift - Quit date & commitment
+7. OnboardingViewModel.swift - State management
+8. OnboardingModels.swift - Data structures
+
+### Key Emotional Hooks
+- Acknowledgment: "We see your struggle"
+- Hope: "Recovery is possible"
+- Community: "You're not alone"
+- Personalization: Tailored experience
+- Small wins: "Every day matters"
+- No judgment: "Safe space"
+
+### Visual Design Notes
+- Use OptimizedBackground for consistency
+- Progress bar at top showing journey
+- Gentle transitions between questions
+- Multiple select with checkboxes
+- Single select with radio buttons
+- Empathetic color choices (soft blues/purples)
+- Show % of users with similar selections for connection
+
 ## Future Roadmap
 - Apple Watch companion app
 - Advanced analytics & statistics

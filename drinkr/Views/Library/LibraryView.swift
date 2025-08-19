@@ -4,9 +4,9 @@ struct LibraryView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var searchText = ""
     @State private var selectedCategory = "All"
-    @State private var selectedItem: LibraryItem?
     @State private var showingContent = false
     @State private var hasAppeared = false
+    @State private var contentToShow: LibraryItem?
     
     let categories = ["All", "Articles", "Stories", "Tips"]
     
@@ -69,12 +69,14 @@ struct LibraryView: View {
                     ScrollView {
                         LazyVStack(spacing: 15) {
                             ForEach(filteredItems, id: \.id) { item in
-                                libraryItemCard(item)
-                                    .padding(.horizontal)
-                                    .onTapGesture {
-                                        selectedItem = item
-                                        showingContent = true
-                                    }
+                                Button(action: {
+                                    contentToShow = item
+                                    showingContent = true
+                                }) {
+                                    libraryItemCard(item)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                .padding(.horizontal)
                             }
                         }
                         .padding(.vertical)
@@ -88,9 +90,11 @@ struct LibraryView: View {
         .onAppear {
             hasAppeared = true
         }
-        .sheet(isPresented: $showingContent) {
-            if let item = selectedItem {
-                contentDetailView(item)
+        .sheet(isPresented: $showingContent, onDismiss: {
+            contentToShow = nil
+        }) {
+            if let item = contentToShow {
+                ContentDetailView(item: item, isPresented: $showingContent)
             }
         }
     }
@@ -182,73 +186,6 @@ struct LibraryView: View {
         }
         .padding(isCompact ? 15 : 20)
         .futuristicCard()
-    }
-    
-    func contentDetailView(_ item: LibraryItem) -> some View {
-        NavigationView {
-            ZStack {
-                OptimizedBackground()
-                    .ignoresSafeArea()
-                
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        // Header
-                        VStack(alignment: .leading, spacing: 15) {
-                            HStack {
-                                Image(systemName: item.icon)
-                                    .font(.system(size: 28))
-                                    .foregroundColor(ColorTheme.accentPurple)
-                                    .frame(width: 50, height: 50)
-                                    .background(ColorTheme.accentPurple.opacity(0.2))
-                                    .cornerRadius(15)
-                                
-                                VStack(alignment: .leading, spacing: 5) {
-                                    Text(item.category)
-                                        .font(.system(size: 14, weight: .medium))
-                                        .foregroundColor(ColorTheme.accentCyan)
-                                        .textCase(.uppercase)
-                                        .tracking(1)
-                                    
-                                    Text(item.duration)
-                                        .font(.system(size: 12))
-                                        .foregroundColor(ColorTheme.textSecondary)
-                                }
-                                
-                                Spacer()
-                            }
-                            
-                            Text(item.title)
-                                .font(.system(size: isCompact ? 24 : 28, weight: .bold))
-                                .foregroundColor(ColorTheme.textPrimary)
-                                .lineLimit(nil)
-                        }
-                        .padding(isCompact ? 20 : 25)
-                        .futuristicCard()
-                        
-                        // Content
-                        VStack(alignment: .leading, spacing: 15) {
-                            Text(item.content)
-                                .font(.system(size: isCompact ? 16 : 18))
-                                .foregroundColor(ColorTheme.textPrimary)
-                                .lineSpacing(6)
-                                .lineLimit(nil)
-                        }
-                        .padding(isCompact ? 20 : 25)
-                        .futuristicCard()
-                        
-                        Spacer(minLength: 20)
-                    }
-                    .padding(.horizontal)
-                }
-            }
-            .navigationBarItems(
-                trailing: Button("Done") {
-                    showingContent = false
-                }
-                .foregroundColor(ColorTheme.accentCyan)
-                .fontWeight(.semibold)
-            )
-        }
     }
 }
 
