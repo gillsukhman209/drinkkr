@@ -14,6 +14,9 @@ struct OnboardingUserProfile: Codable {
     var biggestFear: String = ""
     var previousAttempts: String = ""
     
+    // Personal data
+    var userName: String = ""
+    
     // Practical data
     var age: String = ""
     var gender: String = ""
@@ -104,9 +107,10 @@ enum OnboardingPage: CaseIterable {
     case afterFeeling     // Q6
     case biggestFear      // Q7
     case previousAttempts // Q8
-    case basics           // Q9
-    case drinkingPattern  // Q10
-    case cost             // Q11
+    case name             // Q9 - Name collection
+    case basics           // Q10
+    case drinkingPattern  // Q11
+    case cost             // Q12
     case motivation
     case goals
     case commitment
@@ -128,7 +132,7 @@ enum OnboardingPage: CaseIterable {
     var isQuestion: Bool {
         switch self {
         case .whyHere, .lifeImpact, .symptoms, .losses, .triggers,
-             .afterFeeling, .biggestFear, .previousAttempts, .basics,
+             .afterFeeling, .biggestFear, .previousAttempts, .name, .basics,
              .drinkingPattern, .cost, .goals:
             return true
         default:

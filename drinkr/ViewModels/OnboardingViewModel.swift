@@ -18,6 +18,7 @@ class OnboardingViewModel: ObservableObject {
     @Published var selectedAfterFeeling: OnboardingOption?
     @Published var selectedBiggestFear: OnboardingOption?
     @Published var selectedPreviousAttempts: OnboardingOption?
+    @Published var userName: String = ""
     @Published var selectedAge: OnboardingOption?
     @Published var selectedGender: OnboardingOption?
     @Published var selectedRelationship: OnboardingOption?
@@ -70,6 +71,14 @@ class OnboardingViewModel: ObservableObject {
             .store(in: &cancellables)
         
         $selectedPreviousAttempts
+            .sink { [weak self] _ in 
+                DispatchQueue.main.async {
+                    self?.updateCanProceed()
+                }
+            }
+            .store(in: &cancellables)
+        
+        $userName
             .sink { [weak self] _ in 
                 DispatchQueue.main.async {
                     self?.updateCanProceed()
@@ -203,6 +212,8 @@ class OnboardingViewModel: ObservableObject {
             canProceed = selectedBiggestFear != nil
         case .previousAttempts:
             canProceed = selectedPreviousAttempts != nil
+        case .name:
+            canProceed = !userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         case .basics:
             canProceed = selectedAge != nil && selectedGender != nil
         case .drinkingPattern:
@@ -278,6 +289,8 @@ class OnboardingViewModel: ObservableObject {
         case .biggestFear:
             currentPage = .previousAttempts
         case .previousAttempts:
+            currentPage = .name
+        case .name:
             currentPage = .basics
         case .basics:
             currentPage = .drinkingPattern
@@ -324,8 +337,10 @@ class OnboardingViewModel: ObservableObject {
             currentPage = .afterFeeling
         case .previousAttempts:
             currentPage = .biggestFear
-        case .basics:
+        case .name:
             currentPage = .previousAttempts
+        case .basics:
+            currentPage = .name
         case .drinkingPattern:
             currentPage = .basics
         case .cost:
@@ -361,6 +376,8 @@ class OnboardingViewModel: ObservableObject {
             userProfile.biggestFear = selectedBiggestFear?.text ?? ""
         case .previousAttempts:
             userProfile.previousAttempts = selectedPreviousAttempts?.text ?? ""
+        case .name:
+            userProfile.userName = userName
         case .basics:
             userProfile.age = selectedAge?.text ?? ""
             userProfile.gender = selectedGender?.text ?? ""

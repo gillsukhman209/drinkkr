@@ -120,6 +120,8 @@ struct OnboardingContainerView: View {
                 OnboardingIntroView(page: viewModel.currentPage, viewModel: viewModel)
             case .whyHere, .lifeImpact, .symptoms, .losses, .triggers, .afterFeeling, .biggestFear, .previousAttempts:
                 OnboardingEmotionalQuestionView(page: viewModel.currentPage, viewModel: viewModel)
+            case .name:
+                OnboardingNameView(viewModel: viewModel)
             case .basics, .drinkingPattern, .cost:
                 OnboardingDataQuestionView(page: viewModel.currentPage, viewModel: viewModel)
             case .motivation:
@@ -141,27 +143,6 @@ struct OnboardingContainerView: View {
     
     private var navigationButtons: some View {
         HStack(spacing: 15) {
-            // Skip button (only on certain pages)
-            if shouldShowSkipButton() {
-                Button(action: {
-                    viewModel.nextPage()
-                }) {
-                    Text("Skip")
-                        .font(.system(size: isCompact ? 16 : 18, weight: .medium))
-                        .foregroundColor(ColorTheme.textSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: isCompact ? 50 : 56)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color.white.opacity(0.1))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                                )
-                        )
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
             
             // Next/Continue button
             Button(action: {
@@ -215,14 +196,6 @@ struct OnboardingContainerView: View {
         }
     }
     
-    private func shouldShowSkipButton() -> Bool {
-        switch viewModel.currentPage {
-        case .symptoms, .losses, .triggers:
-            return true
-        default:
-            return false
-        }
-    }
     
     private func getButtonText() -> String {
         switch viewModel.currentPage {
