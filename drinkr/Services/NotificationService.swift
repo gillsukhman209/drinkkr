@@ -4,6 +4,7 @@ import UIKit
 
 class NotificationService: ObservableObject {
     static let shared = NotificationService()
+    private let messageService = NotificationMessageService.shared
     
     private init() {
         requestPermission()
@@ -131,6 +132,113 @@ class NotificationService: ObservableObject {
         }
     }
     
+    // MARK: - Phase 1: Daily Check-In Notifications
+    
+    func schedulePersonalizedDailyCheckIn(
+        userName: String,
+        checkInTime: Date,
+        daysSober: Int,
+        weeklySpending: String
+    ) {
+        // Cancel existing daily check-ins
+        cancelDailyCheckInNotifications()
+        
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: checkInTime)
+        let minute = calendar.component(.minute, from: checkInTime)
+        
+        let message = messageService.getDailyCheckInMessage(
+            userName: userName,
+            daysSober: daysSober,
+            weeklySpending: weeklySpending
+        )
+        
+        let content = UNMutableNotificationContent()
+        content.title = message.title
+        content.body = message.body
+        content.sound = .default
+        content.badge = 1
+        content.categoryIdentifier = "DAILY_CHECKIN"
+        
+        var dateComponents = DateComponents()
+        dateComponents.hour = hour
+        dateComponents.minute = minute
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        
+        let request = UNNotificationRequest(
+            identifier: "daily-checkin-personalized",
+            content: content,
+            trigger: trigger
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Error scheduling personalized daily check-in: \(error)")
+                } else {
+                    print("✅ Personalized daily check-in scheduled for \(hour):\(String(format: "%02d", minute))")
+                }
+            }
+        }
+    }
+    
+    // MARK: - Phase 2: Craving Crusher Notifications
+    
+    func scheduleCravingCrusherNotifications(
+        userName: String,
+        triggers: [String],
+        afterFeeling: String,
+        daysSober: Int
+    ) {
+        // Cancel existing craving crushers
+        cancelCravingCrusherNotifications()
+        
+        let times = messageService.getRandomCravingCrusherTimes()
+        
+        for (index, time) in times.enumerated() {
+            let message = messageService.getCravingCrusherMessage(
+                userName: userName,
+                triggers: triggers,
+                afterFeeling: afterFeeling,
+                daysSober: daysSober
+            )
+            
+            let content = UNMutableNotificationContent()
+            content.title = message.title
+            content.body = message.body
+            content.sound = .default
+            content.badge = 1
+            content.categoryIdentifier = "CRAVING_CRUSHER"
+            
+            let calendar = Calendar.current
+            let hour = calendar.component(.hour, from: time)
+            let minute = calendar.component(.minute, from: time)
+            
+            var dateComponents = DateComponents()
+            dateComponents.hour = hour
+            dateComponents.minute = minute
+            
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+            
+            let request = UNNotificationRequest(
+                identifier: "craving-crusher-\(index)",
+                content: content,
+                trigger: trigger
+            )
+            
+            UNUserNotificationCenter.current().add(request) { error in
+                DispatchQueue.main.async {
+                    if let error = error {
+                        print("❌ Error scheduling craving crusher \(index): \(error)")
+                    } else {
+                        print("✅ Craving crusher \(index) scheduled for \(hour):\(String(format: "%02d", minute))")
+                    }
+                }
+            }
+        }
+    }
+    
     func scheduleDailyReminderNotification(at hour: Int, minute: Int) {
         // Cancel existing daily reminder
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily-reminder"])
@@ -172,6 +280,17 @@ class NotificationService: ObservableObject {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
             let checkInIds = requests.filter { $0.identifier.hasPrefix("daily-checkin") }.map { $0.identifier }
             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: checkInIds)
+        }
+    }
+    
+    func cancelDailyCheckInNotifications() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily-checkin-personalized"])
+    }
+    
+    func cancelCravingCrusherNotifications() {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            let crusherIds = requests.filter { $0.identifier.hasPrefix("craving-crusher") }.map { $0.identifier }
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: crusherIds)
         }
     }
     

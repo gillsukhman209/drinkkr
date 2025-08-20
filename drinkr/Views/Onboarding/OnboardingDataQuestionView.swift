@@ -35,10 +35,8 @@ struct OnboardingDataQuestionView: View {
                 }
                 .padding(.top, isCompact ? 20 : 30)
                 
-                // Multi-part questions (like basics page)
-                if page == .basics {
-                    basicsQuestions
-                } else if page == .drinkingPattern {
+                // Multi-part questions
+                if page == .drinkingPattern {
                     drinkingPatternQuestions
                 } else if page == .cost {
                     costQuestions
@@ -57,26 +55,6 @@ struct OnboardingDataQuestionView: View {
         }
     }
     
-    private var basicsQuestions: some View {
-        VStack(spacing: 30) {
-            // Age question
-            questionSection(
-                title: "Your age range",
-                options: OnboardingQuestions.ageOptions,
-                selectedOption: viewModel.selectedAge,
-                onSelect: { viewModel.selectedAge = $0 }
-            )
-            
-            // Gender question
-            questionSection(
-                title: "Gender",
-                options: OnboardingQuestions.genderOptions,
-                selectedOption: viewModel.selectedGender,
-                onSelect: { viewModel.selectedGender = $0 }
-            )
-        }
-        .padding(.horizontal, 20)
-    }
     
     private var drinkingPatternQuestions: some View {
         VStack(spacing: 30) {
@@ -94,14 +72,6 @@ struct OnboardingDataQuestionView: View {
                 options: OnboardingQuestions.drinksPerSessionOptions,
                 selectedOption: viewModel.selectedDrinksPerSession,
                 onSelect: { viewModel.selectedDrinksPerSession = $0 }
-            )
-            
-            // Type question
-            questionSection(
-                title: "Preferred drink type",
-                options: OnboardingQuestions.preferredDrinkOptions,
-                selectedOption: viewModel.selectedPreferredDrink,
-                onSelect: { viewModel.selectedPreferredDrink = $0 }
             )
         }
         .padding(.horizontal, 20)
@@ -273,8 +243,6 @@ struct OnboardingDataQuestionView: View {
     
     private var questionTitle: String {
         switch page {
-        case .basics:
-            return "Tell us a bit about yourself"
         case .drinkingPattern:
             return "Your drinking pattern"
         case .cost:
@@ -286,8 +254,6 @@ struct OnboardingDataQuestionView: View {
     
     private var questionSubtitle: String? {
         switch page {
-        case .basics:
-            return "This helps us personalize your experience"
         case .drinkingPattern:
             return "Understanding your habits helps us calculate your progress"
         case .cost:

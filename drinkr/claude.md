@@ -1,9 +1,11 @@
 # Claude Instructions for Drinkr iOS App
 
 ## Overview
+
 Drinkr is an iOS app designed to help people quit alcohol. It provides a sobriety timer, streak tracking, relapse logging, panic button, reflection prompts, and an educational library. The app is built with SwiftUI and follows a dark navy/purple gradient design theme with smooth animations.
 
 ## Tech Stack
+
 - Language: Swift
 - UI: SwiftUI (no UIKit unless necessary)
 - Data Storage: SwiftData for persistence, UserDefaults for lightweight settings
@@ -12,6 +14,7 @@ Drinkr is an iOS app designed to help people quit alcohol. It provides a sobriet
 - Health: HealthKit integration (optional, future)
 
 ## Current File Structure
+
 ```
 drinkr/
 ├── ContentView.swift (Tab navigation - 3 tabs)
@@ -36,9 +39,10 @@ drinkr/
 ```
 
 ## Completed Features (Phase 1-4)
+
 - ✅ Tab-based navigation with 3 tabs (Home, Stats, Learn)
 - ✅ Modern starfield background with animated twinkling stars
-- ✅ Responsive design for all iOS device sizes  
+- ✅ Responsive design for all iOS device sizes
 - ✅ Dashboard with smart timer display and glassmorphism UI
 - ✅ Profile/Stats view with comprehensive progress tracking
 - ✅ Learn view (formerly Library) with educational content
@@ -52,6 +56,7 @@ drinkr/
 - ✅ Milestone celebrations with animations
 
 ## Implementation Phases
+
 1. ✅ Core Structure & Navigation - COMPLETED
 2. ✅ Data Models & Storage - COMPLETED
    - User model with real data
@@ -84,6 +89,7 @@ drinkr/
    - Home screen widget
 
 ## Design Guidelines
+
 - Modern/futuristic aesthetic with glowing effects
 - Responsive layouts using @Environment size classes
 - isCompact property for adaptive sizing
@@ -92,6 +98,7 @@ drinkr/
 - .glowEffect() modifier for accent elements
 
 ## Edge Cases Handled
+
 - Different screen sizes (iPhone SE to iPad)
 - Landscape/Portrait orientations
 - Dark mode only (enforced)
@@ -100,9 +107,11 @@ drinkr/
 - Keyboard avoidance in chat
 
 ## Next Steps
+
 Phase 2: Data Models & Storage implementation
 
 ## Coding Guidelines
+
 - Use MVVM pattern for views
 - Keep code modular and aligned with file structure above
 - Do not delete placeholder views — expand them instead
@@ -113,11 +122,13 @@ Phase 2: Data Models & Storage implementation
 ## Onboarding Flow (To Be Implemented)
 
 ### Overview
+
 Emotionally-engaging onboarding that deeply understands user struggles with alcohol, building strong connection and motivation for change.
 
 ### Onboarding Structure:
 
 #### 1. Welcome & Hook Screens (3-4 screens)
+
 - "You're not alone. Let's take this journey together."
 - "Every day without alcohol is a victory worth celebrating"
 - "Join thousands who've reclaimed their lives"
@@ -126,6 +137,7 @@ Emotionally-engaging onboarding that deeply understands user struggles with alco
 #### 2. Emotional Connection Questions
 
 **Q1: Why are you here today?**
+
 - I want to quit completely
 - I need to cut back
 - Someone asked me to stop
@@ -133,6 +145,7 @@ Emotionally-engaging onboarding that deeply understands user struggles with alco
 - I hit rock bottom
 
 **Q2: How is alcohol affecting your life?** (Multiple select)
+
 - Damaging my relationships
 - Affecting my work/career
 - Harming my health
@@ -143,6 +156,7 @@ Emotionally-engaging onboarding that deeply understands user struggles with alco
 - Missing important moments
 
 **Q3: What symptoms are you experiencing?** (Multiple select)
+
 - Morning shakes or tremors
 - Constant fatigue
 - Memory blackouts
@@ -154,6 +168,7 @@ Emotionally-engaging onboarding that deeply understands user struggles with alco
 - Brain fog
 
 **Q4: What have you lost to alcohol?** (Multiple select)
+
 - Trust from loved ones
 - Job opportunities
 - Money and savings
@@ -164,6 +179,7 @@ Emotionally-engaging onboarding that deeply understands user struggles with alco
 - Personal goals
 
 **Q5: What triggers your drinking?** (Multiple select)
+
 - Stress from work
 - Social pressure
 - Loneliness
@@ -175,6 +191,7 @@ Emotionally-engaging onboarding that deeply understands user struggles with alco
 - Physical cravings
 
 **Q6: How do you feel after drinking?**
+
 - Ashamed and guilty
 - Anxious and worried
 - Physically sick
@@ -183,6 +200,7 @@ Emotionally-engaging onboarding that deeply understands user struggles with alco
 - Hopeless
 
 **Q7: What's your biggest fear about quitting?**
+
 - I'll lose my friends
 - I can't handle stress without it
 - Life will be boring
@@ -191,6 +209,7 @@ Emotionally-engaging onboarding that deeply understands user struggles with alco
 - I don't know who I am without it
 
 **Q8: Have you tried to quit before?**
+
 - Never tried
 - Once or twice
 - Several times
@@ -200,27 +219,34 @@ Emotionally-engaging onboarding that deeply understands user struggles with alco
 #### 3. Data Collection Questions
 
 **Q9: Your basics**
+
 - Age range (18-24, 25-34, 35-44, 45-54, 55+)
 - Gender (Male/Female/Other/Prefer not to say)
 - Relationship status
 
 **Q10: Your drinking pattern**
+
 - How often do you drink? (Daily/Few times a week/Weekly/Occasionally)
 - How many drinks per session? (1-2/3-4/5-6/7+)
 - Preferred type? (Beer/Wine/Spirits/Mixed)
 
 **Q11: The cost**
+
 - Weekly spending on alcohol ($0-20/$20-50/$50-100/$100+)
 - Hours per week lost to drinking/hangovers
 
 #### 4. Hope & Motivation Screen
+
 Personalized message based on answers:
+
 - "You could save $[amount] per month"
 - "You could reclaim [hours] hours per week"
 - "Join [number] others who felt exactly like you"
 
 #### 5. Goal Setting Screen
+
 **What do you want to achieve?** (Multiple select)
+
 - 🧠 Clear mind and better focus
 - ❤️ Rebuild trust with loved ones
 - 💪 Get healthy and fit
@@ -231,16 +257,19 @@ Personalized message based on answers:
 - 🏆 Prove I can do this
 
 #### 6. Commitment Screen
+
 - "I'm ready to take control of my life"
 - Set quit date (Today/Tomorrow/Choose date)
 - Daily check-in time preference
 
 #### 7. Support & Permissions
+
 - Enable notifications
 - Show success story quote
 - "We'll be here every step of the way"
 
 ### User Profile Data Structure
+
 ```
 UserProfile:
   // Emotional data
@@ -252,7 +281,7 @@ UserProfile:
   - afterFeeling: String
   - biggestFear: String
   - previousAttempts: String
-  
+
   // Practical data
   - age: String
   - gender: String
@@ -261,7 +290,7 @@ UserProfile:
   - drinksPerSession: Int
   - weeklySpending: Double
   - hoursLostWeekly: Int
-  
+
   // Goals & Commitment
   - selectedGoals: [String]
   - quitDate: Date
@@ -269,6 +298,7 @@ UserProfile:
 ```
 
 ### Implementation Files Needed
+
 1. OnboardingContainerView.swift - Main navigation with progress
 2. OnboardingWelcomeView.swift - Welcome/hook screens
 3. OnboardingEmotionalQuestions.swift - Emotional questions (Q1-Q8)
@@ -279,6 +309,7 @@ UserProfile:
 8. OnboardingModels.swift - Data structures
 
 ### Key Emotional Hooks
+
 - Acknowledgment: "We see your struggle"
 - Hope: "Recovery is possible"
 - Community: "You're not alone"
@@ -287,6 +318,7 @@ UserProfile:
 - No judgment: "Safe space"
 
 ### Visual Design Notes
+
 - Use OptimizedBackground for consistency
 - Progress bar at top showing journey
 - Gentle transitions between questions
@@ -295,7 +327,109 @@ UserProfile:
 - Empathetic color choices (soft blues/purples)
 - Show % of users with similar selections for connection
 
+## Viral TikTok Notification Strategy
+
+### Overview
+
+Transform notifications from interruptions into shareable, viral TikTok moments through hyper-personalized messaging using rich onboarding data.
+
+### Data Source: Step 15 (Commitment)
+
+- **checkInTime**: User's preferred daily check-in time
+- **Personal data**: userName, triggers, biggestFear, afterFeeling, losses, weeklySpending, etc.
+- **Goal**: Create "screenshot-worthy" notifications that users want to share
+
+### Implementation Phases
+
+#### **PHASE 1: Daily Check-In Foundation**
+
+_Timeline: Week 1_
+
+- ✅ Use saved `checkInTime` from onboarding
+- ✅ Implement personalized daily check-in notifications
+- ✅ Replace current pledge modal system
+- **Examples**:
+  - "Good morning [Name]! Day 47 without alcohol. Your brain is 47 days clearer ✨"
+  - "[Name], it's your check-in time. Remember: you chose growth over guilt today 💪"
+
+#### **PHASE 2: Craving Crusher System**
+
+_Timeline: Week 2_
+
+- ✅ 2-3 random notifications daily
+
+- ✅ Psychic-level personalization
+- **Examples**:
+  - "Friday 6 PM trigger alert! You said work stress makes you drink. Try 5 deep breaths instead 🌟"
+  - "Craving hitting? Remember: you told us alcohol makes you anxious. Your sober brain is protecting you ❤️"
+
+#### **PHASE 3: Milestone Celebrations**
+
+_Timeline: Week 3_
+
+- ✅ Achievement-based notifications
+- ✅ Dramatic savings/time calculations
+- ✅ Screenshots designed for sharing
+- **Examples**:
+  - "🚨 MONTH 1 COMPLETE 🚨 [Name], you've saved $400 and reclaimed 80 hours!"
+  - "365 DAYS! From rock bottom to rock solid. Screenshot this moment 🏆"
+
+#### **PHASE 4: Savage Motivation**
+
+_Timeline: Week 4_
+
+- ✅ 2x weekly brutal honesty
+- ✅ Tuesday 11 AM, Friday 9 PM
+- ✅ Reality check messaging
+- **Examples**:
+  - "[Name], you used to lose weekends to hangovers. It's Saturday 10 AM and you're free 🌅"
+  - "Reality check: 23 days ago you couldn't sleep without alcohol. Now you sleep like a baby 😴"
+
+#### **PHASE 5: Fear Crusher**
+
+_Timeline: Week 5_
+
+- ✅ Weekly Sunday 8 PM
+- ✅ Directly addresses biggest fears from onboarding
+- ✅ Growth mindset reframes
+- **Examples**:
+  - "You feared 'life will be boring.' Plot twist: you've had 3 weeks of authentic joy 🎉"
+  - "Afraid of losing friends? Real friends celebrate your growth. The rest were just drinking buddies 🤷‍♀️"
+
+#### **PHASE 6: Wisdom Drops**
+
+_Timeline: Week 6_
+
+- ✅ Daily random profound insights
+- ✅ Philosophical and motivational
+- ✅ Shareable quote-style format
+- **Examples**:
+  - "You're not 'giving up' alcohol. You're choosing everything it took away: clarity, money, time ✨"
+  - "The version of you that needed alcohol was doing her best. Today's version is writing a different story 📖"
+
+### Viral TikTok Features
+
+- **Screenshot-worthy design**: Beautiful gradients, emojis, visual breaks
+- **Personal callbacks**: "Psychic" accuracy using onboarding data
+- **Engagement hooks**: "This app called me out 💀", "POV: Your app is your therapist"
+- **Shareable moments**: Major milestones, brutal honesty, accurate predictions
+
+### Technical Implementation
+
+- **Smart timing**: Avoid late nights, higher frequency during trigger times
+- **Data utilization**: Every onboarding response used for personalization
+- **Notification frequency**: 4-6 per day at full implementation
+- **A/B testing**: Track which notifications get screenshot/shared most
+
+### Success Metrics
+
+- TikTok mentions and hashtags
+- Screenshot shares in app reviews
+- User engagement with notifications
+- Retention rates by notification type
+
 ## Future Roadmap
+
 - Apple Watch companion app
 - Advanced analytics & statistics
 - Community engagement features

@@ -19,12 +19,8 @@ class OnboardingViewModel: ObservableObject {
     @Published var selectedBiggestFear: OnboardingOption?
     @Published var selectedPreviousAttempts: OnboardingOption?
     @Published var userName: String = ""
-    @Published var selectedAge: OnboardingOption?
-    @Published var selectedGender: OnboardingOption?
-    @Published var selectedRelationship: OnboardingOption?
     @Published var selectedDrinkingFrequency: OnboardingOption?
     @Published var selectedDrinksPerSession: OnboardingOption?
-    @Published var selectedPreferredDrink: OnboardingOption?
     @Published var selectedWeeklySpending: OnboardingOption?
     @Published var selectedHoursLost: OnboardingOption?
     @Published var selectedGoals: Set<OnboardingGoal> = []
@@ -86,29 +82,6 @@ class OnboardingViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         
-        $selectedAge
-            .sink { [weak self] _ in 
-                DispatchQueue.main.async {
-                    self?.updateCanProceed()
-                }
-            }
-            .store(in: &cancellables)
-        
-        $selectedGender
-            .sink { [weak self] _ in 
-                DispatchQueue.main.async {
-                    self?.updateCanProceed()
-                }
-            }
-            .store(in: &cancellables)
-        
-        $selectedRelationship
-            .sink { [weak self] _ in 
-                DispatchQueue.main.async {
-                    self?.updateCanProceed()
-                }
-            }
-            .store(in: &cancellables)
         
         $selectedDrinkingFrequency
             .sink { [weak self] _ in 
@@ -119,14 +92,6 @@ class OnboardingViewModel: ObservableObject {
             .store(in: &cancellables)
         
         $selectedDrinksPerSession
-            .sink { [weak self] _ in 
-                DispatchQueue.main.async {
-                    self?.updateCanProceed()
-                }
-            }
-            .store(in: &cancellables)
-        
-        $selectedPreferredDrink
             .sink { [weak self] _ in 
                 DispatchQueue.main.async {
                     self?.updateCanProceed()
@@ -214,10 +179,8 @@ class OnboardingViewModel: ObservableObject {
             canProceed = selectedPreviousAttempts != nil
         case .name:
             canProceed = !userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        case .basics:
-            canProceed = selectedAge != nil && selectedGender != nil
         case .drinkingPattern:
-            canProceed = selectedDrinkingFrequency != nil && selectedDrinksPerSession != nil && selectedPreferredDrink != nil
+            canProceed = selectedDrinkingFrequency != nil && selectedDrinksPerSession != nil
         case .cost:
             canProceed = selectedWeeklySpending != nil && selectedHoursLost != nil
         case .motivation:
@@ -225,8 +188,6 @@ class OnboardingViewModel: ObservableObject {
         case .goals:
             canProceed = !selectedGoals.isEmpty
         case .commitment:
-            canProceed = true
-        case .permissions:
             canProceed = true
         case .complete:
             canProceed = true
@@ -291,8 +252,6 @@ class OnboardingViewModel: ObservableObject {
         case .previousAttempts:
             currentPage = .name
         case .name:
-            currentPage = .basics
-        case .basics:
             currentPage = .drinkingPattern
         case .drinkingPattern:
             currentPage = .cost
@@ -303,8 +262,6 @@ class OnboardingViewModel: ObservableObject {
         case .goals:
             currentPage = .commitment
         case .commitment:
-            currentPage = .permissions
-        case .permissions:
             currentPage = .complete
         case .complete:
             break
@@ -339,10 +296,8 @@ class OnboardingViewModel: ObservableObject {
             currentPage = .biggestFear
         case .name:
             currentPage = .previousAttempts
-        case .basics:
-            currentPage = .name
         case .drinkingPattern:
-            currentPage = .basics
+            currentPage = .name
         case .cost:
             currentPage = .drinkingPattern
         case .motivation:
@@ -351,10 +306,8 @@ class OnboardingViewModel: ObservableObject {
             currentPage = .motivation
         case .commitment:
             currentPage = .goals
-        case .permissions:
-            currentPage = .commitment
         case .complete:
-            currentPage = .permissions
+            currentPage = .commitment
         }
     }
     
@@ -378,14 +331,9 @@ class OnboardingViewModel: ObservableObject {
             userProfile.previousAttempts = selectedPreviousAttempts?.text ?? ""
         case .name:
             userProfile.userName = userName
-        case .basics:
-            userProfile.age = selectedAge?.text ?? ""
-            userProfile.gender = selectedGender?.text ?? ""
-            userProfile.relationshipStatus = selectedRelationship?.text ?? ""
         case .drinkingPattern:
             userProfile.drinkingFrequency = selectedDrinkingFrequency?.text ?? ""
             userProfile.drinksPerSession = selectedDrinksPerSession?.text ?? ""
-            userProfile.preferredDrink = selectedPreferredDrink?.text ?? ""
         case .cost:
             userProfile.weeklySpending = selectedWeeklySpending?.text ?? ""
             userProfile.hoursLostWeekly = selectedHoursLost?.text ?? ""

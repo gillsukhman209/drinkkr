@@ -43,7 +43,15 @@ struct ProfileView: View {
                         
                         relapseHistorySection
                             .padding(.horizontal)
-                            .padding(.bottom)
+                        
+                        // Test buttons for viral notifications (Debug)
+                        #if DEBUG
+                        testNotificationButtons
+                            .padding(.horizontal)
+                        #endif
+                        
+                        Spacer()
+                            .frame(height: 20)
                     }
                 }
             }
@@ -413,6 +421,63 @@ struct ProfileView: View {
         
         return (moneySaved, drinksAvoided, caloriesSaved, timeReclaimed, checkInCount, meditationCount, achievementCount)
     }
+    
+    #if DEBUG
+    var testNotificationButtons: some View {
+        VStack(spacing: 15) {
+            Text("🧪 Viral Notification Testing")
+                .font(.system(size: isCompact ? 16 : 18, weight: .bold))
+                .foregroundColor(ColorTheme.accentCyan)
+            
+            HStack(spacing: 10) {
+                Button(action: {
+                    ViralNotificationManager.shared.testNotifications()
+                }) {
+                    Text("Test Notifications")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(ColorTheme.accentPurple)
+                        .cornerRadius(12)
+                }
+                
+                Button(action: {
+                    NotificationService.shared.scheduleTestNotification()
+                }) {
+                    Text("Test in 5s")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(ColorTheme.successGreen)
+                        .cornerRadius(12)
+                }
+                
+                Button(action: {
+                    ViralNotificationManager.shared.cancelAllViralNotifications()
+                }) {
+                    Text("Cancel All")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(.red)
+                        .cornerRadius(12)
+                }
+            }
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.05))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(ColorTheme.accentCyan.opacity(0.3), lineWidth: 1)
+                )
+        )
+    }
+    #endif
 }
 
 #Preview {

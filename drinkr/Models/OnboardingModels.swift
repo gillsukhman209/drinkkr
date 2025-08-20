@@ -16,14 +16,8 @@ struct OnboardingUserProfile: Codable {
     
     // Personal data
     var userName: String = ""
-    
-    // Practical data
-    var age: String = ""
-    var gender: String = ""
-    var relationshipStatus: String = ""
     var drinkingFrequency: String = ""
     var drinksPerSession: String = ""
-    var preferredDrink: String = ""
     var weeklySpending: String = ""
     var hoursLostWeekly: String = ""
     
@@ -108,13 +102,11 @@ enum OnboardingPage: CaseIterable {
     case biggestFear      // Q7
     case previousAttempts // Q8
     case name             // Q9 - Name collection
-    case basics           // Q10
-    case drinkingPattern  // Q11
-    case cost             // Q12
+    case drinkingPattern  // Q10
+    case cost             // Q11
     case motivation
     case goals
     case commitment
-    case permissions
     case complete
     
     var progress: Double {
@@ -132,7 +124,7 @@ enum OnboardingPage: CaseIterable {
     var isQuestion: Bool {
         switch self {
         case .whyHere, .lifeImpact, .symptoms, .losses, .triggers,
-             .afterFeeling, .biggestFear, .previousAttempts, .name, .basics,
+             .afterFeeling, .biggestFear, .previousAttempts, .name,
              .drinkingPattern, .cost, .goals:
             return true
         default:
@@ -315,29 +307,6 @@ struct OnboardingQuestions {
         icon: "clock.arrow.circlepath"
     )
     
-    // Data collection questions
-    static let ageOptions = [
-        OnboardingOption(text: "18-24", icon: nil, color: nil),
-        OnboardingOption(text: "25-34", icon: nil, color: nil),
-        OnboardingOption(text: "35-44", icon: nil, color: nil),
-        OnboardingOption(text: "45-54", icon: nil, color: nil),
-        OnboardingOption(text: "55+", icon: nil, color: nil)
-    ]
-    
-    static let genderOptions = [
-        OnboardingOption(text: "Male", icon: nil, color: nil),
-        OnboardingOption(text: "Female", icon: nil, color: nil),
-        OnboardingOption(text: "Other", icon: nil, color: nil),
-        OnboardingOption(text: "Prefer not to say", icon: nil, color: nil)
-    ]
-    
-    static let relationshipOptions = [
-        OnboardingOption(text: "Single", icon: nil, color: nil),
-        OnboardingOption(text: "In a relationship", icon: nil, color: nil),
-        OnboardingOption(text: "Married", icon: nil, color: nil),
-        OnboardingOption(text: "Divorced", icon: nil, color: nil),
-        OnboardingOption(text: "Prefer not to say", icon: nil, color: nil)
-    ]
     
     static let drinkingFrequencyOptions = [
         OnboardingOption(text: "Daily", icon: "calendar.circle.fill", color: .red),
@@ -353,12 +322,6 @@ struct OnboardingQuestions {
         OnboardingOption(text: "7+ drinks", icon: "plus.circle.fill", color: .red)
     ]
     
-    static let preferredDrinkOptions = [
-        OnboardingOption(text: "Beer", icon: "drop.fill", color: .yellow),
-        OnboardingOption(text: "Wine", icon: "wineglass.fill", color: .purple),
-        OnboardingOption(text: "Spirits", icon: "flame.fill", color: .orange),
-        OnboardingOption(text: "Mixed drinks", icon: "cup.and.saucer.fill", color: .blue)
-    ]
     
     static let weeklySpendingOptions = [
         OnboardingOption(text: "$0-20", icon: "dollarsign.circle", color: .green),

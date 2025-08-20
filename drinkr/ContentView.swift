@@ -80,12 +80,22 @@ struct ContentView: View {
             if let data = UserDefaults.standard.data(forKey: "onboardingUserProfile"),
                let profile = try? JSONDecoder().decode(OnboardingUserProfile.self, from: data) {
                 updateDataServiceWithProfile(profile)
+                
+                // Set up viral notifications for existing users
+                if let sobrietyData = dataService.sobrietyData {
+                    ViralNotificationManager.shared.setupViralNotifications(sobrietyData: sobrietyData, onboardingProfile: profile)
+                }
             }
         }
     }
     
     private func handleOnboardingCompletion(_ profile: OnboardingUserProfile) {
         updateDataServiceWithProfile(profile)
+        
+        // Set up viral notifications with onboarding data
+        if let sobrietyData = dataService.sobrietyData {
+            ViralNotificationManager.shared.setupViralNotifications(sobrietyData: sobrietyData, onboardingProfile: profile)
+        }
         
         withAnimation(.spring(response: 0.8, dampingFraction: 0.9)) {
             hasCompletedOnboarding = true

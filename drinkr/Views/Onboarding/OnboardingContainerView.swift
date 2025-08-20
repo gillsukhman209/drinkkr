@@ -122,7 +122,7 @@ struct OnboardingContainerView: View {
                 OnboardingEmotionalQuestionView(page: viewModel.currentPage, viewModel: viewModel)
             case .name:
                 OnboardingNameView(viewModel: viewModel)
-            case .basics, .drinkingPattern, .cost:
+            case .drinkingPattern, .cost:
                 OnboardingDataQuestionView(page: viewModel.currentPage, viewModel: viewModel)
             case .motivation:
                 OnboardingMotivationView(viewModel: viewModel)
@@ -130,8 +130,6 @@ struct OnboardingContainerView: View {
                 OnboardingGoalsView(viewModel: viewModel)
             case .commitment:
                 OnboardingCommitmentView(viewModel: viewModel)
-            case .permissions:
-                OnboardingPermissionView(viewModel: viewModel)
             case .complete:
                 OnboardingCompleteView(viewModel: viewModel)
             }
@@ -205,8 +203,6 @@ struct OnboardingContainerView: View {
             return "Continue"
         case .commitment:
             return "I'm Ready"
-        case .permissions:
-            return "Enable Notifications"
         case .complete:
             return "Start My Journey"
         default:
