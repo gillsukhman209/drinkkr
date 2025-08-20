@@ -203,36 +203,25 @@ struct CelebrationView: View {
     
     var actionButtons: some View {
         VStack(spacing: 15) {
-            Button(action: shareAchievement) {
-                HStack {
-                    Image(systemName: "square.and.arrow.up")
-                    Text("Share Achievement")
-                }
-                .font(.system(size: isCompact ? 16 : 18, weight: .semibold))
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
-                .padding(isCompact ? 15 : 18)
-                .background(ColorTheme.successGreen)
-                .cornerRadius(15)
-                .glowEffect(color: ColorTheme.successGreen, radius: 10)
-            }
-            
             Button(action: {
                 withAnimation(.spring()) {
                     isPresented = false
                 }
             }) {
                 Text("Continue Journey")
-                    .font(.system(size: isCompact ? 16 : 18, weight: .medium))
-                    .foregroundColor(ColorTheme.textPrimary)
+                    .font(.system(size: isCompact ? 16 : 18, weight: .semibold))
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(isCompact ? 12 : 15)
-                    .background(ColorTheme.cardBackground)
-                    .cornerRadius(15)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 15)
-                            .stroke(ColorTheme.accentCyan.opacity(0.3), lineWidth: 1)
+                    .padding(isCompact ? 15 : 18)
+                    .background(
+                        LinearGradient(
+                            colors: [ColorTheme.accentCyan, ColorTheme.accentPurple],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
                     )
+                    .cornerRadius(15)
+                    .glowEffect(color: ColorTheme.accentCyan, radius: 10)
             }
         }
     }
@@ -255,9 +244,6 @@ struct CelebrationView: View {
         }
     }
     
-    func shareAchievement() {
-        print("Share achievement: \(milestone) days sober!")
-    }
 }
 
 #Preview {
