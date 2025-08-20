@@ -429,11 +429,12 @@ struct ProfileView: View {
                 .font(.system(size: isCompact ? 16 : 18, weight: .bold))
                 .foregroundColor(ColorTheme.accentCyan)
             
+            // Main test buttons
             HStack(spacing: 10) {
                 Button(action: {
                     ViralNotificationManager.shared.testNotifications()
                 }) {
-                    Text("Test Notifications")
+                    Text("Test All Phases")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -445,7 +446,7 @@ struct ProfileView: View {
                 Button(action: {
                     NotificationService.shared.scheduleTestNotification()
                 }) {
-                    Text("Test in 5s")
+                    Text("Quick Test (5s)")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -464,6 +465,81 @@ struct ProfileView: View {
                         .padding(.vertical, 12)
                         .background(.red)
                         .cornerRadius(12)
+                }
+            }
+            
+            // Individual phase test buttons
+            VStack(spacing: 8) {
+                Text("Test Individual Phases")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(ColorTheme.textSecondary)
+                
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                    // Phase 3: Milestone
+                    Button(action: {
+                        NotificationService.shared.scheduleMilestoneNotification(
+                            userName: "Test User",
+                            milestone: 30,
+                            moneySaved: "$400",
+                            hoursReclaimed: 90
+                        )
+                    }) {
+                        Text("🏆 Milestone")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.orange)
+                            .cornerRadius(8)
+                    }
+                    
+                    // Phase 4: Savage
+                    Button(action: {
+                        NotificationService.shared.scheduleSavageMotivationNotifications(
+                            userName: "Test User",
+                            losses: ["Time", "Trust"],
+                            afterFeeling: "Ashamed",
+                            daysSober: 15
+                        )
+                    }) {
+                        Text("💪 Savage")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.red)
+                            .cornerRadius(8)
+                    }
+                    
+                    // Phase 5: Fear Crusher
+                    Button(action: {
+                        NotificationService.shared.scheduleFearCrusherNotification(
+                            userName: "Test User",
+                            biggestFear: "Life will be boring",
+                            daysSober: 20
+                        )
+                    }) {
+                        Text("🦁 Fear")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.purple)
+                            .cornerRadius(8)
+                    }
+                    
+                    // Phase 6: Wisdom
+                    Button(action: {
+                        NotificationService.shared.scheduleWisdomDropNotification()
+                    }) {
+                        Text("✨ Wisdom")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.blue)
+                            .cornerRadius(8)
+                    }
                 }
             }
         }

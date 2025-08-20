@@ -92,6 +92,195 @@ struct NotificationMessageService {
         return allMessages.randomElement() ?? genericMessages[0]
     }
     
+    // MARK: - Phase 3: Milestone Celebration Messages
+    
+    func getMilestoneMessage(userName: String, milestone: Int, moneySaved: String, hoursReclaimed: Int) -> (title: String, body: String) {
+        switch milestone {
+        case 1:
+            return (
+                "🎉 FIRST 24 HOURS COMPLETE! 🎉",
+                "\(userName), you did it! One full day without alcohol. Your body is already thanking you. This is just the beginning 💪"
+            )
+        case 3:
+            return (
+                "🔥 72 HOURS STRONG! 🔥",
+                "\(userName), 3 days down! Your liver is celebrating, your brain is clearing, and you're proving you can do this 🌟"
+            )
+        case 7:
+            return (
+                "🏆 ONE WEEK CHAMPION! 🏆",
+                "\(userName), 7 days sober! You've saved \(moneySaved) and reclaimed \(hoursReclaimed) hours. Screenshot this victory 📸"
+            )
+        case 14:
+            return (
+                "💎 TWO WEEKS OF FREEDOM! 💎",
+                "\(userName), 14 days! Your sleep is improving, anxiety decreasing, and you're \(moneySaved) richer. Keep going! 🚀"
+            )
+        case 30:
+            return (
+                "🚨 MONTH 1 COMPLETE! 🚨",
+                "\(userName), 30 DAYS SOBER! You've saved \(moneySaved) and reclaimed \(hoursReclaimed) hours of your life. This is HUGE! 🎊"
+            )
+        case 60:
+            return (
+                "⭐ TWO MONTHS STRONG! ⭐",
+                "\(userName), 60 days of choosing yourself! \(moneySaved) saved, \(hoursReclaimed) hours reclaimed. You're unstoppable 💫"
+            )
+        case 90:
+            return (
+                "🌟 90 DAYS - NEW YOU! 🌟",
+                "\(userName), THREE MONTHS SOBER! Your brain has literally rewired itself. \(moneySaved) saved. Screenshot this transformation 📱"
+            )
+        case 180:
+            return (
+                "🎯 HALF A YEAR HERO! 🎯",
+                "\(userName), 6 MONTHS! From rock bottom to rock solid. \(moneySaved) saved, \(hoursReclaimed) hours of real life lived 🏔️"
+            )
+        case 365:
+            return (
+                "👑 ONE YEAR LEGEND! 👑",
+                "\(userName), 365 DAYS SOBER! You've saved \(moneySaved) and gained a whole new life. Screenshot this moment forever 🎆"
+            )
+        default:
+            let years = milestone / 365
+            if years > 1 {
+                return (
+                    "🌈 \(years) YEARS OF FREEDOM! 🌈",
+                    "\(userName), \(years) YEARS SOBER! You're not just surviving, you're THRIVING. An inspiration to everyone 🦋"
+                )
+            } else {
+                return (
+                    "🎊 DAY \(milestone) MILESTONE! 🎊",
+                    "\(userName), \(milestone) days of strength! Every day is a victory worth celebrating 🌟"
+                )
+            }
+        }
+    }
+    
+    // MARK: - Phase 4: Savage Motivation Messages
+    
+    func getSavageMotivationMessage(userName: String, losses: [String], afterFeeling: String, daysSober: Int) -> (title: String, body: String) {
+        let messages = [
+            (
+                "Reality Check Saturday 🔥",
+                "\(userName), you used to lose entire weekends to hangovers. It's Saturday 10 AM and you're FREE. Past you could never 🌅"
+            ),
+            (
+                "Friday Night Truth Bomb 💣",
+                "Remember when Friday meant blacking out? \(userName), it's Friday night and you're actually living. Day \(daysSober) of real life 🎯"
+            ),
+            (
+                "Brutal Honesty Hour 💪",
+                "\(userName), \(daysSober) days ago you felt '\(afterFeeling)' after drinking. Now? You wake up proud. That's growth 📈"
+            ),
+            (
+                "Tuesday Reality Check ⚡",
+                "Hey \(userName), remember losing \(losses.first ?? "everything") to alcohol? Day \(daysSober) of getting it all back 💎"
+            ),
+            (
+                "Wake Up Call 📢",
+                "\(userName), you're \(daysSober) days into proving everyone wrong who said you couldn't do it. Including yourself 🦁"
+            ),
+            (
+                "Savage Truth Time 🎯",
+                "Plot twist: The 'fun' you thought you were having was just borrowed happiness. Day \(daysSober) of the real thing ✨"
+            )
+        ]
+        
+        return messages.randomElement() ?? messages[0]
+    }
+    
+    // MARK: - Phase 5: Fear Crusher Messages
+    
+    func getFearCrusherMessage(userName: String, biggestFear: String, daysSober: Int) -> (title: String, body: String) {
+        switch biggestFear.lowercased() {
+        case let fear where fear.contains("boring") || fear.contains("life will be boring"):
+            return (
+                "Sunday Fear Check: Boredom 🎭",
+                "\(userName), you feared life would be boring without alcohol. Plot twist: You've had \(daysSober) days of authentic joy. Boring was the blackouts 🎉"
+            )
+        case let fear where fear.contains("friends") || fear.contains("lose my friends"):
+            return (
+                "Sunday Fear Check: Friends 👥",
+                "You feared losing friends, \(userName). Truth: Real friends celebrate your \(daysSober) days of growth. The rest? Just drinking buddies 🤷‍♀️"
+            )
+        case let fear where fear.contains("stress") || fear.contains("handle stress"):
+            return (
+                "Sunday Fear Check: Stress 🧘",
+                "\(userName), you thought you couldn't handle stress without alcohol. \(daysSober) days later, you're handling EVERYTHING. Alcohol was the stress 💪"
+            )
+        case let fear where fear.contains("fail") || fear.contains("disappoint"):
+            return (
+                "Sunday Fear Check: Failure 🏆",
+                "Afraid of failing? \(userName), you're \(daysSober) days into the hardest thing you've ever done. That's not failure, that's heroic 🦸‍♀️"
+            )
+        case let fear where fear.contains("withdrawal") || fear.contains("symptoms"):
+            return (
+                "Sunday Fear Check: Withdrawal ⚡",
+                "\(userName), you feared withdrawal symptoms. You survived them ALL and here you are, \(daysSober) days stronger. You're unstoppable 🚀"
+            )
+        case let fear where fear.contains("who i am") || fear.contains("identity"):
+            return (
+                "Sunday Fear Check: Identity 🦋",
+                "You feared not knowing who you are without alcohol. \(userName), after \(daysSober) days, you're meeting the REAL you. And they're amazing 🌟"
+            )
+        default:
+            return (
+                "Sunday Fear Check 🎯",
+                "\(userName), remember your biggest fear about quitting? \(daysSober) days later, you're living proof that fear was lying to you 💫"
+            )
+        }
+    }
+    
+    // MARK: - Phase 6: Wisdom Drop Messages
+    
+    func getWisdomDropMessage() -> (title: String, body: String) {
+        let wisdomMessages = [
+            (
+                "Daily Wisdom 🌟",
+                "You're not 'giving up' alcohol. You're choosing everything it took away: clarity, money, time, self-respect, real happiness ✨"
+            ),
+            (
+                "Truth Moment 💭",
+                "The version of you that needed alcohol to cope was doing their best with what they knew. Today's version knows better 📖"
+            ),
+            (
+                "Perspective Shift 🔄",
+                "Alcohol promised to solve your problems. Instead, it became one. Sobriety isn't the hard part - drinking was 💡"
+            ),
+            (
+                "Today's Insight 🧠",
+                "You didn't have a drinking problem. You had a problem that drinking temporarily silenced. Now you're healing the real issue 🌱"
+            ),
+            (
+                "Wisdom Wednesday ✨",
+                "Rock bottom became the solid foundation on which you rebuilt your life. Sometimes you need to fall to learn how to fly 🦅"
+            ),
+            (
+                "Daily Reframe 🎨",
+                "FOMO about not drinking? The only thing you're missing out on is hangovers, regret, and borrowed happiness. That's JOMO - Joy of Missing Out 🎉"
+            ),
+            (
+                "Truth Drop 💎",
+                "Sobriety didn't open the gates of heaven and let you in. It opened the gates of hell and let you out 🔓"
+            ),
+            (
+                "Philosophical Friday 🤔",
+                "The opposite of addiction isn't sobriety. It's connection. Every sober day, you're reconnecting with yourself and others 🤝"
+            ),
+            (
+                "Mindset Medicine 💊",
+                "You're not broken and in need of fixing. You're healing and in need of time. There's a profound difference 🕰️"
+            ),
+            (
+                "Reality Check ☄️",
+                "One day you'll tell your story of how you overcame what you went through, and it will be someone else's survival guide 📚"
+            )
+        ]
+        
+        return wisdomMessages.randomElement() ?? wisdomMessages[0]
+    }
+    
     // MARK: - Helper Methods
     
     private func calculateMonthlySavings(from spending: String) -> String {

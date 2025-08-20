@@ -239,6 +239,219 @@ class NotificationService: ObservableObject {
         }
     }
     
+    // MARK: - Phase 3: Milestone Celebration Notifications
+    
+    func scheduleMilestoneNotification(
+        userName: String,
+        milestone: Int,
+        moneySaved: String,
+        hoursReclaimed: Int
+    ) {
+        let message = messageService.getMilestoneMessage(
+            userName: userName,
+            milestone: milestone,
+            moneySaved: moneySaved,
+            hoursReclaimed: hoursReclaimed
+        )
+        
+        let content = UNMutableNotificationContent()
+        content.title = message.title
+        content.body = message.body
+        content.sound = .default
+        content.badge = 1
+        content.categoryIdentifier = "MILESTONE_CELEBRATION"
+        
+        // Schedule for 10 seconds from now for immediate celebration
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)
+        
+        let request = UNNotificationRequest(
+            identifier: "milestone-\(milestone)",
+            content: content,
+            trigger: trigger
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Error scheduling milestone \(milestone) notification: \(error)")
+                } else {
+                    print("🎉 Milestone \(milestone) notification scheduled!")
+                }
+            }
+        }
+    }
+    
+    // MARK: - Phase 4: Savage Motivation Notifications
+    
+    func scheduleSavageMotivationNotifications(
+        userName: String,
+        losses: [String],
+        afterFeeling: String,
+        daysSober: Int
+    ) {
+        // Cancel existing savage motivation notifications
+        cancelSavageMotivationNotifications()
+        
+        // Tuesday 11 AM
+        scheduleSavageMotivation(
+            userName: userName,
+            losses: losses,
+            afterFeeling: afterFeeling,
+            daysSober: daysSober,
+            weekday: 3, // Tuesday
+            hour: 11,
+            identifier: "savage-tuesday"
+        )
+        
+        // Friday 9 PM
+        scheduleSavageMotivation(
+            userName: userName,
+            losses: losses,
+            afterFeeling: afterFeeling,
+            daysSober: daysSober,
+            weekday: 6, // Friday
+            hour: 21,
+            identifier: "savage-friday"
+        )
+    }
+    
+    private func scheduleSavageMotivation(
+        userName: String,
+        losses: [String],
+        afterFeeling: String,
+        daysSober: Int,
+        weekday: Int,
+        hour: Int,
+        identifier: String
+    ) {
+        let message = messageService.getSavageMotivationMessage(
+            userName: userName,
+            losses: losses,
+            afterFeeling: afterFeeling,
+            daysSober: daysSober
+        )
+        
+        let content = UNMutableNotificationContent()
+        content.title = message.title
+        content.body = message.body
+        content.sound = .default
+        content.badge = 1
+        content.categoryIdentifier = "SAVAGE_MOTIVATION"
+        
+        var dateComponents = DateComponents()
+        dateComponents.weekday = weekday
+        dateComponents.hour = hour
+        dateComponents.minute = 0
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        
+        let request = UNNotificationRequest(
+            identifier: identifier,
+            content: content,
+            trigger: trigger
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Error scheduling savage motivation \(identifier): \(error)")
+                } else {
+                    print("💪 Savage motivation \(identifier) scheduled!")
+                }
+            }
+        }
+    }
+    
+    // MARK: - Phase 5: Fear Crusher Notifications
+    
+    func scheduleFearCrusherNotification(
+        userName: String,
+        biggestFear: String,
+        daysSober: Int
+    ) {
+        // Cancel existing fear crusher
+        cancelFearCrusherNotifications()
+        
+        let message = messageService.getFearCrusherMessage(
+            userName: userName,
+            biggestFear: biggestFear,
+            daysSober: daysSober
+        )
+        
+        let content = UNMutableNotificationContent()
+        content.title = message.title
+        content.body = message.body
+        content.sound = .default
+        content.badge = 1
+        content.categoryIdentifier = "FEAR_CRUSHER"
+        
+        // Sunday 8 PM
+        var dateComponents = DateComponents()
+        dateComponents.weekday = 1 // Sunday
+        dateComponents.hour = 20
+        dateComponents.minute = 0
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        
+        let request = UNNotificationRequest(
+            identifier: "fear-crusher-sunday",
+            content: content,
+            trigger: trigger
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Error scheduling fear crusher: \(error)")
+                } else {
+                    print("🦁 Fear crusher scheduled for Sunday 8 PM!")
+                }
+            }
+        }
+    }
+    
+    // MARK: - Phase 6: Wisdom Drop Notifications
+    
+    func scheduleWisdomDropNotification() {
+        // Cancel existing wisdom drops
+        cancelWisdomDropNotifications()
+        
+        let message = messageService.getWisdomDropMessage()
+        
+        let content = UNMutableNotificationContent()
+        content.title = message.title
+        content.body = message.body
+        content.sound = .default
+        content.badge = 1
+        content.categoryIdentifier = "WISDOM_DROP"
+        
+        // Random time between 10 AM and 8 PM
+        let randomHour = Int.random(in: 10...20)
+        let randomMinute = Int.random(in: 0...59)
+        
+        var dateComponents = DateComponents()
+        dateComponents.hour = randomHour
+        dateComponents.minute = randomMinute
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        
+        let request = UNNotificationRequest(
+            identifier: "wisdom-drop-daily",
+            content: content,
+            trigger: trigger
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Error scheduling wisdom drop: \(error)")
+                } else {
+                    print("✨ Wisdom drop scheduled for \(randomHour):\(String(format: "%02d", randomMinute))!")
+                }
+            }
+        }
+    }
+    
     func scheduleDailyReminderNotification(at hour: Int, minute: Int) {
         // Cancel existing daily reminder
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily-reminder"])
@@ -291,6 +504,25 @@ class NotificationService: ObservableObject {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
             let crusherIds = requests.filter { $0.identifier.hasPrefix("craving-crusher") }.map { $0.identifier }
             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: crusherIds)
+        }
+    }
+    
+    func cancelSavageMotivationNotifications() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["savage-tuesday", "savage-friday"])
+    }
+    
+    func cancelFearCrusherNotifications() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["fear-crusher-sunday"])
+    }
+    
+    func cancelWisdomDropNotifications() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["wisdom-drop-daily"])
+    }
+    
+    func cancelMilestoneNotifications() {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            let milestoneIds = requests.filter { $0.identifier.hasPrefix("milestone-") }.map { $0.identifier }
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: milestoneIds)
         }
     }
     

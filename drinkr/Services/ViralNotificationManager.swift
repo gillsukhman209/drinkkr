@@ -11,7 +11,7 @@ class ViralNotificationManager: ObservableObject {
     
     // MARK: - Public Methods
     
-    /// Sets up Phase 1 & 2 notifications using onboarding data and current user status
+    /// Sets up ALL Phase 1-6 notifications using onboarding data and current user status
     func setupViralNotifications(sobrietyData: SobrietyData, onboardingProfile: OnboardingUserProfile) {
         print("🚀 Setting up viral notifications for \(onboardingProfile.userName)")
         
@@ -30,7 +30,28 @@ class ViralNotificationManager: ObservableObject {
             daysSober: daysSober
         )
         
-        print("✅ Viral notifications setup complete!")
+        // Phase 3: Milestone Celebrations
+        checkAndScheduleMilestone(
+            sobrietyData: sobrietyData,
+            profile: onboardingProfile
+        )
+        
+        // Phase 4: Savage Motivation
+        setupSavageMotivation(
+            profile: onboardingProfile,
+            daysSober: daysSober
+        )
+        
+        // Phase 5: Fear Crusher
+        setupFearCrusher(
+            profile: onboardingProfile,
+            daysSober: daysSober
+        )
+        
+        // Phase 6: Wisdom Drops
+        setupWisdomDrops()
+        
+        print("✅ All 6 phases of viral notifications setup complete!")
     }
     
     /// Updates notifications with current streak data (call daily)
@@ -86,10 +107,74 @@ class ViralNotificationManager: ObservableObject {
         )
     }
     
+    // MARK: - Phase 3: Milestone Celebrations
+    
+    private func checkAndScheduleMilestone(sobrietyData: SobrietyData, profile: OnboardingUserProfile) {
+        print("🏆 Checking for milestone achievements")
+        
+        let milestones = [1, 3, 7, 14, 30, 60, 90, 180, 365]
+        let currentStreak = sobrietyData.currentStreak
+        
+        // Check if current streak matches any milestone
+        if milestones.contains(currentStreak) {
+            let moneySaved = calculateMoneySaved(profile: profile, days: currentStreak)
+            let hoursReclaimed = currentStreak * 3 // Estimate 3 hours per day reclaimed
+            
+            notificationService.scheduleMilestoneNotification(
+                userName: profile.userName,
+                milestone: currentStreak,
+                moneySaved: moneySaved,
+                hoursReclaimed: hoursReclaimed
+            )
+        }
+    }
+    
+    // MARK: - Phase 4: Savage Motivation
+    
+    private func setupSavageMotivation(profile: OnboardingUserProfile, daysSober: Int) {
+        print("💪 Setting up savage motivation notifications")
+        print("📝 User losses: \(profile.losses.joined(separator: ", "))")
+        print("😔 After feeling: \(profile.afterFeeling)")
+        
+        notificationService.scheduleSavageMotivationNotifications(
+            userName: profile.userName,
+            losses: profile.losses,
+            afterFeeling: profile.afterFeeling,
+            daysSober: daysSober
+        )
+    }
+    
+    // MARK: - Phase 5: Fear Crusher
+    
+    private func setupFearCrusher(profile: OnboardingUserProfile, daysSober: Int) {
+        print("🦁 Setting up fear crusher notifications")
+        print("😨 Biggest fear: \(profile.biggestFear)")
+        
+        notificationService.scheduleFearCrusherNotification(
+            userName: profile.userName,
+            biggestFear: profile.biggestFear,
+            daysSober: daysSober
+        )
+    }
+    
+    // MARK: - Phase 6: Wisdom Drops
+    
+    private func setupWisdomDrops() {
+        print("✨ Setting up wisdom drop notifications")
+        notificationService.scheduleWisdomDropNotification()
+    }
+    
     private func calculateDaysSober(from quitDate: Date) -> Int {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.day], from: quitDate, to: Date())
         return max(components.day ?? 0, 0)
+    }
+    
+    private func calculateMoneySaved(profile: OnboardingUserProfile, days: Int) -> String {
+        let weeklyAmount = profile.weeklySpendingAmount
+        let dailyAmount = weeklyAmount / 7.0
+        let total = dailyAmount * Double(days)
+        return "$\(Int(total))"
     }
     
     private func formatTime(_ date: Date) -> String {
@@ -109,7 +194,7 @@ class ViralNotificationManager: ObservableObject {
     // MARK: - Testing Methods
     
     func testNotifications() {
-        print("🧪 Testing viral notifications...")
+        print("🧪 Testing ALL viral notification phases...")
         
         // Test with sample data
         let sampleProfile = OnboardingUserProfile()
@@ -117,12 +202,14 @@ class ViralNotificationManager: ObservableObject {
         profile.userName = "Alex"
         profile.triggers = ["Stress from work", "Loneliness"]
         profile.afterFeeling = "Ashamed and guilty"
+        profile.biggestFear = "Life will be boring"
+        profile.losses = ["Trust from loved ones", "Self-respect", "Time with family"]
         profile.weeklySpending = "$50-100"
         profile.checkInTime = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date()) ?? Date()
         
-        let daysSober = 15
+        let daysSober = 30
         
-        // Schedule test daily check-in
+        print("📋 Testing Phase 1: Daily Check-In")
         notificationService.schedulePersonalizedDailyCheckIn(
             userName: profile.userName,
             checkInTime: profile.checkInTime,
@@ -130,7 +217,7 @@ class ViralNotificationManager: ObservableObject {
             weeklySpending: profile.weeklySpending
         )
         
-        // Schedule test craving crushers
+        print("📋 Testing Phase 2: Craving Crushers")
         notificationService.scheduleCravingCrusherNotifications(
             userName: profile.userName,
             triggers: profile.triggers,
@@ -138,13 +225,43 @@ class ViralNotificationManager: ObservableObject {
             daysSober: daysSober
         )
         
-        print("✅ Test notifications scheduled!")
+        print("📋 Testing Phase 3: Milestone (30 days)")
+        notificationService.scheduleMilestoneNotification(
+            userName: profile.userName,
+            milestone: 30,
+            moneySaved: "$200-400",
+            hoursReclaimed: 90
+        )
+        
+        print("📋 Testing Phase 4: Savage Motivation")
+        notificationService.scheduleSavageMotivationNotifications(
+            userName: profile.userName,
+            losses: profile.losses,
+            afterFeeling: profile.afterFeeling,
+            daysSober: daysSober
+        )
+        
+        print("📋 Testing Phase 5: Fear Crusher")
+        notificationService.scheduleFearCrusherNotification(
+            userName: profile.userName,
+            biggestFear: profile.biggestFear,
+            daysSober: daysSober
+        )
+        
+        print("📋 Testing Phase 6: Wisdom Drop")
+        notificationService.scheduleWisdomDropNotification()
+        
+        print("✅ All 6 phases of test notifications scheduled!")
     }
     
     func cancelAllViralNotifications() {
         print("🛑 Cancelling all viral notifications...")
         notificationService.cancelDailyCheckInNotifications()
         notificationService.cancelCravingCrusherNotifications()
-        print("✅ All viral notifications cancelled")
+        notificationService.cancelMilestoneNotifications()
+        notificationService.cancelSavageMotivationNotifications()
+        notificationService.cancelFearCrusherNotifications()
+        notificationService.cancelWisdomDropNotifications()
+        print("✅ All 6 phases of viral notifications cancelled")
     }
 }
