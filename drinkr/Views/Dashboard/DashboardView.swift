@@ -23,6 +23,7 @@ struct DashboardView: View {
     @EnvironmentObject var dataService: DataService
     
     @State private var timeComponents: (days: Int, hours: Int, minutes: Int, seconds: Int) = (0, 0, 0, 0)
+    @State private var lastCelebratedMilestone = 0
     
     var isCompact: Bool {
         horizontalSizeClass == .compact || verticalSizeClass == .compact
@@ -543,19 +544,29 @@ struct DashboardView: View {
     }
     
     func updateTimeComponents() {
-        let previousStreak = timeComponents.days
         timeComponents = dataService.getTimeComponents()
-        
         let currentStreak = timeComponents.days
-        if currentStreak > previousStreak {
-            checkForMilestone(currentStreak)
-        }
+        
+        // Load last celebrated milestone from UserDefaults
+        lastCelebratedMilestone = UserDefaults.standard.integer(forKey: "lastCelebratedMilestone")
+        
+        // Check if we've reached a new milestone
+        checkForMilestone(currentStreak)
     }
     
     func checkForMilestone(_ streak: Int) {
         let milestones = [1, 7, 14, 30, 60, 90, 180, 365]
-        if milestones.contains(streak) {
+        
+        // Only celebrate if this is a milestone AND we haven't celebrated it before
+        if milestones.contains(streak) && streak > lastCelebratedMilestone {
+            print("🎉 New milestone reached: \(streak) days (last celebrated: \(lastCelebratedMilestone))")
+            
             celebrationMilestone = streak
+            lastCelebratedMilestone = streak
+            
+            // Save the milestone to UserDefaults so we don't celebrate it again
+            UserDefaults.standard.set(streak, forKey: "lastCelebratedMilestone")
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 showingCelebration = true
             }
