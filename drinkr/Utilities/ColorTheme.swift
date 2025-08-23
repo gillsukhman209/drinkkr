@@ -26,6 +26,7 @@ struct ColorTheme {
     static let accentPink = Color(red: 1.0, green: 0.4, blue: 0.8)
     
     static let cardBackground = Color(white: 0.15).opacity(0.8)
+    static let cardBorder = Color(white: 0.3).opacity(0.3)
     static let textPrimary = Color.white
     static let textSecondary = Color.gray
     

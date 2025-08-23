@@ -18,7 +18,9 @@ struct drinkrApp: App {
             User.self,
             SobrietyData.self,
             Achievement.self,
-            Relapse.self
+            Relapse.self,
+            CheckIn.self,
+            MeditationSession.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

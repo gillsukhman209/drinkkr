@@ -45,6 +45,12 @@ struct ContentView: View {
                             Label("Learn", systemImage: "graduationcap.fill")
                         }
                         .tag(2)
+                    
+                    SettingsView()
+                        .tabItem {
+                            Label("Settings", systemImage: "gearshape.fill")
+                        }
+                        .tag(3)
                 }
                 .accentColor(.cyan)
                 .preferredColorScheme(.dark)

@@ -41,6 +41,12 @@ struct ProfileView: View {
                         milestonesSection
                             .padding(.horizontal)
                         
+                        checkInHistorySection
+                            .padding(.horizontal)
+                        
+                        meditationStatsSection
+                            .padding(.horizontal)
+                        
                         relapseHistorySection
                             .padding(.horizontal)
                         
@@ -303,6 +309,93 @@ struct ProfileView: View {
         .padding(.vertical, 8)
     }
     
+    var checkInHistorySection: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            HStack {
+                Text("Check-In History")
+                    .font(.system(size: isCompact ? 18 : 20, weight: .bold))
+                    .foregroundColor(ColorTheme.textPrimary)
+                
+                Spacer()
+                
+                if !dataService.checkIns.isEmpty {
+                    Text("\(dataService.checkIns.count) total")
+                        .font(.system(size: isCompact ? 14 : 16))
+                        .foregroundColor(ColorTheme.textSecondary)
+                }
+            }
+            
+            if dataService.checkIns.isEmpty {
+                Text("No check-ins yet. Start tracking your mood!")
+                    .font(.system(size: isCompact ? 14 : 16))
+                    .foregroundColor(ColorTheme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 20)
+            } else {
+                // Show last 3 check-ins
+                ForEach(dataService.checkIns.prefix(3), id: \.id) { checkIn in
+                    HStack {
+                        // Mood emoji
+                        Text(getMoodEmoji(checkIn.mood))
+                            .font(.system(size: isCompact ? 24 : 28))
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(formatCheckInDate(checkIn.timestamp))
+                                .font(.system(size: isCompact ? 12 : 14))
+                                .foregroundColor(ColorTheme.textSecondary)
+                            
+                            if !checkIn.notes.isEmpty {
+                                Text(checkIn.notes)
+                                    .font(.system(size: isCompact ? 14 : 16))
+                                    .foregroundColor(ColorTheme.textPrimary)
+                                    .lineLimit(2)
+                            } else {
+                                Text("Mood: \(checkIn.mood)/5")
+                                    .font(.system(size: isCompact ? 14 : 16))
+                                    .foregroundColor(ColorTheme.textPrimary)
+                            }
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(isCompact ? 12 : 15)
+                    .background(ColorTheme.cardBackground.opacity(0.5))
+                    .cornerRadius(10)
+                }
+            }
+        }
+        .padding(isCompact ? 20 : 25)
+        .futuristicCard()
+    }
+    
+    var meditationStatsSection: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            HStack {
+                Text("Meditation Progress")
+                    .font(.system(size: isCompact ? 18 : 20, weight: .bold))
+                    .foregroundColor(ColorTheme.textPrimary)
+                
+                Spacer()
+                
+                Image(systemName: "brain.head.profile")
+                    .font(.system(size: isCompact ? 20 : 24))
+                    .foregroundColor(ColorTheme.accentPurple)
+            }
+            
+            let totalSessions = dataService.meditationSessions.count
+            let totalMinutes = dataService.meditationSessions.reduce(0) { $0 + $1.duration }
+            let averageMinutes = totalSessions > 0 ? totalMinutes / totalSessions : 0
+            
+            VStack(spacing: 12) {
+                statRow(label: "Total Sessions", value: "\(totalSessions)", icon: "leaf.fill", color: ColorTheme.successGreen)
+                statRow(label: "Total Time", value: "\(totalMinutes) min", icon: "clock.fill", color: ColorTheme.accentCyan)
+                statRow(label: "Average Session", value: "\(averageMinutes) min", icon: "chart.bar.fill", color: ColorTheme.accentPurple)
+            }
+        }
+        .padding(isCompact ? 20 : 25)
+        .futuristicCard()
+    }
+    
     var relapseHistorySection: some View {
         VStack(alignment: .leading, spacing: 15) {
             HStack {
@@ -420,6 +513,23 @@ struct ProfileView: View {
         let checkInCount = daysSinceStart > 0 ? min(daysSinceStart, 30) : 0 // Estimate
         
         return (moneySaved, drinksAvoided, caloriesSaved, timeReclaimed, checkInCount, meditationCount, achievementCount)
+    }
+    
+    func getMoodEmoji(_ mood: Int) -> String {
+        switch mood {
+        case 1: return "😔"
+        case 2: return "😟"
+        case 3: return "😐"
+        case 4: return "🙂"
+        case 5: return "😊"
+        default: return "😐"
+        }
+    }
+    
+    func formatCheckInDate(_ date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: date, relativeTo: Date())
     }
     
     #if DEBUG

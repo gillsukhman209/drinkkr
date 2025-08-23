@@ -9,6 +9,8 @@ class DataService: ObservableObject {
     @Published var currentUser: User?
     @Published var sobrietyData: SobrietyData?
     @Published var achievements: [Achievement] = []
+    @Published var checkIns: [CheckIn] = []
+    @Published var meditationSessions: [MeditationSession] = []
     
     init() {
         
@@ -56,6 +58,10 @@ class DataService: ObservableObject {
         }
         
         updateAchievementProgress()
+        
+        // Load check-ins and meditation sessions
+        loadCheckIns()
+        loadMeditationSessions()
         
         try? modelContext.save()
     }
@@ -164,13 +170,62 @@ class DataService: ObservableObject {
     }
     
     func logCheckIn(mood: Int, notes: String) {
-        // Log the check-in (you can expand this to save detailed data)
-        print("Check-in logged: Mood \(mood)/5, Notes: \(notes)")
+        guard let modelContext = modelContext else { return }
+        
+        // Create and save new check-in
+        let checkIn = CheckIn(mood: mood, notes: notes, timestamp: Date())
+        modelContext.insert(checkIn)
+        
+        // Update local array
+        checkIns.append(checkIn)
+        checkIns.sort { $0.timestamp > $1.timestamp } // Keep sorted by newest first
         
         // Update last check-in date
         if let user = currentUser {
             user.lastCheckInDate = Date()
-            saveContext()
+        }
+        
+        saveContext()
+    }
+    
+    func saveMeditationSession(duration: Int) {
+        guard let modelContext = modelContext else { return }
+        
+        // Create and save new meditation session
+        let session = MeditationSession(duration: duration, timestamp: Date(), completed: true)
+        modelContext.insert(session)
+        
+        // Update local array
+        meditationSessions.append(session)
+        meditationSessions.sort { $0.timestamp > $1.timestamp } // Keep sorted by newest first
+        
+        // Also increment the meditation count for achievements
+        incrementMeditationCount()
+        
+        saveContext()
+    }
+    
+    func loadCheckIns() {
+        guard let modelContext = modelContext else { return }
+        
+        let descriptor = FetchDescriptor<CheckIn>(
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        
+        if let fetchedCheckIns = try? modelContext.fetch(descriptor) {
+            checkIns = fetchedCheckIns
+        }
+    }
+    
+    func loadMeditationSessions() {
+        guard let modelContext = modelContext else { return }
+        
+        let descriptor = FetchDescriptor<MeditationSession>(
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        
+        if let fetchedSessions = try? modelContext.fetch(descriptor) {
+            meditationSessions = fetchedSessions
         }
     }
     
