@@ -533,31 +533,4 @@ class NotificationService: ObservableObject {
             }
         }
     }
-    
-    func scheduleTestNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "Test Notification"
-        content.body = "This is a test to verify notifications are working! 🎉"
-        content.sound = .default
-        content.badge = 1
-        
-        // Schedule for 5 seconds from now
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5.0, repeats: false)
-        
-        let request = UNNotificationRequest(
-            identifier: "test-notification-\(Date().timeIntervalSince1970)",
-            content: content,
-            trigger: trigger
-        )
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    print("❌ Error scheduling test notification: \(error)")
-                } else {
-                    print("✅ Test notification scheduled for 5 seconds from now")
-                }
-            }
-        }
-    }
 }

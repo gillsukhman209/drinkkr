@@ -4,7 +4,6 @@ struct ContentDetailView: View {
     let item: LibraryItem
     @Binding var isPresented: Bool
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @State private var hasLoaded = false
     
     var isCompact: Bool {
         horizontalSizeClass == .compact
@@ -16,25 +15,19 @@ struct ContentDetailView: View {
                 OptimizedBackground()
                     .ignoresSafeArea()
                 
-                if hasLoaded {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 20) {
-                            // Header
-                            headerView
-                                .padding(.horizontal)
-                                .padding(.top)
-                            
-                            // Content
-                            contentView
-                                .padding(.horizontal)
-                            
-                            Spacer(minLength: 50)
-                        }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        // Header
+                        headerView
+                            .padding(.horizontal)
+                            .padding(.top)
+                        
+                        // Content
+                        contentView
+                            .padding(.horizontal)
+                        
+                        Spacer(minLength: 50)
                     }
-                } else {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                        .foregroundColor(ColorTheme.accentCyan)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -45,14 +38,6 @@ struct ContentDetailView: View {
                     }
                     .foregroundColor(ColorTheme.accentCyan)
                     .fontWeight(.semibold)
-                }
-            }
-        }
-        .onAppear {
-            // Small delay to ensure smooth presentation
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                withAnimation(.easeIn(duration: 0.3)) {
-                    hasLoaded = true
                 }
             }
         }

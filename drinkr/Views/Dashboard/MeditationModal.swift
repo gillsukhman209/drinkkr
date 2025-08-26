@@ -14,7 +14,7 @@ struct MeditationModal: View {
     @State private var showingCompletion = false
     @State private var hapticTimer: Timer?
     
-    let durations = [1, 3, 5, 10, 15, 20]
+    let durations = [3, 5, 10, 15, 20]
     
     enum BreathPhase {
         case inhale, hold, exhale, pause
@@ -347,8 +347,7 @@ struct MeditationModal: View {
     func startMeditation() {
         withAnimation(.spring()) {
             isActive = true
-            // Special case for 1-second test duration
-            timeRemaining = selectedDuration == 1 ? 1 : selectedDuration * 60
+            timeRemaining = selectedDuration * 60
         }
         startTimer()
         startBreathingCycle()

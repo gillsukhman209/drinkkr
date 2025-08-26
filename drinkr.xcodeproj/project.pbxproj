@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		1A79C2E32E4ED99300BDC6F4 /* drinkr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = drinkr.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1A79C2E32E4ED99300BDC6F4 /* Sobbr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sobbr.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -40,7 +40,7 @@
 		1A79C2E42E4ED99300BDC6F4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1A79C2E32E4ED99300BDC6F4 /* drinkr.app */,
+				1A79C2E32E4ED99300BDC6F4 /* Sobbr.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1A79C2E22E4ED99300BDC6F4 /* drinkr */ = {
+		1A79C2E22E4ED99300BDC6F4 /* Sobbr */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1A79C2F02E4ED99400BDC6F4 /* Build configuration list for PBXNativeTarget "drinkr" */;
+			buildConfigurationList = 1A79C2F02E4ED99400BDC6F4 /* Build configuration list for PBXNativeTarget "Sobbr" */;
 			buildPhases = (
 				1A79C2DF2E4ED99300BDC6F4 /* Sources */,
 				1A79C2E02E4ED99300BDC6F4 /* Frameworks */,
@@ -63,11 +63,11 @@
 			fileSystemSynchronizedGroups = (
 				1A79C2E52E4ED99300BDC6F4 /* drinkr */,
 			);
-			name = drinkr;
+			name = Sobbr;
 			packageProductDependencies = (
 			);
-			productName = drinkr;
-			productReference = 1A79C2E32E4ED99300BDC6F4 /* drinkr.app */;
+			productName = Sobbr;
+			productReference = 1A79C2E32E4ED99300BDC6F4 /* Sobbr.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1A79C2E22E4ED99300BDC6F4 /* drinkr */,
+				1A79C2E22E4ED99300BDC6F4 /* Sobbr */,
 			);
 		};
 /* End PBXProject section */
@@ -251,11 +251,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EPB5476N6P;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Sobbr;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -266,8 +268,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gill.drinkr;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gill.Sobbr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -279,11 +282,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EPB5476N6P;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Sobbr;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -294,8 +299,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gill.drinkr;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gill.Sobbr;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -314,7 +320,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1A79C2F02E4ED99400BDC6F4 /* Build configuration list for PBXNativeTarget "drinkr" */ = {
+		1A79C2F02E4ED99400BDC6F4 /* Build configuration list for PBXNativeTarget "Sobbr" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1A79C2F12E4ED99400BDC6F4 /* Debug */,

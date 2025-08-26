@@ -91,9 +91,7 @@ struct LibraryView: View {
         .onAppear {
             hasAppeared = true
         }
-        .sheet(isPresented: $showingContent, onDismiss: {
-            contentToShow = nil
-        }) {
+        .sheet(isPresented: $showingContent) {
             if let item = contentToShow {
                 ContentDetailView(item: item, isPresented: $showingContent)
             }

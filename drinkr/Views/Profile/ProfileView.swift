@@ -554,18 +554,6 @@ struct ProfileView: View {
                 }
                 
                 Button(action: {
-                    NotificationService.shared.scheduleTestNotification()
-                }) {
-                    Text("Quick Test (5s)")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(ColorTheme.successGreen)
-                        .cornerRadius(12)
-                }
-                
-                Button(action: {
                     ViralNotificationManager.shared.cancelAllViralNotifications()
                 }) {
                     Text("Cancel All")
