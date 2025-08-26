@@ -4,6 +4,8 @@ struct ContentDetailView: View {
     let item: LibraryItem
     @Binding var isPresented: Bool
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @State private var isLoaded = false
+    @State private var hasError = false
     
     var isCompact: Bool {
         horizontalSizeClass == .compact
@@ -15,18 +17,61 @@ struct ContentDetailView: View {
                 OptimizedBackground()
                     .ignoresSafeArea()
                 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        // Header
-                        headerView
-                            .padding(.horizontal)
-                            .padding(.top)
+                if !isLoaded {
+                    // Loading state
+                    VStack(spacing: 20) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                            .tint(ColorTheme.accentCyan)
                         
-                        // Content
-                        contentView
-                            .padding(.horizontal)
+                        Text("Loading \(item.title)...")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(ColorTheme.textSecondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if hasError {
+                    // Error state
+                    VStack(spacing: 20) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 50))
+                            .foregroundColor(ColorTheme.dangerRed)
                         
-                        Spacer(minLength: 50)
+                        Text("Unable to load content")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(ColorTheme.textPrimary)
+                        
+                        Text("Please try again or select a different article.")
+                            .font(.system(size: 14))
+                            .foregroundColor(ColorTheme.textSecondary)
+                            .multilineTextAlignment(.center)
+                        
+                        Button("Retry") {
+                            loadContent()
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(ColorTheme.accentCyan)
+                        .foregroundColor(.black)
+                        .cornerRadius(10)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding()
+                } else {
+                    // Content loaded successfully
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 20) {
+                            // Header
+                            headerView
+                                .padding(.horizontal)
+                                .padding(.top)
+                            
+                            // Content
+                            contentView
+                                .padding(.horizontal)
+                            
+                            Spacer(minLength: 50)
+                        }
                     }
                 }
             }
@@ -40,6 +85,9 @@ struct ContentDetailView: View {
                     .fontWeight(.semibold)
                 }
             }
+        }
+        .onAppear {
+            loadContent()
         }
     }
     
@@ -136,5 +184,25 @@ struct ContentDetailView: View {
                         .stroke(ColorTheme.textSecondary.opacity(0.1), lineWidth: 1)
                 )
         )
+    }
+    
+    func loadContent() {
+        // Reset states
+        hasError = false
+        isLoaded = false
+        
+        // Simulate content loading with validation
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            // Validate that we have valid content
+            if !item.title.isEmpty && !item.content.isEmpty {
+                withAnimation(.easeIn(duration: 0.3)) {
+                    isLoaded = true
+                }
+            } else {
+                withAnimation(.easeIn(duration: 0.3)) {
+                    hasError = true
+                }
+            }
+        }
     }
 }

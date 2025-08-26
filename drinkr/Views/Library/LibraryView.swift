@@ -71,8 +71,11 @@ struct LibraryView: View {
                         LazyVStack(spacing: 15) {
                             ForEach(filteredItems, id: \.id) { item in
                                 Button(action: {
+                                    // Ensure content is set before showing sheet
                                     contentToShow = item
-                                    showingContent = true
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                        showingContent = true
+                                    }
                                 }) {
                                     libraryItemCard(item)
                                 }
@@ -91,9 +94,31 @@ struct LibraryView: View {
         .onAppear {
             hasAppeared = true
         }
-        .sheet(isPresented: $showingContent) {
+        .sheet(isPresented: $showingContent, onDismiss: {
+            // Clean up state when sheet is dismissed
+            contentToShow = nil
+        }) {
             if let item = contentToShow {
                 ContentDetailView(item: item, isPresented: $showingContent)
+            } else {
+                // Fallback loading view
+                VStack {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                        .padding()
+                    Text("Loading content...")
+                        .foregroundColor(ColorTheme.textSecondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(ColorTheme.backgroundGradient)
+                .onAppear {
+                    // If we somehow got here without content, dismiss the sheet
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        if contentToShow == nil {
+                            showingContent = false
+                        }
+                    }
+                }
             }
         }
     }
