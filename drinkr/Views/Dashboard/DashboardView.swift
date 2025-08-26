@@ -24,6 +24,19 @@ struct DashboardView: View {
     
     @State private var timeComponents: (days: Int, hours: Int, minutes: Int, seconds: Int) = (0, 0, 0, 0)
     @State private var lastCelebratedMilestone = 0
+    @State private var currentQuoteIndex = 0
+    @State private var todaysReflection = ""
+    
+    let motivationalQuotes = [
+        "Your strength grows with every sober sunrise.",
+        "Progress, not perfection. Every moment counts.",
+        "You're not giving up alcohol, you're gaining everything.",
+        "The hardest step was the first one. Keep going.",
+        "Your future self is thanking you right now.",
+        "Sobriety delivers everything alcohol promised.",
+        "You are stronger than your strongest excuse.",
+        "One day at a time becomes a lifetime of freedom."
+    ]
     
     var isCompact: Bool {
         horizontalSizeClass == .compact || verticalSizeClass == .compact
@@ -35,7 +48,7 @@ struct DashboardView: View {
                 OptimizedBackground()
                     .ignoresSafeArea()
                 
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(spacing: isCompact ? 20 : 30) {
                         weekProgressIndicator
                             .padding(.top, isCompact ? 10 : 20)
@@ -49,10 +62,23 @@ struct DashboardView: View {
                         
                         actionButtons
                             .padding(.horizontal)
-                            .padding(.bottom, isCompact ? 20 : 30)
+                        
+                        motivationalQuoteSection
+                            .padding(.horizontal)
                         
                         quickStatsCards
                             .padding(.horizontal)
+                        
+                        todaysFocusSection
+                            .padding(.horizontal)
+                        
+                        recentAchievementsSection
+                            .padding(.horizontal)
+                        
+                        healthBenefitsSection
+                            .padding(.horizontal)
+                        
+                        Spacer(minLength: 30)
                     }
                 }
             }
@@ -570,6 +596,299 @@ struct DashboardView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 showingCelebration = true
             }
+        }
+    }
+    
+    var motivationalQuoteSection: some View {
+        VStack(spacing: isCompact ? 12 : 16) {
+            let quote = motivationalQuotes[currentQuoteIndex % motivationalQuotes.count]
+            
+            HStack {
+                Image(systemName: "quote.opening")
+                    .font(.system(size: isCompact ? 18 : 22))
+                    .foregroundColor(ColorTheme.accentCyan.opacity(0.6))
+                
+                Spacer()
+                
+                Image(systemName: "quote.closing")
+                    .font(.system(size: isCompact ? 18 : 22))
+                    .foregroundColor(ColorTheme.accentCyan.opacity(0.6))
+            }
+            
+            Text(quote)
+                .font(.system(size: isCompact ? 16 : 18, weight: .medium))
+                .foregroundColor(.white.opacity(0.9))
+                .multilineTextAlignment(.center)
+                .lineSpacing(4)
+                .padding(.horizontal)
+            
+            Button(action: {
+                withAnimation(.easeInOut) {
+                    currentQuoteIndex += 1
+                }
+            }) {
+                HStack(spacing: 6) {
+                    Text("Next Quote")
+                        .font(.system(size: isCompact ? 12 : 14, weight: .semibold))
+                    Image(systemName: "arrow.right.circle.fill")
+                        .font(.system(size: isCompact ? 14 : 16))
+                }
+                .foregroundColor(ColorTheme.accentCyan)
+            }
+            .padding(.top, 4)
+        }
+        .padding(isCompact ? 20 : 24)
+        .background(
+            RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            ColorTheme.accentPurple.opacity(0.15),
+                            ColorTheme.accentCyan.opacity(0.1)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                        .stroke(.white.opacity(0.1), lineWidth: 1)
+                )
+        )
+        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+        .onAppear {
+            currentQuoteIndex = Int.random(in: 0..<motivationalQuotes.count)
+        }
+    }
+    
+    @ViewBuilder
+    func focusItemRow(title: String, subtitle: String, icon: String) -> some View {
+        HStack(spacing: isCompact ? 12 : 16) {
+            ZStack {
+                Circle()
+                    .fill(ColorTheme.accentCyan.opacity(0.2))
+                    .frame(width: isCompact ? 36 : 42, height: isCompact ? 36 : 42)
+                
+                Image(systemName: icon)
+                    .font(.system(size: isCompact ? 16 : 18))
+                    .foregroundColor(ColorTheme.accentCyan)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: isCompact ? 14 : 16, weight: .semibold))
+                    .foregroundColor(.white)
+                
+                Text(subtitle)
+                    .font(.system(size: isCompact ? 12 : 14))
+                    .foregroundColor(.white.opacity(0.7))
+            }
+            
+            Spacer()
+            
+            Circle()
+                .stroke(ColorTheme.accentCyan.opacity(0.3), lineWidth: 2)
+                .frame(width: isCompact ? 20 : 24, height: isCompact ? 20 : 24)
+        }
+    }
+    
+    var todaysFocusSection: some View {
+        VStack(spacing: isCompact ? 16 : 20) {
+            HStack {
+                Image(systemName: "target")
+                    .font(.system(size: isCompact ? 18 : 20))
+                    .foregroundColor(ColorTheme.accentPink)
+                
+                Text("Today's Focus")
+                    .font(.system(size: isCompact ? 18 : 20, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Spacer()
+            }
+            
+            VStack(spacing: isCompact ? 12 : 16) {
+                focusItemRow(title: "Stay Hydrated", subtitle: "Drink 8 glasses of water today", icon: "drop.fill")
+                focusItemRow(title: "Move Your Body", subtitle: "Take a 20-minute walk", icon: "figure.walk")
+                focusItemRow(title: "Practice Gratitude", subtitle: "Write 3 things you're grateful for", icon: "heart.text.square.fill")
+            }
+        }
+        .padding(isCompact ? 20 : 24)
+        .background(
+            RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                        .stroke(.white.opacity(0.1), lineWidth: 1)
+                )
+        )
+        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+    }
+    
+    @ViewBuilder
+    func achievementRow(_ achievement: Achievement) -> some View {
+        HStack(spacing: isCompact ? 12 : 16) {
+            Image(systemName: achievement.icon)
+                .font(.system(size: isCompact ? 24 : 28))
+                .foregroundColor(ColorTheme.accentCyan)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(achievement.title)
+                    .font(.system(size: isCompact ? 14 : 16, weight: .semibold))
+                    .foregroundColor(.white)
+                
+                Text(achievement.achievementDescription)
+                    .font(.system(size: isCompact ? 12 : 14))
+                    .foregroundColor(.white.opacity(0.7))
+                    .lineLimit(1)
+            }
+            
+            Spacer()
+            
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: isCompact ? 18 : 20))
+                .foregroundColor(ColorTheme.successGreen)
+        }
+        .padding(isCompact ? 12 : 14)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.white.opacity(0.05))
+        )
+    }
+    
+    @ViewBuilder
+    var achievementsContent: some View {
+        let unlockedAchievements = dataService.achievements.filter { $0.isUnlocked }
+        
+        if unlockedAchievements.isEmpty {
+            VStack(spacing: 8) {
+                Image(systemName: "star.circle")
+                    .font(.system(size: 32))
+                    .foregroundColor(.white.opacity(0.3))
+                
+                Text("Your achievements will appear here")
+                    .font(.system(size: isCompact ? 14 : 16))
+                    .foregroundColor(.white.opacity(0.5))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+        } else {
+            VStack(spacing: 8) {
+                ForEach(Array(unlockedAchievements.prefix(3))) { achievement in
+                    achievementRow(achievement)
+                }
+            }
+        }
+    }
+    
+    var recentAchievementsSection: some View {
+        VStack(spacing: isCompact ? 16 : 20) {
+            HStack {
+                Image(systemName: "trophy.fill")
+                    .font(.system(size: isCompact ? 18 : 20))
+                    .foregroundColor(ColorTheme.warningOrange)
+                
+                Text("Recent Achievements")
+                    .font(.system(size: isCompact ? 18 : 20, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Spacer()
+                
+                NavigationLink(destination: ProfileView()) {
+                    Text("View All")
+                        .font(.system(size: isCompact ? 12 : 14, weight: .medium))
+                        .foregroundColor(ColorTheme.accentCyan)
+                }
+            }
+            
+            achievementsContent
+        }
+        .padding(isCompact ? 20 : 24)
+        .background(
+            RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                        .stroke(.white.opacity(0.1), lineWidth: 1)
+                )
+        )
+        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+    }
+    
+    var healthBenefitsSection: some View {
+        VStack(spacing: isCompact ? 16 : 20) {
+            HStack {
+                Image(systemName: "heart.text.square.fill")
+                    .font(.system(size: isCompact ? 18 : 20))
+                    .foregroundColor(ColorTheme.dangerRed)
+                
+                Text("Your Body is Healing")
+                    .font(.system(size: isCompact ? 18 : 20, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Spacer()
+            }
+            
+            let daysSober = timeComponents.days
+            let benefits = getHealthBenefits(for: daysSober)
+            
+            VStack(spacing: isCompact ? 12 : 14) {
+                ForEach(Array(benefits.enumerated()), id: \.offset) { index, benefit in
+                    HStack(spacing: isCompact ? 12 : 16) {
+                        Image(systemName: benefit.2 ? "checkmark.circle.fill" : "circle")
+                            .font(.system(size: isCompact ? 20 : 24))
+                            .foregroundColor(benefit.2 ? ColorTheme.successGreen : .white.opacity(0.3))
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(benefit.0)
+                                .font(.system(size: isCompact ? 14 : 16, weight: .semibold))
+                                .foregroundColor(benefit.2 ? .white : .white.opacity(0.5))
+                            
+                            Text(benefit.1)
+                                .font(.system(size: isCompact ? 12 : 14))
+                                .foregroundColor(benefit.2 ? .white.opacity(0.8) : .white.opacity(0.4))
+                        }
+                        
+                        Spacer()
+                    }
+                }
+            }
+        }
+        .padding(isCompact ? 20 : 24)
+        .background(
+            RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            ColorTheme.dangerRed.opacity(0.1),
+                            ColorTheme.accentPink.opacity(0.05)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                        .stroke(.white.opacity(0.1), lineWidth: 1)
+                )
+        )
+        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+    }
+    
+    func getHealthBenefits(for days: Int) -> [(String, String, Bool)] {
+        let allBenefits = [
+            (1, "Blood Sugar Normalized", "Your blood sugar levels are stabilizing"),
+            (2, "Better Sleep", "Sleep quality is improving significantly"),
+            (7, "Hydration Restored", "Your body is properly hydrated again"),
+            (14, "Energy Boost", "Natural energy levels are returning"),
+            (30, "Liver Recovery", "Your liver is healing and regenerating"),
+            (60, "Mental Clarity", "Brain fog has lifted, thinking is clearer"),
+            (90, "Immune System", "Your immune system is stronger"),
+            (180, "Heart Health", "Cardiovascular health greatly improved"),
+            (365, "Full Recovery", "Your body has undergone complete transformation")
+        ]
+        
+        return allBenefits.map { milestone, title, description in
+            (title, description, days >= milestone)
         }
     }
 }
