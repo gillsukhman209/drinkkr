@@ -1,4 +1,5 @@
 import SwiftUI
+import SafariServices
 
 struct SettingsView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -7,6 +8,8 @@ struct SettingsView: View {
     @State private var showingNameEdit = false
     @State private var tempName: String = ""
     @State private var showingSaveConfirmation = false
+    @State private var showingTerms = false
+    @State private var showingPrivacy = false
     
     var isCompact: Bool {
         horizontalSizeClass == .compact
@@ -70,6 +73,12 @@ struct SettingsView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text("Your name has been updated successfully")
+        }
+        .sheet(isPresented: $showingTerms) {
+            SafariView(url: URL(string: "https://www.freeprivacypolicy.com/live/c8a0d137-7a09-4a53-a7de-b43c13619987")!)
+        }
+        .sheet(isPresented: $showingPrivacy) {
+            SafariView(url: URL(string: "https://www.freeprivacypolicy.com/live/b6edc08d-395d-47ae-b9d2-699ead421394")!)
         }
     }
     
@@ -167,14 +176,12 @@ struct SettingsView: View {
                 .font(.system(size: isCompact ? 12 : 14, weight: .semibold))
                 .foregroundColor(ColorTheme.textSecondary)
             
-            VStack(spacing: 0) {
-                // Terms of Use
-                Button(action: {
-                    // Open terms of use
-                    if let url = URL(string: "https://www.example.com/terms") {
-                        UIApplication.shared.open(url)
-                    }
-                }) {
+            VStack(spacing: 8) {
+                // Terms of Use Button
+                Button {
+                    print("Terms button tapped!") // Debug
+                    showingTerms = true
+                } label: {
                     HStack {
                         Text("Terms of Use")
                             .font(.system(size: isCompact ? 14 : 16))
@@ -187,19 +194,20 @@ struct SettingsView: View {
                             .foregroundColor(ColorTheme.textSecondary)
                     }
                     .padding(isCompact ? 15 : 18)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(ColorTheme.cardBackground)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(ColorTheme.cardBorder, lineWidth: 1)
+                    )
                 }
-                .buttonStyle(PlainButtonStyle())
                 
-                Divider()
-                    .background(ColorTheme.cardBorder)
-                
-                // Privacy Policy
-                Button(action: {
-                    // Open privacy policy
-                    if let url = URL(string: "https://www.example.com/privacy") {
-                        UIApplication.shared.open(url)
-                    }
-                }) {
+                // Privacy Policy Button
+                Button {
+                    print("Privacy button tapped!") // Debug
+                    showingPrivacy = true
+                } label: {
                     HStack {
                         Text("Privacy Policy")
                             .font(.system(size: isCompact ? 14 : 16))
@@ -212,15 +220,15 @@ struct SettingsView: View {
                             .foregroundColor(ColorTheme.textSecondary)
                     }
                     .padding(isCompact ? 15 : 18)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(ColorTheme.cardBackground)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(ColorTheme.cardBorder, lineWidth: 1)
+                    )
                 }
-                .buttonStyle(PlainButtonStyle())
             }
-            .background(ColorTheme.cardBackground)
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(ColorTheme.cardBorder, lineWidth: 1)
-            )
         }
     }
     
@@ -244,6 +252,21 @@ struct SettingsView: View {
         .padding(.vertical, isCompact ? 20 : 25)
         .background(ColorTheme.cardBackground.opacity(0.5))
         .cornerRadius(12)
+    }
+}
+
+struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+    
+    func makeUIViewController(context: UIViewControllerRepresentableContext<SafariView>) -> SFSafariViewController {
+        let safariViewController = SFSafariViewController(url: url)
+        safariViewController.preferredBarTintColor = UIColor.systemBackground
+        safariViewController.preferredControlTintColor = UIColor.systemBlue
+        return safariViewController
+    }
+    
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: UIViewControllerRepresentableContext<SafariView>) {
+        // No update needed
     }
 }
 
