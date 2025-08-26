@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  drinkr
+//  Sobbr
 //
 //  Created by Sukhman Singh on 8/14/25.
 //

@@ -1,6 +1,6 @@
 //
-//  drinkrApp.swift
-//  drinkr
+//  SobbrApp.swift
+//  Sobbr
 //
 //  Created by Sukhman Singh on 8/14/25.
 //
@@ -10,7 +10,7 @@ import SwiftData
 import UserNotifications
 
 @main
-struct drinkrApp: App {
+struct SobbrApp: App {
     @StateObject private var appStateManager = AppStateManager.shared
     
     var sharedModelContainer: ModelContainer = {

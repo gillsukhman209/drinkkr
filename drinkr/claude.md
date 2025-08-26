@@ -1,8 +1,8 @@
-# Claude Instructions for Drinkr iOS App
+# Claude Instructions for Sobbr iOS App
 
 ## Overview
 
-Drinkr is an iOS app designed to help people quit alcohol. It provides a sobriety timer, streak tracking, relapse logging, panic button, reflection prompts, and an educational library. The app is built with SwiftUI and follows a dark navy/purple gradient design theme with smooth animations.
+Sobbr is an iOS app designed to help people quit alcohol. It provides a sobriety timer, streak tracking, relapse logging, panic button, reflection prompts, and an educational library. The app is built with SwiftUI and follows a dark navy/purple gradient design theme with smooth animations.
 
 ## Tech Stack
 
@@ -16,7 +16,7 @@ Drinkr is an iOS app designed to help people quit alcohol. It provides a sobriet
 ## Current File Structure
 
 ```
-drinkr/
+sobbr/
 ├── ContentView.swift (Tab navigation - 3 tabs)
 ├── Views/
 │   ├── Dashboard/

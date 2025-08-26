@@ -42,7 +42,7 @@ struct OnboardingWelcomeView: View {
                         .opacity(animationPhase >= 2 ? 1.0 : 0.0)
                 }
                 
-                Text("Drinkr")
+                Text("Sobbr")
                     .font(.system(size: isCompact ? 42 : 52, weight: .bold, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
