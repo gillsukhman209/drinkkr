@@ -14,10 +14,12 @@ struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.modelContext) private var modelContext
     @StateObject private var dataService = DataService()
+    @StateObject private var storeManager = SimpleStoreKitManager.shared
     @EnvironmentObject var appStateManager: AppStateManager
     @State private var hasInitialized = false
     @State private var showingOnboarding = false
     @State private var hasCompletedOnboarding = false
+    @State private var showingPaywall = false
     
     init() {
         UITabBar.appearance().backgroundColor = UIColor.black.withAlphaComponent(0.3)
@@ -26,7 +28,16 @@ struct ContentView: View {
     
     var body: some View {
         Group {
-            if hasCompletedOnboarding {
+            if !hasCompletedOnboarding {
+                // Show onboarding first
+                OnboardingContainerView(isPresented: $showingOnboarding)
+                    .preferredColorScheme(.dark)
+            } else if !storeManager.isSubscribed {
+                // Show paywall if onboarding completed but no subscription
+                PaywallView()
+                    .preferredColorScheme(.dark)
+            } else {
+                // Show main app if subscribed
                 TabView(selection: $selectedTab) {
                     DashboardView()
                         .tabItem {
@@ -59,9 +70,6 @@ struct ContentView: View {
                     CheckInModal(isPresented: $appStateManager.showCheckInModal)
                         .environmentObject(dataService)
                 }
-            } else {
-                OnboardingContainerView(isPresented: $showingOnboarding)
-                    .preferredColorScheme(.dark)
             }
         }
         .onAppear {
@@ -70,6 +78,10 @@ struct ContentView: View {
                 checkOnboardingStatus()
                 dataService.initialize(with: modelContext)
                 NotificationService.shared.requestPermission()
+                
+                // Load products and refresh subscription status on app launch
+                storeManager.loadProducts()
+                storeManager.refreshSubscriptionStatus()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .onboardingCompleted)) { notification in
