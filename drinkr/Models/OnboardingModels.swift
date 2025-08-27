@@ -51,6 +51,16 @@ struct OnboardingUserProfile: Codable {
         default: return 3
         }
     }
+    
+    var hoursLostWeeklyInt: Int {
+        switch hoursLostWeekly {
+        case "1-5 hours": return 3
+        case "6-10 hours": return 8
+        case "11-20 hours": return 15
+        case "20+ hours": return 25
+        default: return 5
+        }
+    }
 }
 
 // MARK: - Question Models

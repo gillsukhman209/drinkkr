@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		1A8090B12E5E5BB6003B556C /* SuperwallKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1A8090B02E5E5BB6003B556C /* SuperwallKit */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		1A79C2E32E4ED99300BDC6F4 /* Sobbr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sobbr.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -27,7 +23,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1A8090B12E5E5BB6003B556C /* SuperwallKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +65,6 @@
 			);
 			name = Sobbr;
 			packageProductDependencies = (
-				1A8090B02E5E5BB6003B556C /* SuperwallKit */,
 			);
 			productName = Sobbr;
 			productReference = 1A79C2E32E4ED99300BDC6F4 /* Sobbr.app */;
@@ -101,7 +95,6 @@
 			mainGroup = 1A79C2DA2E4ED99300BDC6F4;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				1A8090AF2E5E5BB6003B556C /* XCRemoteSwiftPackageReference "Superwall-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1A79C2E42E4ED99300BDC6F4 /* Products */;
@@ -339,25 +332,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		1A8090AF2E5E5BB6003B556C /* XCRemoteSwiftPackageReference "Superwall-iOS" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/superwall/Superwall-iOS";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.7.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		1A8090B02E5E5BB6003B556C /* SuperwallKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1A8090AF2E5E5BB6003B556C /* XCRemoteSwiftPackageReference "Superwall-iOS" */;
-			productName = SuperwallKit;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1A79C2DB2E4ED99300BDC6F4 /* Project object */;
 }
