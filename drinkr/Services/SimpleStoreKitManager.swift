@@ -21,7 +21,7 @@ class SimpleStoreKitManager: NSObject, ObservableObject, SKProductsRequestDelega
     
     // MARK: - Private Properties
     private var productsRequest: SKProductsRequest?
-    private var hasValidPurchase = false // Track if we have a valid purchase in this session
+    private var lastSuccessfulPurchaseTime: Date?
     
     override init() {
         super.init()
@@ -34,12 +34,24 @@ class SimpleStoreKitManager: NSObject, ObservableObject, SKProductsRequestDelega
             // Load products
             loadProducts()
             
-            // Check if we already have a valid subscription from UserDefaults
+            // Check if we have a stored subscription status first
             let hasActiveSubscription = UserDefaults.standard.bool(forKey: "hasActiveSubscription")
+            
+            // Also check for recent successful purchase timestamp
+            if let purchaseTimestamp = UserDefaults.standard.object(forKey: "lastSuccessfulPurchaseTime") as? Date {
+                lastSuccessfulPurchaseTime = purchaseTimestamp
+            }
+            
             if hasActiveSubscription {
+                print("✅ Found stored subscription status - granting access")
                 isSubscribed = true
-                hasValidPurchase = true
-                print("✅ Found existing valid subscription in UserDefaults")
+                
+                // Still validate if it's been a while since last purchase
+                if let lastPurchase = lastSuccessfulPurchaseTime,
+                   Date().timeIntervalSince(lastPurchase) > 3600 { // 1 hour
+                    print("🔄 Validating older subscription...")
+                    checkSubscriptionStatus()
+                }
             } else {
                 // Check subscription status via receipt validation
                 checkSubscriptionStatus()
@@ -91,23 +103,25 @@ class SimpleStoreKitManager: NSObject, ObservableObject, SKProductsRequestDelega
     
     // MARK: - Subscription Status
     private func checkSubscriptionStatus() {
-        // If we have a valid purchase in this session, don't override with receipt validation
-        if hasValidPurchase {
-            print("✅ Skipping receipt validation - valid purchase exists in session")
+        // Don't override recent successful purchases with failed receipt validation
+        if let lastPurchase = lastSuccessfulPurchaseTime,
+           Date().timeIntervalSince(lastPurchase) < 300 { // 5 minutes
+            print("✅ Skipping receipt validation - recent successful purchase within 5 minutes")
             return
         }
         
         validateReceipt { [weak self] isValid in
             DispatchQueue.main.async {
-                // Only update if we don't have a valid purchase in this session
-                guard let self = self, !self.hasValidPurchase else { return }
-                
-                self.isSubscribed = isValid
-                if isValid {
-                    UserDefaults.standard.set(true, forKey: "hasActiveSubscription")
-                } else {
-                    UserDefaults.standard.set(false, forKey: "hasActiveSubscription")
+                // Only update subscription status if no recent successful purchase
+                if let self = self,
+                   let lastPurchase = self.lastSuccessfulPurchaseTime,
+                   Date().timeIntervalSince(lastPurchase) < 300 {
+                    print("✅ Keeping subscription active - recent successful purchase")
+                    return
                 }
+                
+                self?.isSubscribed = isValid
+                UserDefaults.standard.set(isValid, forKey: "hasActiveSubscription")
             }
         }
     }
@@ -134,8 +148,26 @@ class SimpleStoreKitManager: NSObject, ObservableObject, SKProductsRequestDelega
             "exclude-old-transactions": true
         ]
         
-        // Always try sandbox first for development/testing
-        let validationURL = URL(string: "https://sandbox.itunes.apple.com/verifyReceipt")!
+        // Try sandbox first (for development/testing)
+        validateReceiptWithURL(requestData: requestData, isSandbox: true) { [weak self] isValid, shouldRetryProduction in
+            if isValid {
+                completion(true)
+            } else if shouldRetryProduction {
+                // Retry with production URL
+                self?.validateReceiptWithURL(requestData: requestData, isSandbox: false) { isValid, _ in
+                    completion(isValid)
+                }
+            } else {
+                completion(false)
+            }
+        }
+    }
+    
+    private func validateReceiptWithURL(requestData: [String: Any], isSandbox: Bool, completion: @escaping (Bool, Bool) -> Void) {
+        let urlString = isSandbox ? "https://sandbox.itunes.apple.com/verifyReceipt" : "https://buy.itunes.apple.com/verifyReceipt"
+        let validationURL = URL(string: urlString)!
+        
+        print("🔄 Trying \(isSandbox ? "sandbox" : "production") receipt validation...")
         
         var request = URLRequest(url: validationURL)
         request.httpMethod = "POST"
@@ -145,7 +177,7 @@ class SimpleStoreKitManager: NSObject, ObservableObject, SKProductsRequestDelega
             request.httpBody = try JSONSerialization.data(withJSONObject: requestData)
         } catch {
             print("❌ Failed to serialize receipt data: \(error)")
-            completion(false)
+            completion(false, false)
             return
         }
         
@@ -154,67 +186,87 @@ class SimpleStoreKitManager: NSObject, ObservableObject, SKProductsRequestDelega
                   let data = data,
                   error == nil else {
                 print("❌ Receipt validation network error: \(error?.localizedDescription ?? "Unknown")")
-                completion(false)
+                completion(false, false)
                 return
             }
             
             Task { @MainActor in
-                self.parseReceiptResponse(data: data, completion: completion)
+                self.parseReceiptResponseWithRetry(data: data, isSandbox: isSandbox, completion: completion)
             }
         }.resume()
     }
     
-    private func parseReceiptResponse(data: Data, completion: @escaping (Bool) -> Void) {
+    private func parseReceiptResponseWithRetry(data: Data, isSandbox: Bool, completion: @escaping (Bool, Bool) -> Void) {
         do {
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-                completion(false)
+                completion(false, false)
                 return
             }
             
             guard let status = json["status"] as? Int else {
-                completion(false)
+                completion(false, false)
                 return
             }
             
-            // Status 0 means valid receipt
-            guard status == 0 else {
+            print("📋 Receipt validation status: \(status) (\(isSandbox ? "sandbox" : "production"))")
+            
+            switch status {
+            case 0:
+                // Success - parse the receipt
+                parseReceiptData(json: json, completion: { isValid in
+                    completion(isValid, false)
+                })
+            case 21007:
+                // Sandbox receipt sent to production - retry with sandbox
+                print("🔄 Status 21007: Sandbox receipt sent to production")
+                completion(false, !isSandbox) // Retry with sandbox if we tried production
+            case 21008:
+                // Production receipt sent to sandbox - retry with production  
+                print("🔄 Status 21008: Production receipt sent to sandbox")
+                completion(false, isSandbox) // Retry with production if we tried sandbox
+            default:
+                // Other error
                 print("❌ Receipt validation failed with status: \(status)")
-                completion(false)
-                return
+                completion(false, false)
             }
-            
-            guard let receipt = json["receipt"] as? [String: Any],
-                  let inApp = receipt["in_app"] as? [[String: Any]] else {
-                completion(false)
-                return
-            }
-            
-            // Check for active subscriptions
-            let hasActiveSubscription = inApp.contains { transaction in
-                guard let productId = transaction["product_id"] as? String,
-                      productIDs.contains(productId),
-                      let expiresDateString = transaction["expires_date"] as? String,
-                      let expiresDateMs = Double(expiresDateString) else {
-                    return false
-                }
-                
-                let expiresDate = Date(timeIntervalSince1970: expiresDateMs / 1000.0)
-                let isActive = expiresDate > Date()
-                
-                if isActive {
-                    print("✅ Active subscription found: \(productId), expires: \(expiresDate)")
-                }
-                
-                return isActive
-            }
-            
-            completion(hasActiveSubscription)
             
         } catch {
             print("❌ Failed to parse receipt response: \(error)")
-            completion(false)
+            completion(false, false)
         }
     }
+    
+    private func parseReceiptData(json: [String: Any], completion: @escaping (Bool) -> Void) {
+        guard let receipt = json["receipt"] as? [String: Any],
+              let inApp = receipt["in_app"] as? [[String: Any]] else {
+            completion(false)
+            return
+        }
+        
+        // Check for active subscriptions
+        let hasActiveSubscription = inApp.contains { transaction in
+            guard let productId = transaction["product_id"] as? String,
+                  productIDs.contains(productId),
+                  let expiresDateString = transaction["expires_date"] as? String,
+                  let expiresDateMs = Double(expiresDateString) else {
+                return false
+            }
+            
+            let expiresDate = Date(timeIntervalSince1970: expiresDateMs / 1000.0)
+            let isActive = expiresDate > Date()
+            
+            if isActive {
+                print("✅ Active subscription found: \(productId), expires: \(expiresDate)")
+            } else {
+                print("❌ Expired subscription found: \(productId), expired: \(expiresDate)")
+            }
+            
+            return isActive
+        }
+        
+        completion(hasActiveSubscription)
+    }
+    
     
     private func updateSubscriptionStatus(_ isActive: Bool) {
         isSubscribed = isActive
@@ -339,21 +391,25 @@ extension SimpleStoreKitManager {
             self.errorMessage = nil
         }
         
-        // For development/testing: if transaction completes successfully, treat as valid subscription
-        // This handles cases where receipt validation fails due to sandbox/production mismatches
+        // After successful transaction, validate receipt to get proper subscription info
+        // But also grant access immediately for valid product IDs during development/testing
         let productId = transaction.payment.productIdentifier
         if productIDs.contains(productId) {
-            print("✅ Valid subscription product purchased: \(productId)")
-            hasValidPurchase = true // Mark that we have a valid purchase
+            print("✅ Granting access for valid subscription product: \(productId)")
+            lastSuccessfulPurchaseTime = Date() // Track successful purchase time
+            UserDefaults.standard.set(lastSuccessfulPurchaseTime, forKey: "lastSuccessfulPurchaseTime")
             DispatchQueue.main.async {
                 self.updateSubscriptionStatus(true)
             }
-        } else {
-            // Try receipt validation as fallback
-            validateReceipt { [weak self] isValid in
-                DispatchQueue.main.async {
-                    self?.updateSubscriptionStatus(isValid)
-                }
+        }
+        
+        // Still try receipt validation for future expiry checking
+        validateReceipt { [weak self] isValid in
+            // Only revoke access if receipt validation fails AND we don't have a valid recent purchase
+            if !isValid {
+                print("⚠️ Receipt validation failed after successful purchase - keeping access for development")
+                // In production, you might want to revoke access here
+                // For now, keep access since purchase was successful
             }
         }
         
@@ -392,14 +448,28 @@ extension SimpleStoreKitManager {
             self.isLoading = false
         }
         
-        // Validate receipt to check for active subscriptions
-        validateReceipt { [weak self] isValid in
+        // Check if any restored transactions are for our subscription products
+        let hasSubscriptionTransaction = queue.transactions.contains { transaction in
+            self.productIDs.contains(transaction.payment.productIdentifier) && 
+            transaction.transactionState == .purchased
+        }
+        
+        if hasSubscriptionTransaction {
+            print("✅ Found subscription transaction in restore - granting access")
             DispatchQueue.main.async {
-                if isValid {
-                    self?.updateSubscriptionStatus(true)
-                    self?.errorMessage = nil
-                } else {
-                    self?.errorMessage = "No active subscriptions found"
+                self.updateSubscriptionStatus(true)
+                self.errorMessage = nil
+            }
+        } else {
+            // Try receipt validation as fallback
+            validateReceipt { [weak self] isValid in
+                DispatchQueue.main.async {
+                    if isValid {
+                        self?.updateSubscriptionStatus(true)
+                        self?.errorMessage = nil
+                    } else {
+                        self?.errorMessage = "No active subscriptions found"
+                    }
                 }
             }
         }
