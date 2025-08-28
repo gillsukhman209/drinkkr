@@ -79,9 +79,10 @@ struct ContentView: View {
                 dataService.initialize(with: modelContext)
                 NotificationService.shared.requestPermission()
                 
-                // Load products and refresh subscription status on app launch
+                // Load products on app launch
                 storeManager.loadProducts()
-                storeManager.refreshSubscriptionStatus()
+                // The subscription status is already checked in StoreKitManager init
+                // and will be validated periodically based on cached expiry
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .onboardingCompleted)) { notification in

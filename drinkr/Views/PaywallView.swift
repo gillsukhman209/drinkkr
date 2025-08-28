@@ -94,7 +94,10 @@ struct PaywallView: View {
         }
         .onChange(of: storeManager.isSubscribed) {
             if storeManager.isSubscribed {
-                dismiss()
+                // Add a small delay to ensure subscription is fully processed
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    dismiss()
+                }
             }
         }
         .alert("Subscription", isPresented: $showingAlert) {
