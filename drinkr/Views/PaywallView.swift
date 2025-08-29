@@ -64,18 +64,33 @@ struct PaywallView: View {
                 ctaButton
                     .padding(.bottom, 16)
                 
-                // Footer
-                HStack(spacing: 20) {
-                    Text("Cancel anytime")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white.opacity(0.7))
+                // Footer with subscription terms
+                VStack(spacing: 12) {
+                    // Important subscription information
+                    Text("Subscription Terms")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.8))
                     
-                    Text("•")
+                    Text("Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless canceled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period.")
+                        .font(.system(size: 10, weight: .regular))
                         .foregroundColor(.white.opacity(0.5))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 30)
                     
-                    Text("Money back guarantee")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white.opacity(0.7))
+                    HStack(spacing: 20) {
+                        Button("Restore Purchases") {
+                            storeManager.restorePurchases()
+                        }
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(ColorTheme.accentCyan)
+                        
+                        Text("•")
+                            .foregroundColor(.white.opacity(0.5))
+                        
+                        Text("Cancel anytime")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
                 }
                 .padding(.bottom, 40)
                 }
@@ -245,17 +260,17 @@ struct PaywallView: View {
     
     private func quittrAnnualCard(product: SKProduct) -> some View {
         VStack(spacing: 0) {
-            // SAVE 80% badge
+            // SAVE badge - smaller and subordinate
             HStack {
                 Spacer()
                 Text("SAVE 75% + 3-DAY FREE TRIAL")
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
                     .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(ColorTheme.accentPink)
+                        RoundedRectangle(cornerRadius: 15)
+                            .fill(ColorTheme.accentPink.opacity(0.8))
                     )
                 Spacer()
             }
@@ -267,21 +282,37 @@ struct PaywallView: View {
                 selectedPlan = product
             } label: {
                 HStack {
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text("Annual")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
                         
-                        Text("12mo • \(storeManager.formattedPrice(for: product))")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.white.opacity(0.7))
+                        // Make billed amount MOST prominent
+                        Text(storeManager.formattedPrice(for: product))
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Text("Billed yearly")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(.white.opacity(0.6))
+                        
+                        // Free trial notice - clear but subordinate
+                        Text("3-day free trial, then \(storeManager.formattedPrice(for: product))/year")
+                            .font(.system(size: 11, weight: .regular))
+                            .foregroundColor(ColorTheme.accentCyan.opacity(0.8))
+                            .padding(.top, 2)
                     }
                     
                     Spacer()
                     
-                    Text(monthlyEquivalent(for: product))
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.white)
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("equals")
+                            .font(.system(size: 10, weight: .regular))
+                            .foregroundColor(.white.opacity(0.5))
+                        Text(monthlyEquivalent(for: product))
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
                 }
                 .padding(20)
                 .background(
@@ -306,21 +337,26 @@ struct PaywallView: View {
             selectedPlan = product
         } label: {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("Monthly")
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
                     
-                    Text("1mo • \(storeManager.formattedPrice(for: product))")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white.opacity(0.7))
+                    // Make billed amount MOST prominent
+                    Text(storeManager.formattedPrice(for: product))
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text("Billed monthly")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.white.opacity(0.6))
                 }
                 
                 Spacer()
                 
-                Text("\(storeManager.formattedPrice(for: product))/mo")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.white)
+                Text("/month")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white.opacity(0.7))
             }
             .padding(20)
             .background(
@@ -353,9 +389,17 @@ struct PaywallView: View {
                         .scaleEffect(0.8)
                 }
                 
-                Text(storeManager.isLoading ? "Starting..." : "START YOUR RECOVERY TODAY")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                VStack(spacing: 2) {
+                    Text(storeManager.isLoading ? "Starting..." : getButtonText())
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    
+                    if !storeManager.isLoading && selectedPlan?.productIdentifier == storeManager.yearlyProduct()?.productIdentifier {
+                        Text("Start 3-day free trial")
+                            .font(.system(size: 11, weight: .regular))
+                            .foregroundColor(.white.opacity(0.8))
+                    }
+                }
             }
             .frame(maxWidth: .infinity)
             .frame(height: 54)
@@ -402,6 +446,14 @@ struct PaywallView: View {
     private func monthlyEquivalent(for product: SKProduct) -> String {
         let monthlyPrice = product.price.doubleValue / 12
         return String(format: "$%.2f/mo", monthlyPrice)
+    }
+    
+    private func getButtonText() -> String {
+        if selectedPlan?.productIdentifier == storeManager.yearlyProduct()?.productIdentifier {
+            return "TRY FREE & SUBSCRIBE"
+        } else {
+            return "SUBSCRIBE NOW"
+        }
     }
 }
 

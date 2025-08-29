@@ -174,7 +174,7 @@ struct DashboardView: View {
     
     var sobrietyTimerView: some View {
         VStack(spacing: isCompact ? 24 : 32) {
-            Text(dataService.currentUser?.name != nil ? "\(dataService.currentUser!.name)you have been alcohol-free for" : "You have been alcohol-free for")
+            Text(dataService.currentUser?.name != nil ? "\(dataService.currentUser!.name) you have been alcohol-free for" : "You have been alcohol-free for")
                 .font(.system(size: isCompact ? 16 : 18, weight: .medium))
                 .foregroundColor(.white.opacity(0.6))
                 .tracking(0.5)
