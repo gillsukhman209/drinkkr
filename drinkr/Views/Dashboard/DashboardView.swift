@@ -49,9 +49,26 @@ struct DashboardView: View {
                     .ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: isCompact ? 20 : 30) {
+                    VStack(spacing: isCompact ? 16 : 20) {
+                        // App name header
+                        HStack {
+                            Text("Sobbr")
+                                .font(.system(size: isCompact ? 30 : 34, weight: .bold, design: .rounded))
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [.white, ColorTheme.accentCyan.opacity(0.9)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+                            
+                            Spacer()
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, isCompact ? 0 : 5)
+                        
                         weekProgressIndicator
-                            .padding(.top, isCompact ? 10 : 20)
                         
                         sobrietyTimerView
                             .padding(.horizontal)
@@ -174,7 +191,7 @@ struct DashboardView: View {
                 )
                 .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
         }
-        .padding(.vertical, isCompact ? 40 : 56)
+        .padding(.vertical, isCompact ? 20 : 30)
     }
     
     func timeComponent(value: Int, unit: String) -> some View {
