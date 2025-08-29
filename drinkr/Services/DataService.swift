@@ -39,7 +39,7 @@ class DataService: ObservableObject {
             sobrietyData?.updateStreak()
             sobrietyData?.calculateStats()
         } else {
-            let newSobrietyData = SobrietyData(quitDate: Date().addingTimeInterval(-86400 * 3))
+            let newSobrietyData = SobrietyData(quitDate: Date())
             newSobrietyData.updateStreak()
             newSobrietyData.calculateStats()
             modelContext.insert(newSobrietyData)

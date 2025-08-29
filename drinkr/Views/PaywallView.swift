@@ -248,7 +248,7 @@ struct PaywallView: View {
             // SAVE 80% badge
             HStack {
                 Spacer()
-                Text("SAVE 75%")
+                Text("SAVE 75% + 3-DAY FREE TRIAL")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.white)
                     .padding(.horizontal, 20)
