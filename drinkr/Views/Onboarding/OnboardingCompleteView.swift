@@ -31,8 +31,8 @@ struct OnboardingCompleteView: View {
                     ZStack {
                         // Background circle
                         Circle()
-                            .stroke(Color.white.opacity(0.1), lineWidth: 8)
-                            .frame(width: isCompact ? 140 : 180, height: isCompact ? 140 : 180)
+                            .stroke(Color.white.opacity(0.15), lineWidth: 12)
+                            .frame(width: isCompact ? 200 : 260, height: isCompact ? 200 : 260)
                         
                         // Progress circle
                         Circle()
@@ -43,42 +43,44 @@ struct OnboardingCompleteView: View {
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
-                                style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                                style: StrokeStyle(lineWidth: 12, lineCap: .round)
                             )
-                            .frame(width: isCompact ? 140 : 180, height: isCompact ? 140 : 180)
+                            .frame(width: isCompact ? 200 : 260, height: isCompact ? 200 : 260)
                             .rotationEffect(.degrees(-90))
                             .animation(.easeInOut(duration: 0.1), value: loadingProgress)
                         
-                        // Percentage text
-                        VStack(spacing: 4) {
-                            Text("\(Int(loadingProgress))%")
-                                .font(.system(size: isCompact ? 42 : 54, weight: .bold, design: .rounded))
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [ColorTheme.accentCyan, ColorTheme.accentPurple],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
+                        // Percentage text - perfectly centered
+                        Text("\(Int(loadingProgress))%")
+                            .font(.system(size: isCompact ? 52 : 68, weight: .bold, design: .rounded))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [ColorTheme.accentCyan, ColorTheme.accentPurple],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
                                 )
-                            
-                            Text("Loading")
-                                .font(.system(size: isCompact ? 14 : 16, weight: .medium))
-                                .foregroundColor(ColorTheme.textSecondary)
-                        }
+                            )
+                            .multilineTextAlignment(.center)
                     }
-                    .padding(.bottom, isCompact ? 40 : 60)
+                    
+                    // Loading label
+                    Text("Loading")
+                        .font(.system(size: isCompact ? 18 : 22, weight: .medium))
+                        .foregroundColor(.white.opacity(0.7))
+                        .padding(.top, 16)
+                        .padding(.bottom, isCompact ? 50 : 70)
                     
                     // Loading message
-                    VStack(spacing: 12) {
+                    VStack(spacing: 16) {
                         Text("Preparing your plan...")
-                            .font(.system(size: isCompact ? 20 : 24, weight: .semibold))
+                            .font(.system(size: isCompact ? 24 : 28, weight: .bold))
                             .foregroundColor(.white)
                         
-                        Text("Analyzing your responses to create a personalized recovery journey")
-                            .font(.system(size: isCompact ? 14 : 16, weight: .medium))
-                            .foregroundColor(ColorTheme.textSecondary)
+                        Text("Analyzing your responses to create a personalized recovery journey tailored just for you")
+                            .font(.system(size: isCompact ? 16 : 18, weight: .medium))
+                            .foregroundColor(.white.opacity(0.8))
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal, 40)
+                            .lineSpacing(4)
+                            .padding(.horizontal, 30)
                     }
                     
                     Spacer()
