@@ -373,6 +373,12 @@ class OnboardingViewModel: ObservableObject {
         return currentPage != .welcome
     }
     
+    func skipToNameSlide() {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            currentPage = .name
+        }
+    }
+    
 }
 
 extension Notification.Name {

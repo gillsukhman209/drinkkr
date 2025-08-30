@@ -141,6 +141,30 @@ struct OnboardingWelcomeView: View {
         .onAppear {
             startAnimationSequence()
         }
+        .overlay(alignment: .topTrailing) {
+            #if DEBUG
+            // Debug skip button
+            Button(action: {
+                viewModel.skipToNameSlide()
+            }) {
+                Text("Skip to Name")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.6))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white.opacity(0.1))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                            )
+                    )
+            }
+            .padding(.top, 60)
+            .padding(.trailing, 20)
+            #endif
+        }
     }
     
     private func statItem(number: String, label: String, delay: Int) -> some View {

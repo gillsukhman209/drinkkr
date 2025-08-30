@@ -14,7 +14,7 @@ struct OnboardingCommitmentView: View {
     
     private var quitDate: Date {
         switch selectedQuitOption {
-        case 0: return Calendar.current.startOfDay(for: Date())
+        case 0: return Date() // Today means right now, not start of day
         case 1: return Calendar.current.startOfDay(for: Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date())
         case 2: return Calendar.current.startOfDay(for: customDate)
         default: return Date()
@@ -153,7 +153,11 @@ struct OnboardingCommitmentView: View {
                 Spacer()
                 
                 // Date display
-                if index != 2 {
+                if index == 0 {
+                    Text("Right now")
+                        .font(.system(size: isCompact ? 14 : 16, weight: .medium))
+                        .foregroundColor(ColorTheme.accentCyan)
+                } else if index == 1 {
                     Text(formatDate(quitDate))
                         .font(.system(size: isCompact ? 14 : 16, weight: .medium))
                         .foregroundColor(ColorTheme.accentCyan)
@@ -273,7 +277,7 @@ struct OnboardingCommitmentView: View {
             }
             
             VStack(spacing: 12) {
-                commitmentItem(icon: "calendar", text: "I will start my alcohol-free journey on \(formatDate(quitDate))")
+                commitmentItem(icon: "calendar", text: selectedQuitOption == 0 ? "I'm starting my alcohol-free journey right now" : "I will start my alcohol-free journey on \(formatDate(quitDate))")
                 commitmentItem(icon: "clock", text: "I will check in daily at \(formatTime(checkInTime))")
                 commitmentItem(icon: "star", text: "I will be patient and kind with myself throughout this process")
                 commitmentItem(icon: "heart", text: "I will reach out for support when I need it")
