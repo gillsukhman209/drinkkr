@@ -121,7 +121,7 @@ struct DashboardView: View {
             ResetModal(isPresented: $showingResetModal)
         }
         .fullScreenCover(isPresented: $showingPanicModal) {
-            PanicButtonModal(isPresented: $showingPanicModal)
+            PanicButtonModal(isPresented: $showingPanicModal, showingMeditationModal: $showingMeditationModal)
         }
         .fullScreenCover(isPresented: $showingCelebration) {
             CelebrationView(isPresented: $showingCelebration, milestone: celebrationMilestone)

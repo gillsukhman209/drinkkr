@@ -2,422 +2,902 @@ import SwiftUI
 
 struct PanicButtonModal: View {
     @Binding var isPresented: Bool
+    @Binding var showingMeditationModal: Bool
     @EnvironmentObject var dataService: DataService
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var currentStep = 0
-    @State private var showingCongratulations = false
+    @State private var selectedTrigger: String? = nil
+    @State private var breathingProgress: CGFloat = 0
+    @State private var breathCount = 0
+    @State private var isBreathing = false
+    @State private var pulseAnimation = false
     
     var isCompact: Bool {
         horizontalSizeClass == .compact
     }
     
-    let cravingSteps = [
-        CravingStep(
-            title: "What's happening?",
-            subtitle: nil,
-            description: nil,
-            icon: "questionmark.circle",
-            actionText: "I feel like drinking",
-            alternativeText: "I'm feeling better",
-            image: "doctor_thinking",
-            foods: nil
-        ),
-        CravingStep(
-            title: "Try drinking water first",
-            subtitle: "Have 2 glasses of water slowly",
-            description: "Dehydration can intensify cravings. Your brain might be asking for fluids.",
-            icon: "drop.fill",
-            actionText: "I drank some water",
-            alternativeText: "I'm feeling better",
-            image: nil,
-            foods: nil
-        ),
-        CravingStep(
-            title: "Let's get your body moving",
-            subtitle: nil,
-            description: "Physical activity releases endorphins and changes your mental state.",
-            icon: "figure.walk",
-            actionText: "I moved my body",
-            alternativeText: "I'm feeling better",
-            image: "doctor_thinking",
-            foods: nil
-        ),
-        CravingStep(
-            title: "Try eating something satisfying",
-            subtitle: "Choose protein-rich foods to stabilize blood sugar",
-            description: nil,
-            icon: nil,
-            actionText: "I ate something",
-            alternativeText: "I'm feeling better",
-            image: nil,
-            foods: [
-                ("Nuts & Seeds", "🥜"),
-                ("Cheese & Crackers", "🧀"),
-                ("Greek Yogurt", "🥛"),
-                ("Hard-boiled Eggs", "🥚"),
-                ("Hummus & Veggies", "🥕"),
-                ("Peanut Butter Toast", "🥜")
-            ]
-        ),
-        CravingStep(
-            title: "How are you feeling now?",
-            subtitle: nil,
-            description: nil,
-            icon: "magnifyingglass",
-            actionText: "Much better!",
-            alternativeText: "I still want to drink",
-            image: "doctor_magnifying",
-            foods: nil
-        ),
-        CravingStep(
-            title: "What's triggering this urge?",
-            subtitle: nil,
-            description: nil,
-            icon: "brain.head.profile",
-            actionText: "Stress or anxiety",
-            alternativeText: "Boredom or habit",
-            image: "doctor_thinking",
-            foods: nil
-        )
-    ]
-    
     var body: some View {
         NavigationView {
             ZStack {
-                Color.white
-                    .ignoresSafeArea()
+                // Dark gradient background
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.05, green: 0.05, blue: 0.15),
+                        Color(red: 0.1, green: 0.05, blue: 0.2)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
-                if showingCongratulations {
-                    congratulationsView
-                } else if currentStep < cravingSteps.count {
-                    stepView(cravingSteps[currentStep])
+                VStack(spacing: 0) {
+                    // Header
+                    headerView
+                    
+                    // Content
+                    ScrollView(showsIndicators: false) {
+                        contentView
+                            .padding(.bottom, 100)
+                    }
                 }
             }
             .navigationBarHidden(true)
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            startPulseAnimation()
+        }
     }
     
-    func stepView(_ step: CravingStep) -> some View {
+    var headerView: some View {
+        HStack {
+            Button(action: {
+                isPresented = false
+            }) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(.white.opacity(0.6))
+            }
+            .padding()
+            
+            Spacer()
+            
+            // Progress dots
+            if currentStep > 0 {
+                HStack(spacing: 8) {
+                    ForEach(0..<5) { index in
+                        Circle()
+                            .fill(index <= currentStep ? Color.cyan : Color.white.opacity(0.3))
+                            .frame(width: 8, height: 8)
+                    }
+                }
+            }
+            
+            Spacer()
+        }
+    }
+    
+    @ViewBuilder
+    var contentView: some View {
+        switch currentStep {
+        case 0:
+            acknowledgeStruggleView
+        case 1:
+            encouragementSlide1View
+        case 2:
+            encouragementSlide2View
+        case 3:
+            encouragementSlide3View
+        case 4:
+            identifyTriggerView
+        case 5:
+            triggerSpecificHelpView
+        case 6:
+            checkInView
+        case 7:
+            conclusionView
+        default:
+            EmptyView()
+        }
+    }
+    
+    // MARK: - Step 1: Stop What You're Doing
+    var acknowledgeStruggleView: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack {
-                Button(action: {
-                    isPresented = false
-                }) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 24))
-                        .foregroundColor(.gray)
-                }
-                .padding()
-                
-                Spacer()
-                
-                if currentStep > 0 {
-                    Button(action: {
-                        // Help button action
-                    }) {
-                        Image(systemName: "questionmark.circle")
-                            .font(.system(size: 24))
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
-                }
-            }
-            
             Spacer()
+                .frame(height: 40)
             
-            // Content
-            VStack(spacing: isCompact ? 30 : 40) {
-                VStack(spacing: 16) {
-                    Text(step.title)
-                        .font(.system(size: isCompact ? 28 : 32, weight: .bold))
-                        .foregroundColor(Color(red: 0.06, green: 0.2, blue: 0.4))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                    
-                    if let subtitle = step.subtitle {
-                        Text(subtitle)
-                            .font(.system(size: isCompact ? 16 : 18))
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-                }
+            // Big warning text
+            VStack(spacing: 16) {
+                Text("STOP WHAT YOU'RE DOING")
+                    .font(.system(size: isCompact ? 32 : 38, weight: .black))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .tracking(1)
                 
-                // Visual content based on step
-                if currentStep == 1 {
-                    waterGlassVisual
-                } else if currentStep == 3, let foods = step.foods {
-                    foodGrid(foods)
-                } else if step.image != nil {
-                    doctorIllustration
-                }
-                
-                if let description = step.description {
-                    Text(description)
-                        .font(.system(size: isCompact ? 14 : 16))
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 30)
-                }
+                Text("Side effects of drinking:")
+                    .font(.system(size: isCompact ? 18 : 20, weight: .medium))
+                    .foregroundColor(.white.opacity(0.8))
             }
+            .padding(.bottom, 30)
             
-            Spacer()
-            
-            // Buttons
+            // Effects list
             VStack(spacing: 20) {
-                Button(action: {
-                    handlePrimaryAction()
-                }) {
-                    Text(step.actionText)
-                        .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, isCompact ? 16 : 20)
-                        .background(Color(red: 0.0, green: 0.48, blue: 1.0))
-                        .cornerRadius(30)
-                }
+                effectItem(
+                    icon: "bed.double.fill",
+                    title: "SLEEP DISRUPTION",
+                    subtitle: "Poor sleep quality for days, waking up exhausted and anxious."
+                )
                 
-                if let alternativeText = step.alternativeText {
-                    Button(action: {
-                        if currentStep == 4 && alternativeText == "I still want to drink" {
-                            // Go to trigger identification
-                            currentStep = 5
-                        } else if currentStep == 5 {
-                            // Any trigger option leads to congratulations
-                            showingCongratulations = true
-                        } else if alternativeText == "I'm feeling better" {
-                            // Most "feeling better" options close modal
-                            showingCongratulations = true
-                        } else {
-                            showingCongratulations = true
-                        }
-                    }) {
-                        Text(alternativeText)
-                            .font(.system(size: isCompact ? 16 : 18, weight: .medium))
-                            .foregroundColor(.gray)
-                    }
+                effectItem(
+                    icon: "eye.slash.fill",
+                    title: "SHAME SPIRAL",
+                    subtitle: "Immediate regret, self-hatred, and breaking promises to yourself."
+                )
+                
+                effectItem(
+                    icon: "heart.slash.fill",
+                    title: "RELATIONSHIP DAMAGE",
+                    subtitle: "Hurting people you love and losing their trust and respect."
+                )
+                
+                effectItem(
+                    icon: "arrow.counterclockwise",
+                    title: "RESET YOUR PROGRESS",
+                    subtitle: "Throwing away all your hard work and starting from day zero."
+                )
+            }
+            .padding(.horizontal, 20)
+            
+            Spacer()
+                .frame(height: 40)
+            
+            // Continue button
+            Button(action: {
+                withAnimation(.spring()) {
+                    currentStep = 1
                 }
+            }) {
+                HStack {
+                    Image(systemName: "hand.raised.fill")
+                        .font(.system(size: 16))
+                    Text("I'm stopping myself")
+                }
+                .font(.system(size: isCompact ? 18 : 20, weight: .bold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 18)
+                .background(
+                    LinearGradient(
+                        colors: [Color.green, Color.cyan],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .cornerRadius(25)
+            }
+            .padding(.horizontal, 20)
+            
+            Spacer()
+                .frame(height: 20)
+        }
+    }
+    
+    // MARK: - Step 2: Encouragement Slide 1
+    var encouragementSlide1View: some View {
+        VStack(spacing: 30) {
+            Spacer()
+                .frame(height: 60)
+            
+            // Animated icon
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color.orange.opacity(0.3), Color.orange.opacity(0.1)],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 100
+                        )
+                    )
+                    .frame(width: 120, height: 120)
+                    .scaleEffect(pulseAnimation ? 1.2 : 1.0)
+                
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 50))
+                    .foregroundColor(.orange)
+                    .scaleEffect(pulseAnimation ? 1.1 : 1.0)
+            }
+            
+            VStack(spacing: 24) {
+                Text("This craving will pass.")
+                    .font(.system(size: isCompact ? 32 : 38, weight: .bold))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                
+                Text("It always does.")
+                    .font(.system(size: isCompact ? 24 : 28, weight: .semibold))
+                    .foregroundColor(.orange)
+                
+                Text("Cravings peak in 3-5 minutes, then fade. You've survived 100% of your worst days so far. You can survive this one too.")
+                    .font(.system(size: isCompact ? 16 : 18))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 30)
+            }
+            
+            Spacer()
+            
+            Button(action: {
+                withAnimation(.spring()) {
+                    currentStep = 2
+                }
+            }) {
+                Text("I believe that")
+                    .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.orange, Color.red],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(25)
             }
             .padding(.horizontal, 30)
             .padding(.bottom, 40)
         }
     }
     
-    var waterGlassVisual: some View {
-        VStack(spacing: 20) {
-            Image("doctor_water") // We'll use a system image as placeholder
-                .resizable()
-                .scaledToFit()
-                .frame(height: isCompact ? 150 : 200)
-                .overlay(
-                    // Placeholder visual
-                    VStack {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color(red: 0.06, green: 0.2, blue: 0.4), lineWidth: 3)
-                                .frame(width: 80, height: 120)
-                            
-                            Rectangle()
-                                .fill(Color(red: 0.0, green: 0.48, blue: 1.0).opacity(0.6))
-                                .frame(width: 74, height: 80)
-                                .offset(y: 17)
-                                .clipShape(RoundedRectangle(cornerRadius: 7))
-                        }
-                        
-                        Image(systemName: "drop.fill")
-                            .font(.system(size: 40))
-                            .foregroundColor(Color(red: 0.0, green: 0.48, blue: 1.0))
-                            .offset(y: 20)
-                    }
-                )
-        }
-    }
-    
-    func foodGrid(_ foods: [(String, String)]) -> some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
-            ForEach(foods, id: \.0) { food in
-                VStack(spacing: 12) {
-                    Text(food.1)
-                        .font(.system(size: 44))
-                    
-                    Text(food.0)
-                        .font(.system(size: isCompact ? 14 : 16))
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .background(Color.gray.opacity(0.05))
-                .cornerRadius(15)
-            }
-        }
-        .padding(.horizontal, 30)
-    }
-    
-    var doctorIllustration: some View {
-        // Placeholder doctor illustration
-        VStack {
-            Image(systemName: "figure.stand")
-                .font(.system(size: 100))
-                .foregroundColor(Color(red: 0.0, green: 0.48, blue: 1.0))
-            
-            Image(systemName: "stethoscope")
-                .font(.system(size: 40))
-                .foregroundColor(Color(red: 0.06, green: 0.2, blue: 0.4))
-                .offset(y: -20)
-        }
-        .padding(.vertical, 40)
-    }
-    
-    var congratulationsView: some View {
+    // MARK: - Step 3: Encouragement Slide 2
+    var encouragementSlide2View: some View {
         VStack(spacing: 30) {
             Spacer()
+                .frame(height: 60)
             
-            VStack(spacing: 20) {
-                Text("Congratulations!")
-                    .font(.system(size: isCompact ? 32 : 36, weight: .bold))
-                    .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.4))
+            // Animated icon
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color.purple.opacity(0.3), Color.purple.opacity(0.1)],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 100
+                        )
+                    )
+                    .frame(width: 120, height: 120)
+                    .scaleEffect(pulseAnimation ? 1.2 : 1.0)
                 
-                Text("You are awesome! 💪")
-                    .font(.system(size: isCompact ? 24 : 28, weight: .semibold))
-                    .foregroundColor(Color(red: 0.06, green: 0.2, blue: 0.4))
-                
-                Text("You didn't drink!")
-                    .font(.system(size: isCompact ? 16 : 18))
-                    .foregroundColor(.gray)
-                
-                Image(systemName: "checkmark.seal.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(Color(red: 0.0, green: 0.6, blue: 0.4))
-                    .padding()
-                
-                Text("Next urge becomes easier ✨")
-                    .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
-                    .foregroundColor(Color(red: 0.06, green: 0.2, blue: 0.4))
+                Image(systemName: "brain.head.profile")
+                    .font(.system(size: 50))
+                    .foregroundColor(.purple)
+                    .scaleEffect(pulseAnimation ? 1.1 : 1.0)
             }
             
-            // Celebration visual
-            doctorCelebrating
+            VStack(spacing: 24) {
+                Text("Your brain is lying to you.")
+                    .font(.system(size: isCompact ? 32 : 38, weight: .bold))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                
+                Text("Alcohol solves nothing.")
+                    .font(.system(size: isCompact ? 24 : 28, weight: .semibold))
+                    .foregroundColor(.purple)
+                
+                Text("It won't fix your problems, reduce your stress, or make you happy. It will only add shame, regret, and reset your progress. The person you'll be tomorrow is counting on the choice you make right now.")
+                    .font(.system(size: isCompact ? 16 : 18))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 30)
+            }
+            
+            Spacer()
+            
+            Button(action: {
+                withAnimation(.spring()) {
+                    currentStep = 3
+                }
+            }) {
+                Text("My future self matters")
+                    .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.purple, Color.blue],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(25)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+        }
+    }
+    
+    // MARK: - Step 4: Encouragement Slide 3
+    var encouragementSlide3View: some View {
+        VStack(spacing: 30) {
+            Spacer()
+                .frame(height: 60)
+            
+            // Animated icon
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color.green.opacity(0.3), Color.green.opacity(0.1)],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 100
+                        )
+                    )
+                    .frame(width: 120, height: 120)
+                    .scaleEffect(pulseAnimation ? 1.2 : 1.0)
+                
+                Image(systemName: "crown.fill")
+                    .font(.system(size: 50))
+                    .foregroundColor(.green)
+                    .scaleEffect(pulseAnimation ? 1.1 : 1.0)
+            }
+            
+            VStack(spacing: 24) {
+                Text("You are stronger than this craving.")
+                    .font(.system(size: isCompact ? 30 : 36, weight: .bold))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                
+                Text("You've already proven it.")
+                    .font(.system(size: isCompact ? 24 : 28, weight: .semibold))
+                    .foregroundColor(.green)
+                
+                Text("Every day you've stayed sober is proof of your strength. You didn't come this far just to come this far. Choose the version of yourself you're becoming, not the one you're leaving behind.")
+                    .font(.system(size: isCompact ? 16 : 18))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, 30)
+            }
+            
+            Spacer()
+            
+            Button(action: {
+                withAnimation(.spring()) {
+                    currentStep = 4
+                }
+            }) {
+                Text("I choose strength")
+                    .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.green, Color.cyan],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(25)
+            }
+            .padding(.horizontal, 30)
+            .padding(.bottom, 40)
+        }
+    }
+    
+    // MARK: - Step 5: Identify Trigger
+    var identifyTriggerView: some View {
+        VStack(spacing: 30) {
+            Spacer()
+                .frame(height: 40)
+            
+            VStack(spacing: 16) {
+                Text("What triggered this craving?")
+                    .font(.system(size: isCompact ? 26 : 30, weight: .bold))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                
+                Text("Understanding helps us address the root cause")
+                    .font(.system(size: isCompact ? 16 : 18))
+                    .foregroundColor(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 20)
+            
+            // Trigger options
+            VStack(spacing: 12) {
+                triggerOption(icon: "cloud.bolt.fill", title: "Stress", subtitle: "Work, life, or pressure", color: .red)
+                triggerOption(icon: "brain.head.profile", title: "Anxiety", subtitle: "Worry or nervousness", color: .purple)
+                triggerOption(icon: "moon.zzz.fill", title: "Boredom", subtitle: "Nothing to do", color: .indigo)
+                triggerOption(icon: "person.2.fill", title: "Social", subtitle: "Others drinking around me", color: .orange)
+                triggerOption(icon: "clock.fill", title: "Habit", subtitle: "It's my usual time", color: .green)
+                triggerOption(icon: "heart.slash.fill", title: "Emotional", subtitle: "Sadness or loneliness", color: .pink)
+            }
+            .padding(.horizontal, 20)
+            
+            Spacer()
+        }
+    }
+    
+    // MARK: - Step 6: Trigger-Specific Help
+    @ViewBuilder
+    var triggerSpecificHelpView: some View {
+        if let trigger = selectedTrigger {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 30) {
+                    Spacer()
+                        .frame(height: 20)
+                    
+                    // Header
+                    VStack(spacing: 12) {
+                        Text(getTriggerTitle(trigger))
+                            .font(.system(size: isCompact ? 24 : 28, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Text(getTriggerSubtitle(trigger))
+                            .font(.system(size: isCompact ? 16 : 18))
+                            .foregroundColor(.white.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    // Specific strategies
+                    VStack(spacing: 16) {
+                        ForEach(getTriggerStrategies(trigger), id: \.self) { strategy in
+                            strategyCard(strategy)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    // Action buttons
+                    VStack(spacing: 12) {
+                        Button(action: {
+                            withAnimation(.spring()) {
+                                currentStep = 6
+                            }
+                        }) {
+                            Text("I tried these strategies")
+                                .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color.cyan, Color.blue],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .cornerRadius(25)
+                        }
+                        
+                        Button(action: {
+                            withAnimation(.spring()) {
+                                currentStep = 6
+                            }
+                        }) {
+                            Text("Skip to check-in")
+                                .font(.system(size: isCompact ? 16 : 18))
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Step 7: Check-in
+    var checkInView: some View {
+        VStack(spacing: 40) {
+            Spacer()
+                .frame(height: 60)
+            
+            VStack(spacing: 20) {
+                Image(systemName: "magnifyingglass.circle.fill")
+                    .font(.system(size: 80))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.cyan, Color.purple],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                
+                Text("How are you feeling now?")
+                    .font(.system(size: isCompact ? 26 : 30, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("Be honest with yourself")
+                    .font(.system(size: isCompact ? 16 : 18))
+                    .foregroundColor(.white.opacity(0.7))
+            }
+            
+            VStack(spacing: 16) {
+                Button(action: {
+                    withAnimation(.spring()) {
+                        currentStep = 7
+                        // Log that user resisted craving (can implement later)
+                    }
+                }) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "face.smiling.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(.green)
+                        Text("The craving passed!")
+                            .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text("I don't want to drink anymore")
+                            .font(.system(size: isCompact ? 14 : 16))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .background(Color.green.opacity(0.2))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.green.opacity(0.5), lineWidth: 2)
+                    )
+                    .cornerRadius(20)
+                }
+                
+                Button(action: {
+                    // Go back to breathing or try different strategies
+                    withAnimation(.spring()) {
+                        currentStep = 1
+                    }
+                }) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "arrow.counterclockwise.circle.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(.orange)
+                        Text("Still struggling")
+                            .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text("Let me try the exercises again")
+                            .font(.system(size: isCompact ? 14 : 16))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .background(Color.orange.opacity(0.2))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.orange.opacity(0.5), lineWidth: 2)
+                    )
+                    .cornerRadius(20)
+                }
+                
+                Button(action: {
+                    // Close panic modal and open meditation
+                    isPresented = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showingMeditationModal = true
+                    }
+                }) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "lungs.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(.blue)
+                        Text("Take me to meditation")
+                            .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text("Guided breathing exercise")
+                            .font(.system(size: isCompact ? 14 : 16))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .background(Color.blue.opacity(0.2))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.blue.opacity(0.5), lineWidth: 2)
+                    )
+                    .cornerRadius(20)
+                }
+                
+            }
+            .padding(.horizontal, 30)
+            
+            Spacer()
+        }
+    }
+    
+    // MARK: - Step 8: Conclusion
+    var conclusionView: some View {
+        VStack(spacing: 30) {
+            Spacer()
+                .frame(height: 60)
+            
+            // Success animation
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color.green.opacity(0.3), Color.green.opacity(0.1)],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 100
+                        )
+                    )
+                    .frame(width: 150, height: 150)
+                    .scaleEffect(pulseAnimation ? 1.2 : 1.0)
+                
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 80))
+                    .foregroundColor(.green)
+                    .scaleEffect(pulseAnimation ? 1.1 : 1.0)
+            }
+            
+            VStack(spacing: 20) {
+                Text("You did it! 🎉")
+                    .font(.system(size: isCompact ? 32 : 36, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("You just proved you're stronger than your cravings")
+                    .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
+                    .foregroundColor(.green)
+                    .multilineTextAlignment(.center)
+                
+                VStack(spacing: 12) {
+                    statItem(icon: "flame.fill", text: "Craving defeated", color: .orange)
+                    statItem(icon: "brain.head.profile", text: "New neural pathway strengthened", color: .purple)
+                    statItem(icon: "chart.line.uptrend.xyaxis", text: "Next craving will be easier", color: .cyan)
+                }
+                .padding(.vertical, 20)
+                
+                Text("Remember: Every time you resist, you're literally rewiring your brain for success.")
+                    .font(.system(size: isCompact ? 14 : 16))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 30)
+            }
             
             Spacer()
             
             Button(action: {
                 isPresented = false
             }) {
-                Text("Continue")
+                Text("Continue my day")
                     .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
-                    .foregroundColor(Color(red: 0.06, green: 0.2, blue: 0.4))
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, isCompact ? 16 : 20)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(30)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.green, Color.cyan],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(25)
             }
             .padding(.horizontal, 30)
             .padding(.bottom, 40)
         }
-        .background(
-            // Confetti effect background
-            GeometryReader { geometry in
-                ForEach(0..<20) { index in
-                    ConfettiPiece()
-                        .position(
-                            x: CGFloat.random(in: 0...geometry.size.width),
-                            y: CGFloat.random(in: 0...geometry.size.height)
-                        )
-                }
-            }
-        )
     }
     
-    var doctorCelebrating: some View {
-        VStack {
-            Image(systemName: "figure.stand")
-                .font(.system(size: 100))
-                .foregroundColor(Color(red: 0.0, green: 0.48, blue: 1.0))
-            
-            HStack {
-                Image(systemName: "star.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(.yellow)
-                    .rotationEffect(.degrees(-15))
-                
-                Image(systemName: "star.fill")
-                    .font(.system(size: 30))
-                    .foregroundColor(.yellow)
-                    .offset(y: -10)
-                
-                Image(systemName: "star.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(.yellow)
-                    .rotationEffect(.degrees(15))
-            }
-            .offset(y: -20)
+    // MARK: - Helper Views
+    func breathingStep(number: String, label: String, color: Color) -> some View {
+        VStack(spacing: 8) {
+            Text(number)
+                .font(.system(size: isCompact ? 24 : 28, weight: .bold))
+                .foregroundColor(color)
+            Text(label)
+                .font(.system(size: isCompact ? 14 : 16))
+                .foregroundColor(.white.opacity(0.7))
         }
     }
     
-    
-    func handlePrimaryAction() {
-        if currentStep == 4 {
-            // After "How are you feeling?" -> "Much better!" leads to congratulations
-            showingCongratulations = true
-        } else if currentStep == 5 {
-            // After "What's triggering you?" -> any option leads to congratulations
-            showingCongratulations = true
-        } else if currentStep < cravingSteps.count - 1 {
-            // Steps 0-3: continue to next step
-            currentStep += 1
-        } else {
-            showingCongratulations = true
-        }
-    }
-}
-
-struct CravingStep {
-    let title: String
-    let subtitle: String?
-    let description: String?
-    let icon: String?
-    let actionText: String
-    let alternativeText: String?
-    let image: String?
-    let foods: [(String, String)]?
-}
-
-struct ConfettiPiece: View {
-    @State private var animate = false
-    let color = [Color.green, Color.blue, Color.purple, Color.pink, Color.orange].randomElement()!
-    let shape = ["circle", "square", "star"].randomElement()!
-    
-    var body: some View {
-        Group {
-            if shape == "circle" {
-                Circle()
-                    .fill(color)
-                    .frame(width: 10, height: 10)
-            } else if shape == "square" {
-                Rectangle()
-                    .fill(color)
-                    .frame(width: 8, height: 8)
-            } else {
-                Image(systemName: "star.fill")
+    func triggerOption(icon: String, title: String, subtitle: String, color: Color) -> some View {
+        Button(action: {
+            selectedTrigger = title
+            withAnimation(.spring()) {
+                currentStep = 5
+            }
+            impactFeedback(.light)
+        }) {
+            HStack(spacing: 16) {
+                Image(systemName: icon)
+                    .font(.system(size: 24))
                     .foregroundColor(color)
-                    .font(.system(size: 12))
+                    .frame(width: 40)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
+                        .foregroundColor(.white)
+                    Text(subtitle)
+                        .font(.system(size: isCompact ? 14 : 16))
+                        .foregroundColor(.white.opacity(0.6))
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 16))
+                    .foregroundColor(.white.opacity(0.4))
             }
+            .padding(16)
+            .background(Color.white.opacity(0.1))
+            .cornerRadius(16)
         }
-        .opacity(animate ? 0 : 0.8)
-        .scaleEffect(animate ? 0.1 : 1)
-        .offset(y: animate ? 100 : 0)
-        .onAppear {
-            withAnimation(.easeOut(duration: Double.random(in: 1...3)).delay(Double.random(in: 0...1))) {
-                animate = true
+    }
+    
+    func strategyCard(_ strategy: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 20))
+                .foregroundColor(.cyan)
+            
+            Text(strategy)
+                .font(.system(size: isCompact ? 16 : 18))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.leading)
+            
+            Spacer()
+        }
+        .padding(16)
+        .background(Color.white.opacity(0.08))
+        .cornerRadius(12)
+    }
+    
+    func effectItem(icon: String, title: String, subtitle: String) -> some View {
+        HStack(alignment: .top, spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(.red)
+                .frame(width: 30, alignment: .leading)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: isCompact ? 16 : 18, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text(subtitle)
+                    .font(.system(size: isCompact ? 14 : 16))
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.leading)
             }
+            
+            Spacer()
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.red.opacity(0.1))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.red.opacity(0.3), lineWidth: 1)
+        )
+        .cornerRadius(12)
+    }
+    
+    func statItem(icon: String, text: String, color: Color) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundColor(color)
+            
+            Text(text)
+                .font(.system(size: isCompact ? 14 : 16))
+                .foregroundColor(.white.opacity(0.9))
+            
+            Spacer()
+        }
+        .padding(.horizontal, 30)
+    }
+    
+    // MARK: - Helper Functions
+    func startPulseAnimation() {
+        withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+            pulseAnimation = true
+        }
+    }
+    
+    
+    func getTriggerTitle(_ trigger: String) -> String {
+        switch trigger {
+        case "Stress": return "Let's manage this stress"
+        case "Anxiety": return "Let's calm your anxiety"
+        case "Boredom": return "Let's beat this boredom"
+        case "Social": return "Handling social pressure"
+        case "Habit": return "Breaking the habit loop"
+        case "Emotional": return "Processing these emotions"
+        default: return "Let's work through this"
+        }
+    }
+    
+    func getTriggerSubtitle(_ trigger: String) -> String {
+        switch trigger {
+        case "Stress": return "Alcohol won't solve the problem, it will add to it"
+        case "Anxiety": return "Alcohol increases anxiety tomorrow for temporary relief today"
+        case "Boredom": return "Your brain is seeking stimulation - let's give it something healthy"
+        case "Social": return "You don't need alcohol to be social or have fun"
+        case "Habit": return "This is just your brain's old programming - we can override it"
+        case "Emotional": return "Feelings are temporary, but drinking consequences last"
+        default: return "You've got this"
+        }
+    }
+    
+    func getTriggerStrategies(_ trigger: String) -> [String] {
+        switch trigger {
+        case "Stress":
+            return [
+                "Take 10 deep breaths right now",
+                "Write down 3 things stressing you out",
+                "Do 20 jumping jacks to release tension",
+                "Call or text someone you trust",
+                "Take a 5-minute walk outside"
+            ]
+        case "Anxiety":
+            return [
+                "Use the 5-4-3-2-1 grounding technique",
+                "Put on calming music or nature sounds",
+                "Practice progressive muscle relaxation",
+                "Write your worries in a journal",
+                "Do gentle stretching for 5 minutes"
+            ]
+        case "Boredom":
+            return [
+                "Start that show you've been meaning to watch",
+                "Play a mobile game for 10 minutes",
+                "Clean or organize one small area",
+                "Learn something new on YouTube",
+                "Text a friend you haven't talked to recently"
+            ]
+        case "Social":
+            return [
+                "Have a non-alcoholic drink in hand",
+                "Prepare your 'not drinking' response",
+                "Find the other non-drinkers",
+                "Have an exit plan ready",
+                "Remember: real friends support your choice"
+            ]
+        case "Habit":
+            return [
+                "Change your environment right now",
+                "Make a cup of tea or coffee",
+                "Brush your teeth (changes taste)",
+                "Do something with your hands",
+                "Go to a different room"
+            ]
+        case "Emotional":
+            return [
+                "Let yourself feel the emotion fully",
+                "Cry if you need to - it's healing",
+                "Write an unsent letter to express feelings",
+                "Listen to music that matches your mood",
+                "Practice self-compassion phrases"
+            ]
+        default:
+            return ["Take it one moment at a time"]
+        }
+    }
+    
+    // MARK: - Haptic Feedback
+    private func impactFeedback(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.prepare()
+        generator.impactOccurred()
+    }
+    
+    private func notificationFeedback(_ type: UINotificationFeedbackGenerator.FeedbackType) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(type)
     }
 }
 
 #Preview {
-    PanicButtonModal(isPresented: .constant(true))
+    PanicButtonModal(isPresented: .constant(true), showingMeditationModal: .constant(false))
         .environmentObject(DataService())
 }
