@@ -258,7 +258,7 @@ class OnboardingViewModel: ObservableObject {
         case .cost:
             currentPage = .motivation
         case .motivation:
-            currentPage = .goals
+            currentPage = .commitment
         case .goals:
             currentPage = .commitment
         case .commitment:
@@ -305,7 +305,7 @@ class OnboardingViewModel: ObservableObject {
         case .goals:
             currentPage = .motivation
         case .commitment:
-            currentPage = .goals
+            currentPage = .motivation
         case .complete:
             currentPage = .commitment
         }

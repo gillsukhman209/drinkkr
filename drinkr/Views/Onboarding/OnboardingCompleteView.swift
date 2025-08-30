@@ -100,30 +100,44 @@ struct OnboardingCompleteView: View {
                 
                 Spacer()
                 
-                // Loading indicator for paywall
-                if showingPaywall {
+                // Start button
+                Button(action: {
+                    showingPaywall = true
+                    viewModel.completeOnboarding()
+                }) {
                     HStack(spacing: 12) {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .scaleEffect(0.8)
+                        Text("Start My Journey")
+                            .font(.system(size: isCompact ? 18 : 20, weight: .bold))
+                            .foregroundColor(.white)
                         
-                        Text("Loading subscription options...")
-                            .font(.system(size: isCompact ? 14 : 16, weight: .medium))
-                            .foregroundColor(.white.opacity(0.8))
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.system(size: isCompact ? 20 : 24))
+                            .foregroundColor(.white)
                     }
-                    .padding(.bottom, 20)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: isCompact ? 56 : 64)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(
+                                LinearGradient(
+                                    colors: [ColorTheme.accentCyan, ColorTheme.accentPurple],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                    )
+                    .shadow(color: ColorTheme.accentCyan.opacity(0.4), radius: 15, x: 0, y: 8)
                 }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.horizontal, isCompact ? 30 : 50)
+                .padding(.bottom, isCompact ? 30 : 40)
+                .opacity(isAnimating ? 1.0 : 0.0)
+                .scaleEffect(isAnimating ? 1.0 : 0.9)
             }
         }
         .onAppear {
             withAnimation(.spring(response: 0.8, dampingFraction: 0.7).delay(0.2)) {
                 isAnimating = true
-            }
-            
-            // Automatically trigger completion after animation
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                showingPaywall = true
-                viewModel.completeOnboarding()
             }
         }
     }

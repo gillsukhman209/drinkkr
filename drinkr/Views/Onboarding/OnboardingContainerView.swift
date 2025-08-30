@@ -32,7 +32,7 @@ struct OnboardingContainerView: View {
                 }
                 
                 // Navigation buttons
-                if viewModel.currentPage != .welcome {
+                if viewModel.currentPage != .welcome && viewModel.currentPage != .complete {
                     navigationButtons
                         .padding(.horizontal)
                         .padding(.bottom, 30)
