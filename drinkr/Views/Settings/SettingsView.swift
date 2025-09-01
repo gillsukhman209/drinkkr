@@ -114,7 +114,7 @@ struct SettingsView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
             }
-            .background(ColorTheme.cardBackground)
+            .background(Color.white.opacity(0.04))
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
@@ -161,7 +161,7 @@ struct SettingsView: View {
                 }
                 .padding(isCompact ? 15 : 18)
             }
-            .background(ColorTheme.cardBackground)
+            .background(Color.white.opacity(0.04))
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
@@ -195,7 +195,7 @@ struct SettingsView: View {
                     }
                     .padding(isCompact ? 15 : 18)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(ColorTheme.cardBackground)
+                    .background(Color.white.opacity(0.04))
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
@@ -221,7 +221,7 @@ struct SettingsView: View {
                     }
                     .padding(isCompact ? 15 : 18)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(ColorTheme.cardBackground)
+                    .background(Color.white.opacity(0.04))
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
@@ -250,7 +250,7 @@ struct SettingsView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, isCompact ? 20 : 25)
-        .background(ColorTheme.cardBackground.opacity(0.5))
+        .background(Color.white.opacity(0.02))
         .cornerRadius(12)
     }
 }

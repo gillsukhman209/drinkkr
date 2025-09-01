@@ -25,7 +25,7 @@ struct ColorTheme {
     static let accentPurple = Color(red: 0.6, green: 0.4, blue: 1.0)
     static let accentPink = Color(red: 1.0, green: 0.4, blue: 0.8)
     
-    static let cardBackground = Color(white: 0.15).opacity(0.8)
+    static let cardBackground = Color(white: 0.15).opacity(0.3)
     static let cardBorder = Color(white: 0.3).opacity(0.3)
     static let textPrimary = Color.white
     static let textSecondary = Color.gray
@@ -46,12 +46,24 @@ extension View {
         self
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(ColorTheme.cardBackground)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.05),
+                                Color.white.opacity(0.02)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(
                                 LinearGradient(
-                                    colors: [ColorTheme.accentCyan.opacity(0.5), ColorTheme.accentPurple.opacity(0.5)],
+                                    colors: [
+                                        ColorTheme.accentCyan.opacity(0.2),
+                                        ColorTheme.accentPurple.opacity(0.2)
+                                    ],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 ),
@@ -59,6 +71,6 @@ extension View {
                             )
                     )
             )
-            .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+            .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
     }
 }

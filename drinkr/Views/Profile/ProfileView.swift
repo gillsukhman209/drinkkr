@@ -150,7 +150,7 @@ struct ProfileView: View {
                 .buttonStyle(PlainButtonStyle())
             }
         }
-        .background(ColorTheme.cardBackground)
+        .background(Color.white.opacity(0.04))
         .cornerRadius(15)
         .overlay(
             RoundedRectangle(cornerRadius: 15)
@@ -251,7 +251,7 @@ struct ProfileView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(isCompact ? 12 : 15)
-        .background(achievement.isUnlocked ? ColorTheme.successGreen.opacity(0.1) : ColorTheme.cardBackground)
+        .background(achievement.isUnlocked ? ColorTheme.successGreen.opacity(0.1) : Color.white.opacity(0.03))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
@@ -353,7 +353,7 @@ struct ProfileView: View {
                         Spacer()
                     }
                     .padding(isCompact ? 12 : 15)
-                    .background(ColorTheme.cardBackground.opacity(0.5))
+                    .background(Color.white.opacity(0.02))
                     .cornerRadius(10)
                 }
             }

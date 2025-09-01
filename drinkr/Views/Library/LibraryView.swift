@@ -133,7 +133,7 @@ struct LibraryView: View {
                 .accentColor(ColorTheme.accentCyan)
         }
         .padding(12)
-        .background(ColorTheme.cardBackground)
+        .background(Color.white.opacity(0.04))
         .cornerRadius(10)
     }
     
@@ -162,7 +162,7 @@ struct LibraryView: View {
                 .background(
                     selectedCategory == category ?
                     AnyView(ColorTheme.accentCyan) :
-                    AnyView(ColorTheme.cardBackground)
+                    AnyView(Color.white.opacity(0.03))
                 )
                 .cornerRadius(20)
                 .overlay(
@@ -179,7 +179,7 @@ struct LibraryView: View {
                 .font(.system(size: isCompact ? 24 : 28))
                 .foregroundColor(ColorTheme.accentPurple)
                 .frame(width: isCompact ? 50 : 60, height: isCompact ? 50 : 60)
-                .background(ColorTheme.accentPurple.opacity(0.2))
+                .background(ColorTheme.accentPurple.opacity(0.1))
                 .cornerRadius(15)
             
             VStack(alignment: .leading, spacing: 5) {
