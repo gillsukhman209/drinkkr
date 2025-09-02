@@ -52,9 +52,9 @@ struct PaywallView: View {
                         quittrAnnualCard(product: yearly)
                     }
                     
-                    // Monthly plan
-                    if let monthly = storeManager.monthlyProduct() {
-                        quittrMonthlyCard(product: monthly)
+                    // Weekly plan
+                    if let weekly = storeManager.weeklyProduct() {
+                        quittrWeeklyCard(product: weekly)
                     }
                 }
                 .padding(.horizontal, 30)
@@ -263,7 +263,7 @@ struct PaywallView: View {
             // SAVE badge - smaller and subordinate
             HStack {
                 Spacer()
-                Text("SAVE 75% + 3-DAY FREE TRIAL")
+                Text("SAVE 85% + 3-DAY FREE TRIAL")
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
@@ -309,7 +309,7 @@ struct PaywallView: View {
                         Text("equals")
                             .font(.system(size: 10, weight: .regular))
                             .foregroundColor(.white.opacity(0.5))
-                        Text(monthlyEquivalent(for: product))
+                        Text(weeklyEquivalent(for: product))
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.white.opacity(0.7))
                     }
@@ -332,13 +332,13 @@ struct PaywallView: View {
         }
     }
     
-    private func quittrMonthlyCard(product: SKProduct) -> some View {
+    private func quittrWeeklyCard(product: SKProduct) -> some View {
         Button {
             selectedPlan = product
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Monthly")
+                    Text("Weekly")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.white)
                     
@@ -347,14 +347,14 @@ struct PaywallView: View {
                         .font(.system(size: 24, weight: .bold))
                         .foregroundColor(.white)
                     
-                    Text("Billed monthly")
+                    Text("Billed weekly")
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(.white.opacity(0.6))
                 }
                 
                 Spacer()
                 
-                Text("/month")
+                Text("/week")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.white.opacity(0.7))
             }
@@ -443,9 +443,9 @@ struct PaywallView: View {
     }
     
     
-    private func monthlyEquivalent(for product: SKProduct) -> String {
-        let monthlyPrice = product.price.doubleValue / 12
-        return String(format: "$%.2f/mo", monthlyPrice)
+    private func weeklyEquivalent(for product: SKProduct) -> String {
+        let weeklyPrice = product.price.doubleValue / 52
+        return String(format: "$%.2f/wk", weeklyPrice)
     }
     
     private func getButtonText() -> String {

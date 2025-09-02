@@ -15,7 +15,7 @@ class SimpleStoreKitManager: NSObject, ObservableObject, SKProductsRequestDelega
     
     // MARK: - Product IDs
     private let productIDs: Set<String> = [
-        "sobbrmonthly",  // $9.99/month
+        "sobbrweekly",   // Weekly subscription
         "sobbryearly"    // $29.99/year
     ]
     
@@ -471,8 +471,8 @@ class SimpleStoreKitManager: NSObject, ObservableObject, SKProductsRequestDelega
     }
     
     // MARK: - Helper Methods
-    func monthlyProduct() -> SKProduct? {
-        return availableProducts.first { $0.productIdentifier == "sobbrmonthly" }
+    func weeklyProduct() -> SKProduct? {
+        return availableProducts.first { $0.productIdentifier == "sobbrweekly" }
     }
     
     func yearlyProduct() -> SKProduct? {
@@ -487,12 +487,12 @@ class SimpleStoreKitManager: NSObject, ObservableObject, SKProductsRequestDelega
     }
     
     func calculateSavings() -> String {
-        guard let monthly = monthlyProduct(),
+        guard let weekly = weeklyProduct(),
               let yearly = yearlyProduct() else { return "0%" }
         
-        let monthlyAnnualCost = monthly.price.doubleValue * 12
+        let weeklyAnnualCost = weekly.price.doubleValue * 52
         let yearlyCost = yearly.price.doubleValue
-        let savings = (monthlyAnnualCost - yearlyCost) / monthlyAnnualCost
+        let savings = (weeklyAnnualCost - yearlyCost) / weeklyAnnualCost
         
         return "\(Int(savings * 100))%"
     }
@@ -503,9 +503,9 @@ extension SimpleStoreKitManager {
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         DispatchQueue.main.async {
             self.availableProducts = response.products.sorted { product1, product2 in
-                // Sort by price, monthly first
-                if product1.productIdentifier == "sobbrmonthly" { return true }
-                if product2.productIdentifier == "sobbrmonthly" { return false }
+                // Sort by price, weekly first
+                if product1.productIdentifier == "sobbrweekly" { return true }
+                if product2.productIdentifier == "sobbrweekly" { return false }
                 return product1.price.doubleValue < product2.price.doubleValue
             }
             
@@ -572,8 +572,8 @@ extension SimpleStoreKitManager {
             
             // Calculate approximate expiry date based on product type
             var estimatedExpiryDate: Date?
-            if productId == "sobbrmonthly" {
-                estimatedExpiryDate = Calendar.current.date(byAdding: .month, value: 1, to: Date())
+            if productId == "sobbrweekly" {
+                estimatedExpiryDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: Date())
             } else if productId == "sobbryearly" {
                 estimatedExpiryDate = Calendar.current.date(byAdding: .year, value: 1, to: Date())
             }
