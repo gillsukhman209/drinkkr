@@ -2,39 +2,47 @@
 
 ## Issues Identified and Fixed
 
-### 1. **Slide 13+ Selection Bug** 
+### 1. **Slide 13+ Selection Bug**
+
 **Problem**: Could not select any options from slide 13 (basics questions) onwards.
 
 **Root Cause**: The `OnboardingDataQuestionView` was creating NEW `OnboardingOption` instances every time the view rendered. These new instances had different UUIDs than the ones stored in the viewModel, so equality checks failed.
 
-**Solution**: 
+**Solution**:
+
 - Created static option arrays in `OnboardingModels.swift` for all data questions
 - Updated `OnboardingDataQuestionView` to use these static references
 - Now all options have consistent UUIDs throughout the app lifecycle
 
 ### 2. **Next Button Greying Out Bug**
+
 **Problem**: When selecting an option, the next button would grey out unexpectedly.
 
 **Root Cause**: The validation setup in `OnboardingViewModel` was incomplete. It was only monitoring some selection variables, not all of them. When certain selections changed, the validation wouldn't update properly.
 
 **Solution**:
+
 - Completely rewrote `setupValidation()` to monitor ALL selection variables individually
 - Each selection now properly triggers `updateCanProceed()`
 - Validation state updates immediately and correctly
 
 ### 3. **Back Button Position**
+
 **Problem**: Back button was in upper right corner instead of upper left.
 
-**Solution**: 
+**Solution**:
+
 - Moved back button to upper left corner in progress bar
 - Added layout balance for better visual appearance
 
 ## Technical Changes Made
 
 ### OnboardingModels.swift
+
 Added static option arrays for all data collection questions:
+
 - `ageOptions`
-- `genderOptions` 
+- `genderOptions`
 - `relationshipOptions`
 - `drinkingFrequencyOptions`
 - `drinksPerSessionOptions`
@@ -43,16 +51,20 @@ Added static option arrays for all data collection questions:
 - `hoursLostOptions`
 
 ### OnboardingViewModel.swift
+
 Rewrote validation setup to properly monitor all fields:
+
 ```swift
-// Now monitors every single selection variable
+
 $selectedAge.sink { [weak self] _ in self?.updateCanProceed() }
 $selectedGender.sink { [weak self] _ in self?.updateCanProceed() }
 // ... and all others
 ```
 
 ### OnboardingDataQuestionView.swift
+
 Updated to use static options:
+
 ```swift
 // Before: Creating new instances
 options: [
@@ -79,6 +91,7 @@ options: OnboardingQuestions.ageOptions
 ## Result
 
 The onboarding now provides a completely smooth, bug-free experience with:
+
 - Consistent option selection throughout all questions
 - Proper validation and button state management
 - Intuitive navigation with back button in correct position

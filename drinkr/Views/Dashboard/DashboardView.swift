@@ -171,7 +171,9 @@ struct DashboardView: View {
         let days = ["M", "T", "W", "T", "F", "S", "S"]
         return days[index]
     }
-    
+
+
+
     var sobrietyTimerView: some View {
         VStack(spacing: isCompact ? 24 : 32) {
             Text(dataService.currentUser?.name != nil ? "\(dataService.currentUser!.name) you have been alcohol-free for" : "You have been alcohol-free for")
