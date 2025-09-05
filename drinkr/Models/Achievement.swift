@@ -42,8 +42,25 @@ final class Achievement {
     }
     
     func unlock() {
+        let wasUnlocked = isUnlocked
         isUnlocked = true
         dateEarned = Date()
+        
+        // Trigger milestone notification if this is a new unlock
+        if !wasUnlocked {
+            triggerMilestoneNotification()
+        }
+    }
+    
+    private func triggerMilestoneNotification() {
+        // Only trigger notifications for milestone and streak achievements
+        guard category == .milestone || category == .streak else { return }
+        
+        // Post notification that achievement was unlocked
+        NotificationCenter.default.post(
+            name: .achievementUnlocked,
+            object: self
+        )
     }
     
     var progress: Double {
@@ -85,4 +102,9 @@ struct AchievementManager {
             Achievement(title: "Committed", description: "30 consecutive daily pledges", icon: "checkmark.seal.fill", category: .community, requiredValue: 30)
         ]
     }
+}
+
+// MARK: - Notification Extensions
+extension Notification.Name {
+    static let achievementUnlocked = Notification.Name("achievementUnlocked")
 }

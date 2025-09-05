@@ -7,7 +7,22 @@ class ViralNotificationManager: ObservableObject {
     static let shared = ViralNotificationManager()
     private let notificationService = NotificationService.shared
     
-    private init() {}
+    private init() {
+        setupNotificationObservers()
+    }
+    
+    private func setupNotificationObservers() {
+        // Listen for achievement unlocks to trigger milestone notifications
+        NotificationCenter.default.addObserver(
+            forName: .achievementUnlocked,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            if let achievement = notification.object as? Achievement {
+                self?.handleAchievementUnlock(achievement)
+            }
+        }
+    }
     
     // MARK: - Public Methods
     
@@ -31,10 +46,8 @@ class ViralNotificationManager: ObservableObject {
         )
         
         // Phase 3: Milestone Celebrations
-        checkAndScheduleMilestone(
-            sobrietyData: sobrietyData,
-            profile: onboardingProfile
-        )
+        // Note: Milestone notifications are now handled automatically 
+        // when achievements are unlocked via the observer pattern
         
         // Phase 4: Savage Motivation
         setupSavageMotivation(
@@ -108,26 +121,7 @@ class ViralNotificationManager: ObservableObject {
     }
     
     // MARK: - Phase 3: Milestone Celebrations
-    
-    private func checkAndScheduleMilestone(sobrietyData: SobrietyData, profile: OnboardingUserProfile) {
-        print("🏆 Checking for milestone achievements")
-        
-        let milestones = [1, 3, 7, 14, 30, 60, 90, 180, 365]
-        let currentStreak = sobrietyData.currentStreak
-        
-        // Check if current streak matches any milestone
-        if milestones.contains(currentStreak) {
-            let moneySaved = calculateMoneySaved(profile: profile, days: currentStreak)
-            let hoursReclaimed = currentStreak * 3 // Estimate 3 hours per day reclaimed
-            
-            notificationService.scheduleMilestoneNotification(
-                userName: profile.userName,
-                milestone: currentStreak,
-                moneySaved: moneySaved,
-                hoursReclaimed: hoursReclaimed
-            )
-        }
-    }
+    // Milestone notifications are now handled automatically via achievement unlock observers
     
     // MARK: - Phase 4: Savage Motivation
     
@@ -199,5 +193,32 @@ class ViralNotificationManager: ObservableObject {
         notificationService.cancelFearCrusherNotifications()
         notificationService.cancelWisdomDropNotifications()
         print("✅ All 6 phases of viral notifications cancelled")
+    }
+    
+    // MARK: - Achievement Unlock Handler
+    
+    private func handleAchievementUnlock(_ achievement: Achievement) {
+        print("🎉 Achievement unlocked: \(achievement.title)")
+        
+        // Only handle milestone and streak achievements for notifications
+        guard achievement.category == .milestone || achievement.category == .streak else { return }
+        
+        guard let profile = loadOnboardingProfile() else {
+            print("❌ No onboarding profile found for milestone notification")
+            return
+        }
+        
+        let milestone = achievement.requiredValue
+        let moneySaved = calculateMoneySaved(profile: profile, days: milestone)
+        let hoursReclaimed = milestone * 3
+        
+        print("🚀 Triggering milestone notification for \(milestone) days")
+        
+        notificationService.scheduleMilestoneNotification(
+            userName: profile.userName,
+            milestone: milestone,
+            moneySaved: moneySaved,
+            hoursReclaimed: hoursReclaimed
+        )
     }
 }

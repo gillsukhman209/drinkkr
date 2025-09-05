@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var selectedTab = 0
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var dataService = DataService()
     @StateObject private var storeManager = SimpleStoreKitManager.shared
     @EnvironmentObject var appStateManager: AppStateManager
@@ -85,6 +86,12 @@ struct ContentView: View {
                 // and will be validated periodically based on cached expiry
             }
         }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                // Update streak and refresh notifications when app becomes active
+                refreshNotificationsWithCurrentStreak()
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .onboardingCompleted)) { notification in
             if let profile = notification.object as? OnboardingUserProfile {
                 handleOnboardingCompletion(profile)
@@ -100,7 +107,11 @@ struct ContentView: View {
                let profile = try? JSONDecoder().decode(OnboardingUserProfile.self, from: data) {
                 updateDataServiceWithProfile(profile)
                 
-                // Set up viral notifications for existing users
+                // Update streak before setting up notifications
+                dataService.sobrietyData?.updateStreak()
+                dataService.sobrietyData?.calculateStats()
+                
+                // Set up viral notifications for existing users with updated streak
                 if let sobrietyData = dataService.sobrietyData {
                     ViralNotificationManager.shared.setupViralNotifications(sobrietyData: sobrietyData, onboardingProfile: profile)
                 }
@@ -111,7 +122,11 @@ struct ContentView: View {
     private func handleOnboardingCompletion(_ profile: OnboardingUserProfile) {
         updateDataServiceWithProfile(profile)
         
-        // Set up viral notifications with onboarding data
+        // Update streak before setting up notifications
+        dataService.sobrietyData?.updateStreak()
+        dataService.sobrietyData?.calculateStats()
+        
+        // Set up viral notifications with onboarding data and current streak
         if let sobrietyData = dataService.sobrietyData {
             ViralNotificationManager.shared.setupViralNotifications(sobrietyData: sobrietyData, onboardingProfile: profile)
         }
@@ -150,6 +165,18 @@ struct ContentView: View {
         UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
         UserDefaults.standard.removeObject(forKey: "onboardingUserProfile")
         hasCompletedOnboarding = false
+    }
+    
+    private func refreshNotificationsWithCurrentStreak() {
+        guard hasCompletedOnboarding,
+              let sobrietyData = dataService.sobrietyData else { return }
+        
+        // Update streak calculations
+        sobrietyData.updateStreak()
+        sobrietyData.calculateStats()
+        
+        // Update notifications with current streak
+        ViralNotificationManager.shared.updateNotificationsWithCurrentStreak(sobrietyData: sobrietyData)
     }
 }
 
