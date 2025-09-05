@@ -173,9 +173,14 @@ struct OnboardingCompleteView: View {
                     // Start button
                     Button(action: {
                         // Present Superwall paywall through SuperwallManager with user's age
+                        // CRITICAL: Only complete onboarding after successful subscription
                         superwallManager.presentOnboardingPaywall(userAge: viewModel.userAge) {
-                            // This closure runs after paywall interaction is complete
-                            viewModel.completeOnboarding()
+                            // Only complete onboarding if user actually subscribed
+                            if superwallManager.isSubscribed {
+                                viewModel.completeOnboarding()
+                            } else {
+                                print("⚠️ Paywall dismissed without subscription - staying in onboarding")
+                            }
                         }
                     }) {
                         HStack(spacing: 12) {

@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var hasInitialized = false
     @State private var showingOnboarding = false
     @State private var hasCompletedOnboarding = false
+    @State private var hasValidSubscriptionSession = false // ATOMIC: onboarding complete AND subscribed
     
     init() {
         UITabBar.appearance().backgroundColor = UIColor.black.withAlphaComponent(0.3)
@@ -28,12 +29,12 @@ struct ContentView: View {
     
     var body: some View {
         Group {
-            if !hasCompletedOnboarding {
-                // Show onboarding first
+            if !hasValidSubscriptionSession {
+                // Show onboarding until BOTH completion AND subscription are done
                 OnboardingContainerView(isPresented: $showingOnboarding)
                     .preferredColorScheme(.dark)
             } else {
-                // Show main app after onboarding (Superwall will handle paywall logic)
+                // Show main app only with atomic valid session
                 TabView(selection: $selectedTab) {
                     DashboardView()
                         .tabItem {
@@ -83,13 +84,26 @@ struct ContentView: View {
             if newPhase == .active {
                 // Update streak and refresh notifications when app becomes active
                 refreshNotificationsWithCurrentStreak()
+                
+                // Check subscription status when app becomes active
+                checkSubscriptionStatus()
             }
+        }
+        .onChange(of: superwallManager.isSubscribed) { _, isSubscribed in
+            // ATOMIC: Only allow app access if BOTH onboarding complete AND subscribed
+            updateValidSubscriptionSession()
         }
         .onReceive(NotificationCenter.default.publisher(for: .onboardingCompleted)) { notification in
             if let profile = notification.object as? OnboardingUserProfile {
                 handleOnboardingCompletion(profile)
             }
         }
+        #if DEBUG
+        .onLongPressGesture(minimumDuration: 3.0) {
+            // Debug: Long press anywhere for 3 seconds to reset app state
+            debugResetApp()
+        }
+        #endif
     }
     
     private func checkOnboardingStatus() {
@@ -108,9 +122,50 @@ struct ContentView: View {
                 if let sobrietyData = dataService.sobrietyData {
                     ViralNotificationManager.shared.setupViralNotifications(sobrietyData: sobrietyData, onboardingProfile: profile)
                 }
+                
+                // Check if subscription is needed
+                checkSubscriptionStatus()
+            }
+        }
+        // Update atomic session state
+        updateValidSubscriptionSession()
+    }
+    
+    // ATOMIC SESSION MANAGEMENT - Prevents all bypass exploits
+    private func updateValidSubscriptionSession() {
+        let newSessionState = hasCompletedOnboarding && superwallManager.isSubscribed
+        
+        if newSessionState != hasValidSubscriptionSession {
+            hasValidSubscriptionSession = newSessionState
+            if newSessionState {
+                print("✅ ATOMIC: Valid subscription session established")
+            } else {
+                print("🔒 ATOMIC: Invalid session - blocking app access")
             }
         }
     }
+    
+    private func checkSubscriptionStatus() {
+        // Only validate subscription if onboarding is complete
+        guard hasCompletedOnboarding else { return }
+        
+        superwallManager.validateSubscription()
+        
+        // Update atomic session state
+        updateValidSubscriptionSession()
+    }
+    
+    // Debug function to reset everything (for testing/fixing stuck states)
+    #if DEBUG
+    private func debugResetApp() {
+        UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
+        UserDefaults.standard.removeObject(forKey: "onboardingUserProfile")
+        superwallManager.debugRemoveSubscription()
+        hasCompletedOnboarding = false
+        hasValidSubscriptionSession = false
+        print("🐛 DEBUG: App state reset")
+    }
+    #endif
     
     private func handleOnboardingCompletion(_ profile: OnboardingUserProfile) {
         updateDataServiceWithProfile(profile)
@@ -124,9 +179,9 @@ struct ContentView: View {
             ViralNotificationManager.shared.setupViralNotifications(sobrietyData: sobrietyData, onboardingProfile: profile)
         }
         
-        withAnimation(.spring(response: 0.8, dampingFraction: 0.9)) {
-            hasCompletedOnboarding = true
-        }
+        hasCompletedOnboarding = true
+        // Update atomic session state - will only allow app access if also subscribed
+        updateValidSubscriptionSession()
     }
     
     private func updateDataServiceWithProfile(_ profile: OnboardingUserProfile) {
