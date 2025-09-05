@@ -64,6 +64,41 @@ struct PaywallView: View {
                 ctaButton
                     .padding(.bottom, 16)
                 
+                // Debug Skip Button - Only in Debug Mode
+                #if DEBUG
+                Button {
+                    // Set subscription status to true for debugging
+                    storeManager.isSubscribed = true
+                    UserDefaults.standard.set(true, forKey: "hasActiveSubscription")
+                    
+                    // Save a fake expiry date far in the future
+                    let futureDate = Calendar.current.date(byAdding: .year, value: 10, to: Date())!
+                    UserDefaults.standard.set(futureDate, forKey: "subscriptionExpiryDate")
+                    
+                    // Dismiss the paywall
+                    dismiss()
+                } label: {
+                    HStack {
+                        Image(systemName: "ladybug.fill")
+                            .font(.system(size: 14))
+                        Text("Skip Paywall (Debug)")
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    .foregroundColor(.orange)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.orange.opacity(0.5), lineWidth: 1)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.orange.opacity(0.1))
+                            )
+                    )
+                }
+                .padding(.bottom, 20)
+                #endif
+                
                 // Footer with subscription terms
                 VStack(spacing: 12) {
                     // Important subscription information
