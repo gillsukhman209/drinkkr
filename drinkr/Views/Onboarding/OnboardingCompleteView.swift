@@ -10,8 +10,8 @@ import SwiftUI
 struct OnboardingCompleteView: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @StateObject private var superwallManager = SuperwallManager.shared
     @State private var isAnimating = false
-    @State private var showingPaywall = false
     @State private var loadingProgress: Double = 0
     @State private var isLoading = true
     @State private var showContent = false
@@ -172,8 +172,11 @@ struct OnboardingCompleteView: View {
                     
                     // Start button
                     Button(action: {
-                        showingPaywall = true
-                        viewModel.completeOnboarding()
+                        // Present Superwall paywall through SuperwallManager with user's age
+                        superwallManager.presentOnboardingPaywall(userAge: viewModel.userAge) {
+                            // This closure runs after paywall interaction is complete
+                            viewModel.completeOnboarding()
+                        }
                     }) {
                         HStack(spacing: 12) {
                             Text("Start My Journey")

@@ -15,12 +15,11 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var dataService = DataService()
-    @StateObject private var storeManager = SimpleStoreKitManager.shared
+    @StateObject private var superwallManager = SuperwallManager.shared
     @EnvironmentObject var appStateManager: AppStateManager
     @State private var hasInitialized = false
     @State private var showingOnboarding = false
     @State private var hasCompletedOnboarding = false
-    @State private var showingPaywall = false
     
     init() {
         UITabBar.appearance().backgroundColor = UIColor.black.withAlphaComponent(0.3)
@@ -33,12 +32,8 @@ struct ContentView: View {
                 // Show onboarding first
                 OnboardingContainerView(isPresented: $showingOnboarding)
                     .preferredColorScheme(.dark)
-            } else if !storeManager.isSubscribed {
-                // Show paywall if onboarding completed but no subscription
-                PaywallView()
-                    .preferredColorScheme(.dark)
             } else {
-                // Show main app if subscribed
+                // Show main app after onboarding (Superwall will handle paywall logic)
                 TabView(selection: $selectedTab) {
                     DashboardView()
                         .tabItem {
@@ -80,10 +75,8 @@ struct ContentView: View {
                 dataService.initialize(with: modelContext)
                 NotificationService.shared.requestPermission()
                 
-                // Load products on app launch
-                storeManager.loadProducts()
-                // The subscription status is already checked in StoreKitManager init
-                // and will be validated periodically based on cached expiry
+                // Initialize SuperwallManager
+                superwallManager.configure()
             }
         }
         .onChange(of: scenePhase) { _, newPhase in

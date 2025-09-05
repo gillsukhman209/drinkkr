@@ -19,6 +19,7 @@ class OnboardingViewModel: ObservableObject {
     @Published var selectedBiggestFear: OnboardingOption?
     @Published var selectedPreviousAttempts: OnboardingOption?
     @Published var userName: String = ""
+    @Published var userAge: Int = 0
     @Published var selectedDrinkingFrequency: OnboardingOption?
     @Published var selectedDrinksPerSession: OnboardingOption?
     @Published var selectedWeeklySpending: OnboardingOption?
@@ -75,6 +76,14 @@ class OnboardingViewModel: ObservableObject {
             .store(in: &cancellables)
         
         $userName
+            .sink { [weak self] _ in 
+                DispatchQueue.main.async {
+                    self?.updateCanProceed()
+                }
+            }
+            .store(in: &cancellables)
+        
+        $userAge
             .sink { [weak self] _ in 
                 DispatchQueue.main.async {
                     self?.updateCanProceed()
@@ -331,6 +340,7 @@ class OnboardingViewModel: ObservableObject {
             userProfile.previousAttempts = selectedPreviousAttempts?.text ?? ""
         case .name:
             userProfile.userName = userName
+            userProfile.age = userAge
         case .drinkingPattern:
             userProfile.drinkingFrequency = selectedDrinkingFrequency?.text ?? ""
             userProfile.drinksPerSession = selectedDrinksPerSession?.text ?? ""

@@ -4,7 +4,9 @@ struct OnboardingNameView: View {
     @ObservedObject var viewModel: OnboardingViewModel
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var isVisible = false
+    @State private var ageText = ""
     @FocusState private var isTextFieldFocused: Bool
+    @FocusState private var isAgeFieldFocused: Bool
     
     var isCompact: Bool {
         horizontalSizeClass == .compact
@@ -33,7 +35,7 @@ struct OnboardingNameView: View {
                 }
                 .padding(.top, isCompact ? 40 : 60)
                 
-                // Name input section
+                // Name and Age input section
                 VStack(spacing: 20) {
                     // Name input field
                     VStack(alignment: .leading, spacing: 12) {
@@ -67,6 +69,55 @@ struct OnboardingNameView: View {
                             .focused($isTextFieldFocused)
                             .autocorrectionDisabled()
                             .textInputAutocapitalization(.words)
+                    }
+                    .padding(.horizontal, 20)
+                    .opacity(isVisible ? 1.0 : 0.0)
+                    .offset(y: isVisible ? 0 : 20)
+                    
+                    // Age input field
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "calendar.circle.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(ColorTheme.accentPurple)
+                            
+                            Text("Your age")
+                                .font(.system(size: isCompact ? 16 : 18, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                        
+                        TextField("Enter your age", text: $ageText)
+                            .textFieldStyle(PlainTextFieldStyle())
+                            .font(.system(size: isCompact ? 18 : 20, weight: .medium))
+                            .foregroundColor(.white)
+                            .keyboardType(.numberPad)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.white.opacity(0.1))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(
+                                                isAgeFieldFocused ? ColorTheme.accentPurple : Color.white.opacity(0.2),
+                                                lineWidth: isAgeFieldFocused ? 2 : 1
+                                            )
+                                    )
+                            )
+                            .focused($isAgeFieldFocused)
+                            .onChange(of: ageText) { _, newValue in
+                                // Filter only numeric input and update viewModel
+                                let filtered = newValue.filter { "0123456789".contains($0) }
+                                if filtered != newValue {
+                                    ageText = filtered
+                                }
+                                
+                                if let age = Int(filtered), age >= 18 && age <= 99 {
+                                    viewModel.userAge = age
+                                } else {
+                                    viewModel.userAge = 0
+                                }
+                            }
                     }
                     .padding(.horizontal, 20)
                     .opacity(isVisible ? 1.0 : 0.0)
@@ -128,11 +179,15 @@ struct OnboardingNameView: View {
         .onDisappear {
             isVisible = false
             isTextFieldFocused = false
+            isAgeFieldFocused = false
         }
         .onTapGesture {
             // Dismiss keyboard when tapping outside
             if isTextFieldFocused {
                 isTextFieldFocused = false
+            }
+            if isAgeFieldFocused {
+                isAgeFieldFocused = false
             }
         }
     }

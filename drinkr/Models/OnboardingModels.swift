@@ -16,6 +16,7 @@ struct OnboardingUserProfile: Codable {
     
     // Personal data
     var userName: String = ""
+    var age: Int = 0
     var drinkingFrequency: String = ""
     var drinksPerSession: String = ""
     var weeklySpending: String = ""
