@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import UserNotifications
 
 struct ModernButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
@@ -14,8 +15,20 @@ struct DashboardView: View {
     @State private var showingMeditationModal = false
     @State private var showingResetModal = false
     @State private var showingPanicModal = false
-    @State private var showingCelebration = false
-    @State private var celebrationMilestone = 0
+    @State private var showingCelebration = false {
+        didSet {
+            #if DEBUG
+            print("🚨 showingCelebration changed to: \(showingCelebration)")
+            #endif
+        }
+    }
+    @State private var celebrationMilestone = 0 {
+        didSet {
+            #if DEBUG
+            print("🚨 celebrationMilestone changed to: \(celebrationMilestone)")
+            #endif
+        }
+    }
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @EnvironmentObject var dataService: DataService
@@ -109,6 +122,32 @@ struct DashboardView: View {
             // This runs every second and doesn't stop when switching tabs
             updateTimeComponents()
         }
+        #if DEBUG
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ForceMilestone"))) { notification in
+            if let userInfo = notification.userInfo,
+               let days = userInfo["days"] as? Int {
+                print("🚨 FORCE milestone trigger received for \(days) days")
+                celebrationMilestone = days
+                showingCelebration = true
+                print("🚨 showingCelebration = \(showingCelebration)")
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("TestMilestone"))) { notification in
+            if let userInfo = notification.userInfo,
+               let days = userInfo["days"] as? Int {
+                print("🧪 Received test milestone trigger for \(days) days")
+                
+                // Force trigger milestone check regardless of history
+                let milestones = [1, 7, 14, 30, 60, 90, 180, 365]
+                if milestones.contains(days) {
+                    celebrationMilestone = days
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showingCelebration = true
+                    }
+                }
+            }
+        }
+        #endif
         .sheet(isPresented: $showingPledgeModal) {
             PledgeModal(isPresented: $showingPledgeModal)
         }
@@ -550,13 +589,39 @@ struct DashboardView: View {
         let newTimeComponents = dataService.getTimeComponents()
         let oldDays = timeComponents.days
         
+        #if DEBUG
+        if DebugTimeManager.shared.isDebugMode {
+            print("🐛 Debug Time: \(DebugTimeManager.shared.getCurrentTime())")
+            print("🐛 Days: \(newTimeComponents.days), Hours: \(newTimeComponents.hours), Minutes: \(newTimeComponents.minutes)")
+        }
+        #endif
+        
         // Always update the time components for live timer
         timeComponents = newTimeComponents
         
-        // Only check milestones when days change (not every second)
-        if newTimeComponents.days != oldDays && oldDays != 0 {
+        // Check milestones when:
+        // 1. In debug mode with active debug time
+        // 2. When days change (including from 0 to any number on first run)  
+        // 3. Force check on first appearance or when system time might have changed
+        #if DEBUG
+        let isDebugActive = DebugTimeManager.shared.isDebugMode
+        let shouldCheckMilestone = isDebugActive || newTimeComponents.days != oldDays || oldDays == 0
+        #else
+        let shouldCheckMilestone = newTimeComponents.days != oldDays || oldDays == 0  
+        #endif
+        
+        if shouldCheckMilestone {
+            #if DEBUG
+            print("🐛 Milestone check triggered: debugActive=\(isDebugActive), days=\(newTimeComponents.days), oldDays=\(oldDays)")
+            #endif
             // Load last celebrated milestone from UserDefaults
+            #if DEBUG
+            let milestoneKey = DebugTimeManager.shared.isDebugMode ? "debugLastCelebratedMilestone" : "lastCelebratedMilestone"
+            lastCelebratedMilestone = UserDefaults.standard.integer(forKey: milestoneKey)
+            print("🐛 Checking milestone for \(newTimeComponents.days) days (last celebrated: \(lastCelebratedMilestone))")
+            #else
             lastCelebratedMilestone = UserDefaults.standard.integer(forKey: "lastCelebratedMilestone")
+            #endif
             
             // Check if we've reached a new milestone
             checkForMilestone(newTimeComponents.days)
@@ -566,18 +631,86 @@ struct DashboardView: View {
     func checkForMilestone(_ streak: Int) {
         let milestones = [1, 7, 14, 30, 60, 90, 180, 365]
         
+        #if DEBUG
+        print("🐛 checkForMilestone called with streak: \(streak)")
+        print("🐛 Is milestone? \(milestones.contains(streak))")
+        print("🐛 Last celebrated: \(lastCelebratedMilestone)")
+        print("🐛 Should celebrate? \(milestones.contains(streak) && streak > lastCelebratedMilestone)")
+        #endif
+        
         // Only celebrate if this is a milestone AND we haven't celebrated it before
         if milestones.contains(streak) && streak > lastCelebratedMilestone {
-            print("🎉 New milestone reached: \(streak) days (last celebrated: \(lastCelebratedMilestone))")
+            print("🎉 NEW MILESTONE REACHED: \(streak) days (last celebrated: \(lastCelebratedMilestone))")
             
             celebrationMilestone = streak
             lastCelebratedMilestone = streak
             
             // Save the milestone to UserDefaults so we don't celebrate it again
+            #if DEBUG
+            let milestoneKey = DebugTimeManager.shared.isDebugMode ? "debugLastCelebratedMilestone" : "lastCelebratedMilestone"
+            UserDefaults.standard.set(streak, forKey: milestoneKey)
+            print("🐛 Saved milestone \(streak) to key: \(milestoneKey)")
+            #else
             UserDefaults.standard.set(streak, forKey: "lastCelebratedMilestone")
+            #endif
             
+            // Trigger celebration and send notification
+            #if DEBUG
+            print("🐛 About to show celebration modal...")
+            showingCelebration = true
+            #else
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 showingCelebration = true
+            }
+            #endif
+            
+            // Send iOS notification
+            sendMilestoneNotification(for: streak)
+        } else {
+            #if DEBUG
+            print("🐛 No milestone celebration triggered")
+            #endif
+        }
+    }
+    
+    private func sendMilestoneNotification(for days: Int) {
+        let content = UNMutableNotificationContent()
+        
+        switch days {
+        case 1:
+            content.title = "🌟 First Day Complete!"
+            content.body = "You did it! Every journey begins with a single step."
+        case 7:
+            content.title = "🎉 One Week Strong!"
+            content.body = "You're building incredible habits. Keep it up!"
+        case 30:
+            content.title = "🏆 One Month Milestone!"
+            content.body = "A full month! You're proving to yourself what's possible."
+        case 90:
+            content.title = "👑 Three Months!"
+            content.body = "You've created lasting change. You're unstoppable!"
+        case 365:
+            content.title = "🎆 One Year Achievement!"
+            content.body = "A full year! You've completely transformed your life!"
+        default:
+            content.title = "✨ \(days) Days Milestone!"
+            content.body = "Keep going strong! Every day counts."
+        }
+        
+        content.sound = .default
+        content.badge = NSNumber(value: days)
+        
+        let request = UNNotificationRequest(
+            identifier: "milestone-\(days)-\(UUID().uuidString)",
+            content: content,
+            trigger: UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("❌ Failed to send milestone notification: \(error)")
+            } else {
+                print("✅ Milestone notification sent for \(days) days")
             }
         }
     }

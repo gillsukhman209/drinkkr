@@ -239,7 +239,14 @@ class DataService: ObservableObject {
             return (0, 0, 0, 0)
         }
         
-        let interval = Date().timeIntervalSince(sobrietyData.quitDate)
+        // Use debug time if available, otherwise use real time
+        #if DEBUG
+        let currentTime = DebugTimeManager.shared.getCurrentTime()
+        #else
+        let currentTime = Date()
+        #endif
+        
+        let interval = currentTime.timeIntervalSince(sobrietyData.quitDate)
         let days = Int(interval) / 86400
         let hours = Int(interval) % 86400 / 3600
         let minutes = Int(interval) % 3600 / 60
