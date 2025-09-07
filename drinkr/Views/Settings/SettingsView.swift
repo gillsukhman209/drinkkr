@@ -4,20 +4,21 @@ import SafariServices
 struct SettingsView: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @EnvironmentObject var dataService: DataService
+    @StateObject private var superwallManager = SuperwallManager.shared
     @State private var userName: String = ""
     @State private var showingNameEdit = false
     @State private var tempName: String = ""
     @State private var showingSaveConfirmation = false
     @State private var showingTerms = false
     @State private var showingPrivacy = false
+    @State private var isRestoringPurchases = false
     
     var isCompact: Bool {
         horizontalSizeClass == .compact
     }
     
     var body: some View {
-        NavigationView {
-            ZStack {
+        ZStack {
                 OptimizedBackground()
                     .ignoresSafeArea()
                 
@@ -27,6 +28,10 @@ struct SettingsView: View {
                         profileSection
                             .padding(.horizontal)
                             .padding(.top)
+                        
+                        // Subscription Section
+                        subscriptionSection
+                            .padding(.horizontal)
                         
                         // App Info Section
                         appInfoSection
@@ -47,8 +52,6 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
-        }
-        .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
             userName = dataService.currentUser?.name ?? ""
             tempName = userName
@@ -79,6 +82,91 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showingPrivacy) {
             SafariView(url: URL(string: "https://www.freeprivacypolicy.com/live/b6edc08d-395d-47ae-b9d2-699ead421394")!)
+        }
+    }
+    
+    private func restorePurchases() {
+        isRestoringPurchases = true
+        
+        superwallManager.restorePurchases()
+        
+        // Show feedback after a delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            isRestoringPurchases = false
+            
+            if superwallManager.isSubscribed {
+                // Show success message
+                print("✅ Purchases restored successfully!")
+            } else {
+                // Show message that no purchases were found
+                print("ℹ️ No active subscriptions found")
+            }
+        }
+    }
+    
+    var subscriptionSection: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            Text("SUBSCRIPTION")
+                .font(.system(size: isCompact ? 12 : 14, weight: .semibold))
+                .foregroundColor(ColorTheme.textSecondary)
+            
+            VStack(spacing: 0) {
+                // Subscription Status Row
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Status")
+                            .font(.system(size: isCompact ? 14 : 16))
+                            .foregroundColor(ColorTheme.textSecondary)
+                        Text(superwallManager.isSubscribed ? "Premium" : "Free")
+                            .font(.system(size: isCompact ? 16 : 18, weight: .medium))
+                            .foregroundColor(superwallManager.isSubscribed ? ColorTheme.successGreen : ColorTheme.textPrimary)
+                    }
+                    
+                    Spacer()
+                    
+                    if superwallManager.isSubscribed {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: isCompact ? 20 : 24))
+                            .foregroundColor(ColorTheme.successGreen)
+                    }
+                }
+                .padding(isCompact ? 15 : 18)
+                
+                Divider()
+                    .background(ColorTheme.cardBorder)
+                
+                // Restore Purchases Row
+                Button(action: {
+                    restorePurchases()
+                }) {
+                    HStack {
+                        Text("Restore Purchases")
+                            .font(.system(size: isCompact ? 14 : 16))
+                            .foregroundColor(ColorTheme.accentCyan)
+                        
+                        Spacer()
+                        
+                        if isRestoringPurchases {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: ColorTheme.accentCyan))
+                                .scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: isCompact ? 16 : 18))
+                                .foregroundColor(ColorTheme.accentCyan)
+                        }
+                    }
+                    .padding(isCompact ? 15 : 18)
+                }
+                .disabled(isRestoringPurchases)
+                .buttonStyle(PlainButtonStyle())
+            }
+            .background(Color.white.opacity(0.04))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(ColorTheme.cardBorder, lineWidth: 1)
+            )
         }
     }
     

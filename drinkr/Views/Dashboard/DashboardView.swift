@@ -3,13 +3,11 @@ import SwiftUI
 struct ModernButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
-            .animation(.spring(response: 0.2, dampingFraction: 0.6), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
     }
 }
 
 struct DashboardView: View {
-    @State private var animationAmount = 1.0
     @State private var hasAppeared = false
     @State private var showingPledgeModal = false
     @State private var showingMeditationModal = false
@@ -43,8 +41,7 @@ struct DashboardView: View {
     }
     
     var body: some View {
-        NavigationView {
-            ZStack {
+        ZStack {
                 OptimizedBackground()
                     .ignoresSafeArea()
                 
@@ -99,17 +96,11 @@ struct DashboardView: View {
                     }
                 }
             }
-            .navigationBarHidden(true)
-        }
-        .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
             if !hasAppeared {
                 hasAppeared = true
-                startTimer()
+                updateTimeComponents() // Update once instead of starting timer
             }
-        }
-        .onDisappear {
-            stopTimer()
         }
         .sheet(isPresented: $showingPledgeModal) {
             PledgeModal(isPresented: $showingPledgeModal)
@@ -150,8 +141,7 @@ struct DashboardView: View {
                         .foregroundColor(progress[day] ? .white : .white.opacity(0.4))
                         .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
                 }
-                .scaleEffect(progress[day] ? 1.05 : 1.0)
-                .animation(hasAppeared ? .spring(response: 0.3, dampingFraction: 0.6) : nil, value: progress[day])
+                .scaleEffect(progress[day] ? 1.02 : 1.0)
             }
         }
         .padding(.horizontal)
@@ -231,14 +221,7 @@ struct DashboardView: View {
                         )
                         .frame(width: geometry.size.width * 0.35, height: geometry.size.width * 0.35)
                         .rotationEffect(.degrees(Double(index) * 60))
-                        .scaleEffect(animationAmount)
                         .blur(radius: 0.5)
-                        .animation(
-                            hasAppeared ? Animation.easeInOut(duration: 3)
-                                .repeatForever(autoreverses: true)
-                                .delay(Double(index) * 0.3) : nil,
-                            value: animationAmount
-                        )
                         .shadow(color: ColorTheme.accentCyan.opacity(0.3), radius: 8, x: 0, y: 4)
                 }
                 
@@ -253,18 +236,8 @@ struct DashboardView: View {
                         )
                     )
                     .frame(width: geometry.size.width * 0.6, height: geometry.size.width * 0.6)
-                    .animation(
-                        hasAppeared ? Animation.easeInOut(duration: 4)
-                            .repeatForever(autoreverses: true) : nil,
-                        value: animationAmount
-                    )
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
-            .onAppear {
-                if hasAppeared {
-                    animationAmount = 1.3
-                }
-            }
         }
     }
     
@@ -345,17 +318,11 @@ struct DashboardView: View {
         }) {
             VStack(spacing: isCompact ? 10 : 12) {
                 ZStack {
-                    // Pulsing glow effect
+                    // Static glow effect (removed animation)
                     Circle()
                         .fill(ColorTheme.dangerRed.opacity(0.6))
                         .frame(width: isCompact ? 80 : 90, height: isCompact ? 80 : 90)
                         .blur(radius: 15)
-                        .scaleEffect(animationAmount)
-                        .animation(
-                            hasAppeared ? Animation.easeInOut(duration: 1.5)
-                                .repeatForever(autoreverses: true) : nil,
-                            value: animationAmount
-                        )
                     
                     // Outer ring
                     Circle()
@@ -418,11 +385,6 @@ struct DashboardView: View {
             .futuristicCard()
         }
         .buttonStyle(PlainButtonStyle())
-        .scaleEffect(1)
-        .onTapGesture {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-            }
-        }
     }
     
     func handleActionButton(title: String) {
@@ -642,9 +604,7 @@ struct DashboardView: View {
                 .padding(.horizontal)
             
             Button(action: {
-                withAnimation(.easeInOut) {
-                    currentQuoteIndex += 1
-                }
+                currentQuoteIndex += 1
             }) {
                 HStack(spacing: 6) {
                     Text("Next Quote")

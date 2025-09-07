@@ -18,6 +18,10 @@ class SuperwallManager: ObservableObject {
     @Published var isSubscribed = false // Actual subscription status from Superwall
     @Published var subscriptionValidated = false // Security flag
     
+    // MARK: - Persistence Keys
+    private let subscriptionStatusKey = "superwallSubscriptionStatus"
+    private let subscriptionExpiryKey = "superwallSubscriptionExpiry"
+    
     // MARK: - Configuration
     private let apiKey = "pk_PkRoChE79LHjlJNRoMhlc"
     
@@ -89,8 +93,10 @@ class SuperwallManager: ObservableObject {
         isInitialized = true
         print("✅ SuperwallKit initialized successfully")
         
-        // Validate subscription status for security
-        validateSubscription()
+        // Validate subscription status for security (async)
+        Task.detached {
+            await self.validateSubscription()
+        }
     }
     
     // MARK: - Paywall Presentation
@@ -153,7 +159,7 @@ class SuperwallManager: ObservableObject {
     // MARK: - Subscription Management & Security
     
     /// Validate subscription status - SECURITY CRITICAL
-    func validateSubscription() {
+    func validateSubscription() async {
         guard isInitialized else {
             print("❌ Cannot validate subscription - SuperwallManager not initialized")
             isSubscribed = false
@@ -176,14 +182,89 @@ class SuperwallManager: ObservableObject {
     }
     
     private func checkSuperwallSubscriptionStatus() {
-        // This would normally use Superwall.shared.subscriptionStatus
-        // But since we're using the simpler approach, we'll implement a security gate
+        // First, check if we have a persisted subscription status
+        let persistedStatus = UserDefaults.standard.bool(forKey: subscriptionStatusKey)
         
-        // For security, we assume user is NOT subscribed unless proven otherwise
-        isSubscribed = false
-        subscriptionValidated = true // Mark as validated (but not subscribed)
+        // Check if subscription is still valid (not expired)
+        if let expiryDate = UserDefaults.standard.object(forKey: subscriptionExpiryKey) as? Date {
+            if Date() < expiryDate && persistedStatus {
+                // Subscription is still valid - trust the persisted state
+                isSubscribed = true
+                subscriptionValidated = true
+                print("✅ Restored valid subscription (expires: \(expiryDate))")
+                
+                // DO NOT auto-verify with StoreKit - this causes the sign-in loop
+                // Only verify when user explicitly requests it (restore purchases)
+                return
+            }
+        }
         
-        print("🔒 Subscription validation complete - Status: \(isSubscribed)")
+        // If no valid persisted subscription, just use the persisted state
+        // Don't auto-check StoreKit to avoid sign-in prompts
+        isSubscribed = persistedStatus
+        subscriptionValidated = true
+        
+        if !isSubscribed {
+            print("ℹ️ No active subscription found in cache")
+        }
+    }
+    
+    @MainActor
+    private func verifySubscriptionWithSuperwall() async {
+        // Check actual subscription status with StoreKit
+        do {
+            // Verify receipt and entitlements
+            for await result in Transaction.currentEntitlements {
+                if case .verified(let transaction) = result {
+                    // User has an active subscription
+                    print("✅ Found active subscription: \(transaction.productID)")
+                    isSubscribed = true
+                    subscriptionValidated = true
+                    
+                    // Persist the subscription status
+                    UserDefaults.standard.set(true, forKey: subscriptionStatusKey)
+                    
+                    // Set expiry date (for auto-renewable subscriptions)
+                    if let expiryDate = transaction.expirationDate {
+                        UserDefaults.standard.set(expiryDate, forKey: subscriptionExpiryKey)
+                    }
+                    
+                    return
+                }
+            }
+            
+            // No active subscriptions found
+            print("❌ No active subscriptions found")
+            isSubscribed = false
+            subscriptionValidated = true
+            UserDefaults.standard.set(false, forKey: subscriptionStatusKey)
+            
+        } catch {
+            print("❌ Error checking subscription status: \(error)")
+            // In case of error, check persisted status as fallback
+            isSubscribed = UserDefaults.standard.bool(forKey: subscriptionStatusKey)
+            subscriptionValidated = true
+        }
+    }
+    
+    @MainActor
+    private func restoreSubscriptionWithStoreKit() async {
+        // Only call this when user explicitly requests restore
+        // This prevents the repeated sign-in popup issue
+        do {
+            print("🔄 User requested restore purchases...")
+            
+            // Sync with App Store to get latest subscription status
+            try await AppStore.sync()
+            
+            // Re-verify subscription after sync
+            await verifySubscriptionWithSuperwall()
+            
+            print("✅ Restore purchases complete")
+            
+        } catch {
+            print("⚠️ Could not sync with App Store: \(error)")
+        }
     }
     
     /// Mark user as subscribed (called after successful paywall completion)
@@ -191,6 +272,19 @@ class SuperwallManager: ObservableObject {
         print("✅ User subscription confirmed")
         isSubscribed = true
         subscriptionValidated = true
+        
+        // Persist the subscription status
+        UserDefaults.standard.set(true, forKey: subscriptionStatusKey)
+        
+        // Set a default expiry date (1 year for yearly, 1 week for weekly)
+        // This will be updated with actual expiry from StoreKit
+        let defaultExpiry = Calendar.current.date(byAdding: .year, value: 1, to: Date()) ?? Date()
+        UserDefaults.standard.set(defaultExpiry, forKey: subscriptionExpiryKey)
+        
+        // Verify with StoreKit to get actual expiry
+        Task {
+            await verifySubscriptionWithSuperwall()
+        }
     }
     
     /// Security method to verify subscription before allowing app access
@@ -204,11 +298,17 @@ class SuperwallManager: ObservableObject {
         return isSubscribed
     }
     
-    /// Restore purchases - Superwall handles this automatically
+    /// Restore purchases - properly restore and persist subscription status
     func restorePurchases() {
         print("🔄 Restoring purchases...")
-        validateSubscription() // Re-validate on restore
-        print("ℹ️ Superwall handles restore purchases automatically")
+        
+        Task.detached {
+            // First try to restore with StoreKit
+            await self.restoreSubscriptionWithStoreKit()
+            
+            // Then validate the subscription
+            await self.validateSubscription()
+        }
     }
     
     // MARK: - Debug Support

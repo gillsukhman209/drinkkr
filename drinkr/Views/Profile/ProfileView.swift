@@ -15,8 +15,7 @@ struct ProfileView: View {
     }
     
     var body: some View {
-        NavigationView {
-            ZStack {
+        ZStack {
                 OptimizedBackground()
                     .ignoresSafeArea()
                 
@@ -57,8 +56,6 @@ struct ProfileView: View {
             }
             .navigationTitle("\(dataService.currentUser?.name ?? "Your") Progress")
             .navigationBarTitleDisplayMode(.large)
-        }
-        .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
             hasAppeared = true
         }

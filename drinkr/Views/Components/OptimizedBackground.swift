@@ -1,40 +1,17 @@
 import SwiftUI
 
 struct OptimizedBackground: View {
-    @State private var phase: CGFloat = 0
-    
     var body: some View {
-        ZStack {
-            // Static gradient - no animation overhead
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.02, green: 0.05, blue: 0.15),
-                    Color(red: 0.08, green: 0.12, blue: 0.25),
-                    Color(red: 0.02, green: 0.05, blue: 0.15)
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            
-            // Subtle animated gradient overlay - GPU accelerated
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color.cyan.opacity(0.03),
-                    Color.purple.opacity(0.02),
-                    Color.clear
-                ]),
-                startPoint: UnitPoint(x: 0.5 - cos(phase) * 0.3, y: 0.5 - sin(phase) * 0.3),
-                endPoint: UnitPoint(x: 0.5 + cos(phase) * 0.3, y: 0.5 + sin(phase) * 0.3)
-            )
-            .onAppear {
-                withAnimation(.linear(duration: 20).repeatForever(autoreverses: false)) {
-                    phase = .pi * 2
-                }
-            }
-            
-            // Static star field - no individual animations
-            StaticStarfield()
-        }
+        // TRULY static gradient - no animations at all
+        LinearGradient(
+            gradient: Gradient(colors: [
+                Color(red: 0.02, green: 0.05, blue: 0.15),
+                Color(red: 0.08, green: 0.12, blue: 0.25),
+                Color(red: 0.02, green: 0.05, blue: 0.15)
+            ]),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 }
 

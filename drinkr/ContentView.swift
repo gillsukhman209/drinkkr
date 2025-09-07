@@ -36,29 +36,37 @@ struct ContentView: View {
             } else {
                 // Show main app only with atomic valid session
                 TabView(selection: $selectedTab) {
-                    DashboardView()
-                        .tabItem {
-                            Label("Home", systemImage: "house.fill")
-                        }
-                        .tag(0)
+                    NavigationStack {
+                        DashboardView()
+                    }
+                    .tabItem {
+                        Label("Home", systemImage: "house.fill")
+                    }
+                    .tag(0)
                     
-                    ProfileView()
-                        .tabItem {
-                            Label("Stats", systemImage: "chart.bar.fill")
-                        }
-                        .tag(1)
+                    NavigationStack {
+                        ProfileView()
+                    }
+                    .tabItem {
+                        Label("Stats", systemImage: "chart.bar.fill")
+                    }
+                    .tag(1)
                     
-                    LibraryView()
-                        .tabItem {
-                            Label("Learn", systemImage: "graduationcap.fill")
-                        }
-                        .tag(2)
+                    NavigationStack {
+                        LibraryView()
+                    }
+                    .tabItem {
+                        Label("Learn", systemImage: "graduationcap.fill")
+                    }
+                    .tag(2)
                     
-                    SettingsView()
-                        .tabItem {
-                            Label("Settings", systemImage: "gearshape.fill")
-                        }
-                        .tag(3)
+                    NavigationStack {
+                        SettingsView()
+                    }
+                    .tabItem {
+                        Label("Settings", systemImage: "gearshape.fill")
+                    }
+                    .tag(3)
                 }
                 .accentColor(.cyan)
                 .preferredColorScheme(.dark)
@@ -82,11 +90,12 @@ struct ContentView: View {
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
-                // Update streak and refresh notifications when app becomes active
-                refreshNotificationsWithCurrentStreak()
-                
-                // Check subscription status when app becomes active
-                checkSubscriptionStatus()
+                // Only update when absolutely necessary
+                Task {
+                    await MainActor.run {
+                        checkSubscriptionStatus()
+                    }
+                }
             }
         }
         .onChange(of: superwallManager.isSubscribed) { _, isSubscribed in
@@ -98,12 +107,6 @@ struct ContentView: View {
                 handleOnboardingCompletion(profile)
             }
         }
-        #if DEBUG
-        .onLongPressGesture(minimumDuration: 3.0) {
-            // Debug: Long press anywhere for 3 seconds to reset app state
-            debugResetApp()
-        }
-        #endif
     }
     
     private func checkOnboardingStatus() {
@@ -149,10 +152,13 @@ struct ContentView: View {
         // Only validate subscription if onboarding is complete
         guard hasCompletedOnboarding else { return }
         
-        superwallManager.validateSubscription()
-        
-        // Update atomic session state
-        updateValidSubscriptionSession()
+        // Rate limit subscription checks to prevent lag
+        Task.detached {
+            await superwallManager.validateSubscription()
+            await MainActor.run {
+                updateValidSubscriptionSession()
+            }
+        }
     }
     
     // Debug function to reset everything (for testing/fixing stuck states)

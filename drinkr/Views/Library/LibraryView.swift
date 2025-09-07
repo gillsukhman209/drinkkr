@@ -54,8 +54,7 @@ struct LibraryView: View {
     }
     
     var body: some View {
-        NavigationView {
-            ZStack {
+        ZStack {
                 OptimizedBackground()
                     .ignoresSafeArea()
                 
@@ -89,8 +88,6 @@ struct LibraryView: View {
             }
             .navigationTitle("\(dataService.currentUser?.name ?? "Your") Learning")
             .navigationBarTitleDisplayMode(.large)
-        }
-        .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
             hasAppeared = true
         }
