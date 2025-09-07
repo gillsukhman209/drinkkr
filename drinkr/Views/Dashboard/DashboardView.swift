@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 struct ModernButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
@@ -15,7 +16,6 @@ struct DashboardView: View {
     @State private var showingPanicModal = false
     @State private var showingCelebration = false
     @State private var celebrationMilestone = 0
-    @State private var timer: Timer?
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @EnvironmentObject var dataService: DataService
@@ -24,6 +24,9 @@ struct DashboardView: View {
     @State private var lastCelebratedMilestone = 0
     @State private var currentQuoteIndex = 0
     @State private var todaysReflection = ""
+    
+    // Continuous timer that doesn't stop when switching tabs
+    private let timerPublisher = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     let motivationalQuotes = [
         "Your strength grows with every sober sunrise.",
@@ -99,8 +102,12 @@ struct DashboardView: View {
         .onAppear {
             if !hasAppeared {
                 hasAppeared = true
-                updateTimeComponents() // Update once instead of starting timer
+                updateTimeComponents() // Initialize on first appearance
             }
+        }
+        .onReceive(timerPublisher) { _ in
+            // This runs every second and doesn't stop when switching tabs
+            updateTimeComponents()
         }
         .sheet(isPresented: $showingPledgeModal) {
             PledgeModal(isPresented: $showingPledgeModal)
@@ -538,27 +545,22 @@ struct DashboardView: View {
     }
     
     
-    func startTimer() {
-        updateTimeComponents()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            updateTimeComponents()
-        }
-    }
-    
-    func stopTimer() {
-        timer?.invalidate()
-        timer = nil
-    }
     
     func updateTimeComponents() {
-        timeComponents = dataService.getTimeComponents()
-        let currentStreak = timeComponents.days
+        let newTimeComponents = dataService.getTimeComponents()
+        let oldDays = timeComponents.days
         
-        // Load last celebrated milestone from UserDefaults
-        lastCelebratedMilestone = UserDefaults.standard.integer(forKey: "lastCelebratedMilestone")
+        // Always update the time components for live timer
+        timeComponents = newTimeComponents
         
-        // Check if we've reached a new milestone
-        checkForMilestone(currentStreak)
+        // Only check milestones when days change (not every second)
+        if newTimeComponents.days != oldDays && oldDays != 0 {
+            // Load last celebrated milestone from UserDefaults
+            lastCelebratedMilestone = UserDefaults.standard.integer(forKey: "lastCelebratedMilestone")
+            
+            // Check if we've reached a new milestone
+            checkForMilestone(newTimeComponents.days)
+        }
     }
     
     func checkForMilestone(_ streak: Int) {
