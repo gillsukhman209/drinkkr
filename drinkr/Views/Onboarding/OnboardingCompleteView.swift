@@ -15,6 +15,7 @@ struct OnboardingCompleteView: View {
     @State private var loadingProgress: Double = 0
     @State private var isLoading = true
     @State private var showContent = false
+    @State private var showingReviewRequest = false
     
     var isCompact: Bool {
         horizontalSizeClass == .compact
@@ -170,17 +171,40 @@ struct OnboardingCompleteView: View {
                 
                     Spacer()
                     
+                    // Debug skip paywall button (DEBUG only)
+                    #if DEBUG
+                    Button(action: {
+                        // Also skip review in debug mode
+                        UserDefaults.standard.set(true, forKey: "hasRequestedReview")
+                        superwallManager.debugGrantSubscription()
+                        viewModel.completeOnboarding()
+                    }) {
+                        Text("🐛 Skip Paywall (Debug)")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.orange)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 8)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.orange.opacity(0.2))
+                                    .stroke(Color.orange.opacity(0.5), lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(.bottom, 12)
+                    .opacity(showContent ? 1.0 : 0.0)
+                    #endif
+                    
                     // Start button
                     Button(action: {
-                        // Present Superwall paywall through SuperwallManager with user's age
-                        // CRITICAL: Only complete onboarding after successful subscription
-                        superwallManager.presentOnboardingPaywall(userAge: viewModel.userAge) {
-                            // Only complete onboarding if user actually subscribed
-                            if superwallManager.isSubscribed {
-                                viewModel.completeOnboarding()
-                            } else {
-                                print("⚠️ Paywall dismissed without subscription - staying in onboarding")
-                            }
+                        // Show review request first, then paywall
+                        let hasRequestedReview = UserDefaults.standard.bool(forKey: "hasRequestedReview")
+                        let hasSkippedReview = UserDefaults.standard.bool(forKey: "hasSkippedReview")
+                        
+                        if !hasRequestedReview && !hasSkippedReview {
+                            showingReviewRequest = true
+                        } else {
+                            presentPaywall()
                         }
                     }) {
                         HStack(spacing: 12) {
@@ -217,6 +241,25 @@ struct OnboardingCompleteView: View {
         }
         .onAppear {
             startLoadingAnimation()
+        }
+        .fullScreenCover(isPresented: $showingReviewRequest) {
+            ReviewRequestView(isPresented: $showingReviewRequest) {
+                // After review request, present paywall
+                presentPaywall()
+            }
+        }
+    }
+    
+    private func presentPaywall() {
+        // Present Superwall paywall through SuperwallManager with user's age
+        // CRITICAL: Only complete onboarding after successful subscription
+        superwallManager.presentOnboardingPaywall(userAge: viewModel.userAge) {
+            // Only complete onboarding if user actually subscribed
+            if superwallManager.isSubscribed {
+                viewModel.completeOnboarding()
+            } else {
+                print("⚠️ Paywall dismissed without subscription - staying in onboarding")
+            }
         }
     }
     

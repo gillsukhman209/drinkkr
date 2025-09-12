@@ -589,12 +589,6 @@ struct DashboardView: View {
         let newTimeComponents = dataService.getTimeComponents()
         let oldDays = timeComponents.days
         
-        #if DEBUG
-        if DebugTimeManager.shared.isDebugMode {
-            print("🐛 Debug Time: \(DebugTimeManager.shared.getCurrentTime())")
-            print("🐛 Days: \(newTimeComponents.days), Hours: \(newTimeComponents.hours), Minutes: \(newTimeComponents.minutes)")
-        }
-        #endif
         
         // Always update the time components for live timer
         timeComponents = newTimeComponents
@@ -611,14 +605,10 @@ struct DashboardView: View {
         #endif
         
         if shouldCheckMilestone {
-            #if DEBUG
-            print("🐛 Milestone check triggered: debugActive=\(isDebugActive), days=\(newTimeComponents.days), oldDays=\(oldDays)")
-            #endif
             // Load last celebrated milestone from UserDefaults
             #if DEBUG
             let milestoneKey = DebugTimeManager.shared.isDebugMode ? "debugLastCelebratedMilestone" : "lastCelebratedMilestone"
             lastCelebratedMilestone = UserDefaults.standard.integer(forKey: milestoneKey)
-            print("🐛 Checking milestone for \(newTimeComponents.days) days (last celebrated: \(lastCelebratedMilestone))")
             #else
             lastCelebratedMilestone = UserDefaults.standard.integer(forKey: "lastCelebratedMilestone")
             #endif
@@ -631,12 +621,6 @@ struct DashboardView: View {
     func checkForMilestone(_ streak: Int) {
         let milestones = [1, 7, 14, 30, 60, 90, 180, 365]
         
-        #if DEBUG
-        print("🐛 checkForMilestone called with streak: \(streak)")
-        print("🐛 Is milestone? \(milestones.contains(streak))")
-        print("🐛 Last celebrated: \(lastCelebratedMilestone)")
-        print("🐛 Should celebrate? \(milestones.contains(streak) && streak > lastCelebratedMilestone)")
-        #endif
         
         // Only celebrate if this is a milestone AND we haven't celebrated it before
         if milestones.contains(streak) && streak > lastCelebratedMilestone {
@@ -649,14 +633,12 @@ struct DashboardView: View {
             #if DEBUG
             let milestoneKey = DebugTimeManager.shared.isDebugMode ? "debugLastCelebratedMilestone" : "lastCelebratedMilestone"
             UserDefaults.standard.set(streak, forKey: milestoneKey)
-            print("🐛 Saved milestone \(streak) to key: \(milestoneKey)")
             #else
             UserDefaults.standard.set(streak, forKey: "lastCelebratedMilestone")
             #endif
             
             // Trigger celebration and send notification
             #if DEBUG
-            print("🐛 About to show celebration modal...")
             showingCelebration = true
             #else
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -666,14 +648,11 @@ struct DashboardView: View {
             
             // Send iOS notification
             sendMilestoneNotification(for: streak)
-        } else {
-            #if DEBUG
-            print("🐛 No milestone celebration triggered")
-            #endif
         }
     }
     
     private func sendMilestoneNotification(for days: Int) {
+        print("🎯 Scheduling milestone notification for \(days) days")
         let content = UNMutableNotificationContent()
         
         switch days {
@@ -711,6 +690,11 @@ struct DashboardView: View {
                 print("❌ Failed to send milestone notification: \(error)")
             } else {
                 print("✅ Milestone notification sent for \(days) days")
+                
+                // Log all pending notifications for testing
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    NotificationService.shared.logAllPendingNotifications()
+                }
             }
         }
     }

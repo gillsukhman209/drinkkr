@@ -38,12 +38,18 @@ class DataService: ObservableObject {
             sobrietyData = data
             sobrietyData?.updateStreak()
             sobrietyData?.calculateStats()
+            
+            // Store quit date and last relapse in UserDefaults for notifications
+            syncSobrietyDataToUserDefaults()
         } else {
             let newSobrietyData = SobrietyData(quitDate: Date())
             newSobrietyData.updateStreak()
             newSobrietyData.calculateStats()
             modelContext.insert(newSobrietyData)
             sobrietyData = newSobrietyData
+            
+            // Store quit date and last relapse in UserDefaults for notifications
+            syncSobrietyDataToUserDefaults()
         }
         
         let achievementDescriptor = FetchDescriptor<Achievement>()
@@ -92,6 +98,9 @@ class DataService: ObservableObject {
         sobrietyData.updateStreak()
         sobrietyData.calculateStats()
         
+        // Sync to UserDefaults for notifications
+        syncSobrietyDataToUserDefaults()
+        
         saveContext()
         updateAchievementProgress()
     }
@@ -126,6 +135,10 @@ class DataService: ObservableObject {
         sobrietyData?.quitDate = date
         sobrietyData?.updateStreak()
         sobrietyData?.calculateStats()
+        
+        // Sync to UserDefaults for notifications
+        syncSobrietyDataToUserDefaults()
+        
         saveContext()
         updateAchievementProgress()
     }
@@ -261,5 +274,26 @@ class DataService: ObservableObject {
         
         let currentStreak = sobrietyData.currentStreak
         return (0..<7).map { $0 < currentStreak }
+    }
+    
+    // MARK: - UserDefaults Sync for Notifications
+    
+    private func syncSobrietyDataToUserDefaults() {
+        guard let sobrietyData = sobrietyData else { return }
+        
+        // Store quit date for notification calculations
+        UserDefaults.standard.set(sobrietyData.quitDate, forKey: "sobrietyQuitDate")
+        
+        // Store last relapse date if any
+        if let lastRelapse = sobrietyData.relapses.last {
+            UserDefaults.standard.set(lastRelapse.date, forKey: "lastRelapseDate")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "lastRelapseDate")
+        }
+        
+        // Store current streak for quick access
+        UserDefaults.standard.set(sobrietyData.currentStreak, forKey: "currentStreak")
+        
+        print("✅ Synced sobriety data to UserDefaults - Quit date: \(sobrietyData.quitDate), Current streak: \(sobrietyData.currentStreak)")
     }
 }

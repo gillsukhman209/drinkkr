@@ -13,6 +13,7 @@ class NotificationService: ObservableObject {
     func requestPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             DispatchQueue.main.async {
+                #if DEBUG
                 if granted {
                     print("✅ Notification permission granted")
                 } else if let error = error {
@@ -20,12 +21,14 @@ class NotificationService: ObservableObject {
                 } else {
                     print("❌ Notification permission denied")
                 }
+                #endif
             }
         }
     }
     
     func checkPermissionStatus() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
+            #if DEBUG
             DispatchQueue.main.async {
                 switch settings.authorizationStatus {
                 case .authorized:
@@ -46,6 +49,7 @@ class NotificationService: ObservableObject {
                 print("Sound setting: \(settings.soundSetting)")
                 print("Badge setting: \(settings.badgeSetting)")
             }
+            #endif
         }
     }
     
@@ -140,44 +144,56 @@ class NotificationService: ObservableObject {
         daysSober: Int,
         weeklySpending: String
     ) {
-        // Cancel existing daily check-ins
-        cancelDailyCheckInNotifications()
-        
-        let calendar = Calendar.current
-        let hour = calendar.component(.hour, from: checkInTime)
-        let minute = calendar.component(.minute, from: checkInTime)
-        
-        let message = messageService.getDailyCheckInMessage(
-            userName: userName,
-            daysSober: daysSober,
-            weeklySpending: weeklySpending
-        )
-        
-        let content = UNMutableNotificationContent()
-        content.title = message.title
-        content.body = message.body
-        content.sound = .default
-        content.badge = 1
-        content.categoryIdentifier = "DAILY_CHECKIN"
-        
-        var dateComponents = DateComponents()
-        dateComponents.hour = hour
-        dateComponents.minute = minute
-        
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        
-        let request = UNNotificationRequest(
-            identifier: "daily-checkin-personalized",
-            content: content,
-            trigger: trigger
-        )
-        
-        UNUserNotificationCenter.current().add(request) { error in
+        // Check permission first
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            guard settings.authorizationStatus == .authorized else {
+                print("❌ Cannot schedule daily check-in - notification permission not authorized: \(settings.authorizationStatus)")
+                return
+            }
+            
             DispatchQueue.main.async {
-                if let error = error {
-                    print("❌ Error scheduling personalized daily check-in: \(error)")
-                } else {
-                    print("✅ Personalized daily check-in scheduled for \(hour):\(String(format: "%02d", minute))")
+                print("🔧 Scheduling daily check-in for user: \(userName.isEmpty ? "[EMPTY NAME]" : userName)")
+                
+                // Cancel existing daily check-ins
+                self.cancelDailyCheckInNotifications()
+                
+                let calendar = Calendar.current
+                let hour = calendar.component(.hour, from: checkInTime)
+                let minute = calendar.component(.minute, from: checkInTime)
+                
+                let message = self.messageService.getDailyCheckInMessage(
+                    userName: userName,
+                    daysSober: daysSober,
+                    weeklySpending: weeklySpending
+                )
+                
+                let content = UNMutableNotificationContent()
+                content.title = message.title
+                content.body = message.body
+                content.sound = .default
+                content.badge = 1
+                content.categoryIdentifier = "DAILY_CHECKIN"
+                
+                var dateComponents = DateComponents()
+                dateComponents.hour = hour
+                dateComponents.minute = minute
+                
+                let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+                
+                let request = UNNotificationRequest(
+                    identifier: "daily-checkin-personalized",
+                    content: content,
+                    trigger: trigger
+                )
+                
+                UNUserNotificationCenter.current().add(request) { error in
+                    DispatchQueue.main.async {
+                        if let error = error {
+                            print("❌ Error scheduling personalized daily check-in: \(error)")
+                        } else {
+                            print("✅ Personalized daily check-in scheduled for \(hour):\(String(format: "%02d", minute))")
+                        }
+                    }
                 }
             }
         }
@@ -530,6 +546,86 @@ class NotificationService: ObservableObject {
         UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
             DispatchQueue.main.async {
                 completion(requests.count)
+            }
+        }
+    }
+    
+    /// Logs current notification permission status
+    func logNotificationPermissionStatus() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                print("\n🔐 NOTIFICATION PERMISSION STATUS")
+                print("═══════════════════════════════════════")
+                print("Authorization Status: \(settings.authorizationStatus)")
+                print("Alert Setting: \(settings.alertSetting)")
+                print("Sound Setting: \(settings.soundSetting)")
+                print("Badge Setting: \(settings.badgeSetting)")
+                print("Notification Center Setting: \(settings.notificationCenterSetting)")
+                print("Lock Screen Setting: \(settings.lockScreenSetting)")
+                print("═══════════════════════════════════════\n")
+            }
+        }
+    }
+    
+    /// Logs all pending notifications with their scheduled times for testing
+    func logAllPendingNotifications() {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            DispatchQueue.main.async {
+                print("\n🔔 PENDING NOTIFICATIONS DEBUG LOG")
+                print("═══════════════════════════════════════")
+                print("Total pending notifications: \(requests.count)")
+                
+                if requests.isEmpty {
+                    print("❌ No notifications scheduled")
+                    return
+                }
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateStyle = .short
+                dateFormatter.timeStyle = .short
+                
+                for (index, request) in requests.enumerated() {
+                    print("\n[\(index + 1)] \(request.identifier)")
+                    print("   Title: \(request.content.title)")
+                    print("   Body: \(request.content.body)")
+                    
+                    if let trigger = request.trigger as? UNCalendarNotificationTrigger {
+                        if let nextTriggerDate = trigger.nextTriggerDate() {
+                            print("   📅 Next trigger: \(dateFormatter.string(from: nextTriggerDate))")
+                            
+                            // Show how long until next trigger
+                            let timeInterval = nextTriggerDate.timeIntervalSince(Date())
+                            let hours = Int(timeInterval) / 3600
+                            let minutes = (Int(timeInterval) % 3600) / 60
+                            print("   ⏰ Time until trigger: \(hours)h \(minutes)m")
+                        }
+                        
+                        // Show the date components for recurring notifications
+                        let components = trigger.dateComponents
+                        var scheduleInfo = "   📋 Schedule: "
+                        
+                        if let weekday = components.weekday {
+                            let weekdayNames = ["", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+                            scheduleInfo += weekdayNames[weekday] + " "
+                        }
+                        
+                        if let hour = components.hour, let minute = components.minute {
+                            scheduleInfo += String(format: "%02d:%02d", hour, minute)
+                        }
+                        
+                        scheduleInfo += " (repeats: \(trigger.repeats))"
+                        print(scheduleInfo)
+                        
+                    } else if let trigger = request.trigger as? UNTimeIntervalNotificationTrigger {
+                        let triggerDate = Date().addingTimeInterval(trigger.timeInterval)
+                        print("   📅 Will trigger: \(dateFormatter.string(from: triggerDate))")
+                        print("   ⏰ Time interval: \(trigger.timeInterval) seconds")
+                        print("   🔄 Repeats: \(trigger.repeats)")
+                    }
+                }
+                
+                print("═══════════════════════════════════════")
+                print("💡 To test: Change your device time to match a trigger time\n")
             }
         }
     }

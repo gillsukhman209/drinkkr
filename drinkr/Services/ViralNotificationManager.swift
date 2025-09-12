@@ -65,6 +65,12 @@ class ViralNotificationManager: ObservableObject {
         setupWisdomDrops()
         
         print("✅ All 6 phases of viral notifications setup complete!")
+        
+        // Log permission status and scheduled notifications for testing
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.notificationService.logNotificationPermissionStatus()
+            self.notificationService.logAllPendingNotifications()
+        }
     }
     
     /// Updates notifications with current streak data (call daily)
@@ -92,6 +98,11 @@ class ViralNotificationManager: ObservableObject {
             afterFeeling: profile.afterFeeling,
             daysSober: daysSober
         )
+        
+        // Log updated notifications for testing
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.notificationService.logAllPendingNotifications()
+        }
     }
     
     // MARK: - Private Implementation
@@ -220,5 +231,10 @@ class ViralNotificationManager: ObservableObject {
             moneySaved: moneySaved,
             hoursReclaimed: hoursReclaimed
         )
+        
+        // Log milestone notification for testing
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.notificationService.logAllPendingNotifications()
+        }
     }
 }

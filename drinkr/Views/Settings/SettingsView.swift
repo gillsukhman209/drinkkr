@@ -628,6 +628,29 @@ struct SettingsView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                     
+                    // Log notifications button
+                    Button(action: {
+                        NotificationService.shared.logNotificationPermissionStatus()
+                        NotificationService.shared.logAllPendingNotifications()
+                    }) {
+                        HStack {
+                            Image(systemName: "bell.and.waveform")
+                                .foregroundColor(ColorTheme.successGreen)
+                            Text("Log All Notifications")
+                                .font(.system(size: isCompact ? 14 : 16, weight: .medium))
+                                .foregroundColor(ColorTheme.successGreen)
+                            Spacer()
+                        }
+                        .padding(isCompact ? 12 : 15)
+                        .background(ColorTheme.successGreen.opacity(0.1))
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(ColorTheme.successGreen.opacity(0.3), lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
                     // Reset button
                     Button(action: {
                         debugTimeManager.resetToRealTime()
