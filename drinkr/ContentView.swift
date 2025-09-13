@@ -157,6 +157,10 @@ struct ContentView: View {
                 handleOnboardingCompletion(profile)
             }
         }
+        .onOpenURL { url in
+            print("🔗 [CONTENTVIEW] onOpenURL called with: \(url)")
+            handleDeepLink(url)
+        }
     }
     
     private func checkOnboardingStatus() {
@@ -287,6 +291,17 @@ struct ContentView: View {
         
         // Update notifications with current streak
         ViralNotificationManager.shared.updateNotificationsWithCurrentStreak(sobrietyData: sobrietyData)
+    }
+    
+    private func handleDeepLink(_ url: URL) {
+        print("🔗 [CONTENTVIEW] Handling deep link: \(url)")
+        
+        // Check if it's our retention notification deep link
+        if url.scheme == "drinkr" && url.host == "retention" {
+            let placement = url.pathComponents.count > 1 ? url.pathComponents[1] : "default_paywall"
+            print("🎯 [CONTENTVIEW] Retention deep link - presenting placement: \(placement)")
+            SuperwallManager.shared.presentPlacement(placement)
+        }
     }
 }
 

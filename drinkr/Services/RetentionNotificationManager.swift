@@ -41,8 +41,8 @@ class RetentionNotificationManager: ObservableObject {
         
         // Add user info to handle deep link
         content.userInfo = [
-            "type": "retention_free_trial",
-            "placement": SuperwallManager.Placements.yearlyFreeTrial,
+            "type": "retention_free_trial", 
+            "placement": SuperwallManager.Placements.yearlyFreeTrial, // This is "yearly_free_trial"
             "userName": userName
         ]
         

@@ -11,6 +11,7 @@ import UserNotifications
 
 @main
 struct SobbrApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appStateManager = AppStateManager.shared
     
     var sharedModelContainer: ModelContainer = {
@@ -35,6 +36,10 @@ struct SobbrApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appStateManager)
+                .onAppear {
+                    // Note: AppStateManager handles notification delegation
+                    print("🔔 SwiftUI app loaded - AppStateManager manages notifications")
+                }
         }
         .modelContainer(sharedModelContainer)
     }

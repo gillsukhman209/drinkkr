@@ -34,8 +34,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Set up notification categories
         RetentionNotificationManager.shared.setupNotificationCategories()
         
-        // Set notification delegate for handling taps
-        UNUserNotificationCenter.current().delegate = self
+        // Note: AppStateManager sets itself as notification delegate, so we don't override it here
+        print("🔔 AppDelegate initialized - AppStateManager handles notifications")
         
         return true
     }
@@ -77,6 +77,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func applicationDidBecomeActive(_ application: UIApplication) {
         print("📱 AppDelegate: applicationDidBecomeActive called")
         
+        // Note: AppStateManager is the notification delegate, not AppDelegate
+        print("📱 AppDelegate: applicationDidBecomeActive - notification handling managed by AppStateManager")
+        
         // Check if we should show free trial from quick action
         let shouldShow = UserDefaults.standard.bool(forKey: "shouldShowFreeTrialFromQuickAction")
         print("🔍 Should show free trial: \(shouldShow)")
@@ -113,51 +116,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     // MARK: - Notification Deep Link Handling
     
     private func handleNotificationDeepLink(_ userInfo: [AnyHashable: Any]) {
-        print("🔗 Handling notification deep link: \(userInfo)")
+        print("🔗 [APPDELEGATE] Handling notification deep link: \(userInfo)")
         
         guard let notificationType = userInfo["type"] as? String else {
-            print("❌ No notification type found")
+            print("❌ [APPDELEGATE] No notification type found in userInfo: \(userInfo)")
             return
         }
         
-        switch notificationType {
-        case "retention_free_trial":
-            if let placement = userInfo["placement"] as? String {
-                print("🎯 Retention notification tapped - presenting placement: \(placement)")
-                
-                // Delay to ensure app is fully loaded
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    SuperwallManager.shared.presentPlacement(placement)
-                }
-            }
-        default:
-            print("❌ Unknown notification type: \(notificationType)")
-        }
+        print("✅ [APPDELEGATE] Found notification type: \(notificationType)")
+        
+        // Note: This method is no longer called since AppStateManager is the notification delegate
+        print("⚠️ [APPDELEGATE] This method should not be called - AppStateManager handles notifications")
     }
 }
 
-// MARK: - UNUserNotificationCenterDelegate
-
-extension AppDelegate: UNUserNotificationCenterDelegate {
-    
-    // Handle notification tap when app is in foreground
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        
-        print("🔔 Notification tapped: \(response.notification.request.identifier)")
-        print("📱 User info: \(response.notification.request.content.userInfo)")
-        
-        // Handle the deep link
-        handleNotificationDeepLink(response.notification.request.content.userInfo)
-        
-        completionHandler()
-    }
-    
-    // Handle notification presentation when app is in foreground
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        
-        print("🔔 Notification received while app in foreground: \(notification.request.identifier)")
-        
-        // Show notification even when app is in foreground
-        completionHandler([.banner, .sound, .badge])
-    }
-}
+// Note: UNUserNotificationCenterDelegate methods are handled by AppStateManager, not AppDelegate

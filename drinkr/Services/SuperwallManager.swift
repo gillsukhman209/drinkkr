@@ -303,6 +303,9 @@ class SuperwallManager: ObservableObject {
     
     /// Present a specific Superwall placement by name
     func presentPlacement(_ placementName: String) {
+        print("🔍 presentPlacement called with: \(placementName)")
+        print("🔍 SuperwallManager isInitialized: \(isInitialized)")
+        
         guard isInitialized else {
             print("⚠️ SuperwallManager not initialized - cannot present placement")
             return
@@ -312,9 +315,9 @@ class SuperwallManager: ObservableObject {
         
         // Use the correct API for Superwall 4.7.0
         Task { @MainActor in
-            print("🚀 Triggering placement: \(placementName)")
+            print("🚀 [MainActor] About to trigger placement: \(placementName)")
             Superwall.shared.register(placement: placementName)
-            print("✅ Placement registration complete")
+            print("✅ [MainActor] Placement registration called for: \(placementName)")
         }
     }
     
