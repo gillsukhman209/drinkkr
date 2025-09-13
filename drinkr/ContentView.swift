@@ -171,9 +171,12 @@ struct ContentView: View {
                 dataService.sobrietyData?.updateStreak()
                 dataService.sobrietyData?.calculateStats()
                 
-                // Set up viral notifications for existing users with updated streak
-                if let sobrietyData = dataService.sobrietyData {
+                // Only set up viral notifications for existing users with valid subscription
+                if superwallManager.hasValidSubscription(), let sobrietyData = dataService.sobrietyData {
+                    print("✅ Existing user has valid subscription - setting up viral notifications")
                     ViralNotificationManager.shared.setupViralNotifications(sobrietyData: sobrietyData, onboardingProfile: profile)
+                } else {
+                    print("⚠️ Existing user has no valid subscription - skipping viral notifications setup")
                 }
                 
                 // Check if subscription is needed
@@ -230,9 +233,12 @@ struct ContentView: View {
         dataService.sobrietyData?.updateStreak()
         dataService.sobrietyData?.calculateStats()
         
-        // Set up viral notifications with onboarding data and current streak
-        if let sobrietyData = dataService.sobrietyData {
+        // Only set up viral notifications if user has a valid subscription
+        if superwallManager.hasValidSubscription(), let sobrietyData = dataService.sobrietyData {
+            print("✅ User has valid subscription - setting up viral notifications")
             ViralNotificationManager.shared.setupViralNotifications(sobrietyData: sobrietyData, onboardingProfile: profile)
+        } else {
+            print("⚠️ User has no valid subscription - skipping viral notifications setup")
         }
         
         hasCompletedOnboarding = true

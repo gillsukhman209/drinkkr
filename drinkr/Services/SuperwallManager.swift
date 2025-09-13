@@ -30,6 +30,7 @@ class SuperwallManager: ObservableObject {
         static let onboardingComplete = "default_paywall"
         static let premiumFeature = "premium_feature"
         static let settings = "settings_paywall"
+        static let yearlyFreeTrial = "yearly_free_trial"
         
         // Age-based placements (matching Superwall dashboard)
         static let age21_22 = "age21-22"
@@ -87,7 +88,7 @@ class SuperwallManager: ObservableObject {
         print("🚀 Initializing SuperwallKit with API key: \(apiKey)")
         Superwall.configure(apiKey: apiKey)
         
-        // Set up Superwall delegate for subscription status updates
+        // Set up Superwall delegate for subscription status updates and paywall tracking
         setupSuperwallDelegate()
         
         isInitialized = true
@@ -120,8 +121,8 @@ class SuperwallManager: ObservableObject {
         
         Superwall.shared.register(placement: placement) {
             print("✅ Onboarding paywall flow completed for placement: \(placement)")
-            // Mark user as subscribed since paywall completed successfully
-            self.markSubscribed()
+            // Don't automatically mark as subscribed - let delegate handle subscription events
+            // The SuperwallDelegate will call markSubscribed() if user actually subscribes
             completion()
         }
     }
@@ -298,6 +299,25 @@ class SuperwallManager: ObservableObject {
         return isSubscribed
     }
     
+    // MARK: - Placement Presentation
+    
+    /// Present a specific Superwall placement by name
+    func presentPlacement(_ placementName: String) {
+        guard isInitialized else {
+            print("⚠️ SuperwallManager not initialized - cannot present placement")
+            return
+        }
+        
+        print("🎁 Presenting Superwall placement: \(placementName)")
+        
+        // Use the correct API for Superwall 4.7.0
+        Task { @MainActor in
+            print("🚀 Triggering placement: \(placementName)")
+            Superwall.shared.register(placement: placementName)
+            print("✅ Placement registration complete")
+        }
+    }
+    
     /// Restore purchases - properly restore and persist subscription status
     func restorePurchases() {
         print("🔄 Restoring purchases...")
@@ -374,8 +394,93 @@ class SuperwallManager: ObservableObject {
     // MARK: - Superwall Configuration
     
     private func setupSuperwallDelegate() {
-        // Superwall handles subscription status internally
-        // We don't need to set up custom delegates for basic functionality
-        print("ℹ️ Superwall delegate setup - using internal management")
+        Superwall.shared.delegate = self
+        print("ℹ️ Superwall delegate setup complete")
+    }
+}
+
+// MARK: - SuperwallDelegate
+
+extension SuperwallManager: SuperwallDelegate {
+    
+    func handleSuperwallEvent(withInfo eventInfo: SuperwallEventInfo) {
+        switch eventInfo.event {
+        case .paywallDecline(let paywallInfo):
+            print("💔 Paywall declined for placement: \(paywallInfo.identifier)")
+            
+            // Check if this is a paywall dismissal that should trigger retention notifications
+            // Note: paywallInfo.identifier contains the template name from Superwall dashboard, not placement name
+            print("🔍 Checking if placement '\(paywallInfo.identifier)' should trigger retention notification")
+            
+            // Always schedule retention for any paywall decline during onboarding flow
+            // This ensures we catch all paywall dismissals regardless of template names
+            RetentionNotificationManager.shared.handlePaywallDismissed(placement: paywallInfo.identifier)
+            
+        case let .paywallPresentationRequest(status, reason):
+            print("🎯 Paywall presentation requested - Status: \(status), Reason: \(reason?.description ?? "nil")")
+            
+        case .paywallClose(let paywallCloseReason):
+            print("🚪 Paywall closed: \(paywallCloseReason)")
+            
+        case let .subscriptionStart(product, paywallInfo):
+            print("🎉 Subscription started: \(product.productIdentifier) for paywall: \(paywallInfo.identifier)")
+            // User subscribed - cancel any retention notifications
+            RetentionNotificationManager.shared.userDidSubscribe()
+            markSubscribed()
+            
+        case let .freeTrialStart(product, paywallInfo):
+            print("🆓 Free trial started: \(product.productIdentifier) for paywall: \(paywallInfo.identifier)")
+            // User started trial - cancel any retention notifications
+            RetentionNotificationManager.shared.userDidSubscribe()
+            markSubscribed()
+            
+        case let .transactionComplete(transaction, product, transactionType, paywallInfo):
+            print("✅ Transaction completed: \(product.productIdentifier) for paywall: \(paywallInfo.identifier)")
+            // User completed purchase - cancel any retention notifications
+            RetentionNotificationManager.shared.userDidSubscribe()
+            markSubscribed()
+            
+        case let .transactionRestore(restoreType, paywallInfo):
+            print("🔄 Transaction restored: \(restoreType) for paywall: \(paywallInfo.identifier)")
+            // User restored purchase - cancel any retention notifications
+            RetentionNotificationManager.shared.userDidSubscribe()
+            markSubscribed()
+            
+        case let .nonRecurringProductPurchase(product, paywallInfo):
+            print("💳 Non-recurring purchase: \(product.id) for paywall: \(paywallInfo.identifier)")
+            
+        default:
+            print("ℹ️ Superwall event: \(eventInfo.event)")
+        }
+    }
+    
+    // MARK: - Paywall Lifecycle Delegate Methods
+    
+    func didPresentPaywall(withInfo paywallInfo: PaywallInfo) {
+        print("🎬 Paywall presented: \(paywallInfo.identifier)")
+        // You can pause background tasks, hide UI elements, etc. when paywall is shown
+    }
+    
+    func didDismissPaywall(withInfo paywallInfo: PaywallInfo) {
+        print("🔚 Paywall dismissed: \(paywallInfo.identifier)")
+        
+        // Alternative place to trigger retention notifications when paywall is dismissed
+        // This catches all dismissals, including manual dismissals and declines
+        let targetPlacements = ["default_paywall", "premium_feature", "settings_paywall", "yearly_free_trial"]
+        if targetPlacements.contains(paywallInfo.identifier) {
+            RetentionNotificationManager.shared.handlePaywallDismissed(placement: paywallInfo.identifier)
+        }
+        
+        // Resume background tasks, show UI elements, etc.
+    }
+    
+    func willPresentPaywall(withInfo paywallInfo: PaywallInfo) {
+        print("🚀 Paywall about to present: \(paywallInfo.identifier)")
+        // Prepare for paywall presentation (pause video, etc.)
+    }
+    
+    func willDismissPaywall(withInfo paywallInfo: PaywallInfo) {
+        print("👋 Paywall about to dismiss: \(paywallInfo.identifier)")
+        // Prepare for paywall dismissal
     }
 }
