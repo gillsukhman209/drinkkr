@@ -144,6 +144,7 @@ struct ContentView: View {
                 Task {
                     await MainActor.run {
                         checkSubscriptionStatus()
+                        dataService.refreshStats()
                     }
                 }
             }
@@ -193,12 +194,13 @@ struct ContentView: View {
     
     // ATOMIC SESSION MANAGEMENT - Prevents all bypass exploits
     private func updateValidSubscriptionSession() {
-        let newSessionState = hasCompletedOnboarding && superwallManager.isSubscribed
+        // BYPASS: Temporarily disabled subscription check for free access
+        let newSessionState = hasCompletedOnboarding // && superwallManager.isSubscribed
         
         if newSessionState != hasValidSubscriptionSession {
             hasValidSubscriptionSession = newSessionState
             if newSessionState {
-                print("✅ ATOMIC: Valid subscription session established")
+                print("✅ ATOMIC: Valid subscription session established (FREE MODE)")
             } else {
                 print("🔒 ATOMIC: Invalid session - blocking app access")
             }
@@ -274,10 +276,15 @@ struct ContentView: View {
             
             // Calculate and store user-specific metrics
             let mealsPerDay = Double(mealsPerWeek) / 7.0
-            let costPerMeal = mealsPerWeek > 0 ? weeklySpending / Double(mealsPerWeek) : 15.0
+            let calculatedCostPerMeal = mealsPerWeek > 0 ? weeklySpending / Double(mealsPerWeek) : 15.0
+            // Ensure we never have 0 cost per meal (fallback to default $15 if calculation fails)
+            let costPerMeal = calculatedCostPerMeal > 0 ? calculatedCostPerMeal : 15.0
             
             cleanEatingData.mealsPerDay = mealsPerDay
             cleanEatingData.costPerMeal = costPerMeal
+            
+            print("💰 DEBUG: Calculated metrics - Weekly Spending: \(weeklySpending), Meals/Week: \(mealsPerWeek)")
+            print("💰 DEBUG: Derived metrics - Cost/Meal: \(costPerMeal), Meals/Day: \(mealsPerDay)")
             
             // Recalculate stats immediately
             cleanEatingData.calculateStats()

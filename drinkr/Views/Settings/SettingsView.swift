@@ -16,6 +16,11 @@ struct SettingsView: View {
     @State private var notificationsEnabled = true
     @State private var notificationTime = Date()
     
+    // Savings Settings
+    @State private var costPerMeal: Double = 15.0
+    @State private var showingCostEdit = false
+    @State private var tempCost: String = ""
+    
     // Debug time manipulation
     #if DEBUG
     @StateObject private var debugTimeManager = DebugTimeManager.shared
@@ -38,6 +43,10 @@ struct SettingsView: View {
                         profileSection
                             .padding(.horizontal)
                             .padding(.top)
+                        
+                        // Savings Section
+                        savingsSection
+                            .padding(.horizontal)
                         
                         // Subscription Section
                         subscriptionSection
@@ -79,6 +88,11 @@ struct SettingsView: View {
         .onAppear {
             userName = dataService.currentUser?.name ?? ""
             tempName = userName
+            
+            if let cost = dataService.cleanEatingData?.costPerMeal {
+                costPerMeal = cost
+                tempCost = String(format: "%.2f", cost)
+            }
         }
         .alert("Update Name", isPresented: $showingNameEdit) {
             TextField("Enter your name", text: $tempName)
@@ -99,7 +113,25 @@ struct SettingsView: View {
         .alert("Success", isPresented: $showingSaveConfirmation) {
             Button("OK", role: .cancel) { }
         } message: {
-            Text("Your name has been updated successfully")
+            Text("Your changes have been saved successfully")
+        }
+        .alert("Update Meal Cost", isPresented: $showingCostEdit) {
+            TextField("Cost per meal ($)", text: $tempCost)
+                .keyboardType(.decimalPad)
+            Button("Cancel", role: .cancel) {
+                if let cost = dataService.cleanEatingData?.costPerMeal {
+                    tempCost = String(format: "%.2f", cost)
+                }
+            }
+            Button("Save") {
+                if let cost = Double(tempCost), cost > 0 {
+                    costPerMeal = cost
+                    dataService.updateCostPerMeal(cost)
+                    showingSaveConfirmation = true
+                }
+            }
+        } message: {
+            Text("Enter the average cost of a fast food meal to calculate your savings.")
         }
         .sheet(isPresented: $showingTerms) {
             SafariView(url: URL(string: "https://www.freeprivacypolicy.com/live/c8a0d137-7a09-4a53-a7de-b43c13619987")!)
@@ -297,6 +329,49 @@ struct SettingsView: View {
                                 .font(.system(size: isCompact ? 14 : 16))
                                 .foregroundColor(ColorTheme.textSecondary)
                             Text(userName.isEmpty ? "Set your name" : userName)
+                                .font(.system(size: isCompact ? 16 : 18, weight: .medium))
+                                .foregroundColor(ColorTheme.textPrimary)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "pencil")
+                            .font(.system(size: isCompact ? 16 : 18))
+                            .foregroundColor(ColorTheme.accentCyan)
+                    }
+                    .padding(isCompact ? 15 : 18)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            .background(Color.white.opacity(0.04))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(ColorTheme.cardBorder, lineWidth: 1)
+            )
+        }
+    }
+    
+    var savingsSection: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            Text("SAVINGS SETTINGS")
+                .font(.system(size: isCompact ? 12 : 14, weight: .semibold))
+                .foregroundColor(ColorTheme.textSecondary)
+            
+            VStack(spacing: 0) {
+                // Cost Per Meal Row
+                Button(action: {
+                    if let cost = dataService.cleanEatingData?.costPerMeal {
+                        tempCost = String(format: "%.2f", cost)
+                    }
+                    showingCostEdit = true
+                }) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Average Meal Cost")
+                                .font(.system(size: isCompact ? 14 : 16))
+                                .foregroundColor(ColorTheme.textSecondary)
+                            Text("$\(String(format: "%.2f", costPerMeal))")
                                 .font(.system(size: isCompact ? 16 : 18, weight: .medium))
                                 .foregroundColor(ColorTheme.textPrimary)
                         }

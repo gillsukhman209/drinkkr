@@ -78,6 +78,14 @@ class DataService: ObservableObject {
         saveContext()
     }
     
+    func updateCostPerMeal(_ cost: Double) {
+        cleanEatingData?.costPerMeal = cost
+        cleanEatingData?.calculateStats()
+        updateAchievementProgress()
+        saveContext()
+        objectWillChange.send()
+    }
+    
     func completePledge() {
         // Increment pledge count in AppSettings
         AppSettings.shared.incrementPledgeCount()
