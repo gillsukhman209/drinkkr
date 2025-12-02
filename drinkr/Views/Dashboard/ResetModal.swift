@@ -283,7 +283,7 @@ struct ResetModal: View {
         dataService.recordRelapse()
         
         // Then update the most recent relapse with trigger and notes
-        if let relapse = dataService.sobrietyData?.relapses.last {
+        if let relapse = dataService.cleanEatingData?.relapses.last {
             relapse.trigger = trigger
             relapse.notes = notes.isEmpty ? nil : notes
         }

@@ -499,6 +499,13 @@ class NotificationService: ObservableObject {
         }
     }
     
+    func scheduleDailyCheckIn(at date: Date) {
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: date)
+        let minute = calendar.component(.minute, from: date)
+        scheduleDailyReminderNotification(at: hour, minute: minute)
+    }
+    
     func cancelAllNotifications() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()

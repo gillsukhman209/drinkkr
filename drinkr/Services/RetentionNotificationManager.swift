@@ -110,12 +110,12 @@ class RetentionNotificationManager: ObservableObject {
     private func createPersonalizedMessage(userName: String) -> String {
         let messages = [
             "🚨 \(userName), we didn't give up on you! 💰 Get 3 days FREE - LAST CHANCE to change your life! 🚨",
-            "💎 \(userName), your recovery matters! 🎁 FREE 3-DAY TRIAL - No credit card, no strings attached! 💎",
-            "⚡ \(userName), we're STILL here for you! 🔥 3 days FREE to RECLAIM your life - Don't miss out! ⚡",
-            "💥 \(userName), don't let alcohol WIN! 🎯 Your FREE 3-day trial is waiting - TAP NOW! 💥",
-            "🌟 \(userName), recovery IS possible! 💪 Get 3 days FREE to PROVE it to yourself - Limited time! 🌟",
+            "💎 \(userName), your health matters! 🎁 FREE 3-DAY TRIAL - No credit card, no strings attached! 💎",
+            "⚡ \(userName), we're STILL here for you! 🔥 3 days FREE to RECLAIM your health - Don't miss out! ⚡",
+            "💥 \(userName), don't let fast food WIN! 🎯 Your FREE 3-day trial is waiting - TAP NOW! 💥",
+            "🌟 \(userName), healthy eating IS possible! 💪 Get 3 days FREE to PROVE it to yourself - Limited time! 🌟",
             "🚀 \(userName), this is YOUR moment! 💰 3 days FREE access - Your future self will THANK YOU! 🚀",
-            "🔔 \(userName), FINAL OFFER! 🎁 Free 3-day trial - Everything you need to BEAT alcohol! 🔔"
+            "🔔 \(userName), FINAL OFFER! 🎁 Free 3-day trial - Everything you need to BEAT the cravings! 🔔"
         ]
         
         // Return a random message for variety

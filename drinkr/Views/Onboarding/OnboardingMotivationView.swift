@@ -47,7 +47,7 @@ struct OnboardingMotivationView: View {
                         .multilineTextAlignment(.center)
                         .opacity(animationPhase >= 2 ? 1.0 : 0.0)
                     
-                    Text("Based on your answers, here's what freedom from alcohol means for you:")
+                    Text("Based on your answers, here's what freedom from fast food means for you:")
                         .font(.system(size: isCompact ? 16 : 18, weight: .medium))
                         .foregroundColor(ColorTheme.textSecondary)
                         .multilineTextAlignment(.center)
@@ -85,7 +85,7 @@ struct OnboardingMotivationView: View {
                         icon: "heart.fill",
                         title: "Health Restored",
                         value: "90%",
-                        subtitle: "liver recovery in 2 months",
+                        subtitle: "digestion reset in 2 weeks",
                         description: "Your body begins healing immediately after you stop.",
                         gradientColors: [ColorTheme.accentPink, Color.red.opacity(0.8)],
                         delay: 6
@@ -119,7 +119,7 @@ struct OnboardingMotivationView: View {
                         .font(.system(size: isCompact ? 20 : 24, weight: .bold))
                         .foregroundColor(.white)
                     
-                    Text("People with your profile have an 87% success rate in their first 30 days with Sobbr")
+                    Text("People with your profile have an 87% success rate in their first 30 days with CleanEats")
                         .font(.system(size: isCompact ? 14 : 16, weight: .medium))
                         .foregroundColor(ColorTheme.textSecondary)
                         .multilineTextAlignment(.center)

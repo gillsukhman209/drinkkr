@@ -224,25 +224,25 @@ struct RelapseHistoryModal: View {
     // MARK: - Helper Functions
     
     func getRelapseAnalysis() -> (total: Int, thisMonth: Int, averagePerMonth: Double, topTriggers: [String]) {
-        guard let sobrietyData = dataService.sobrietyData else {
+        guard let cleanEatingData = dataService.cleanEatingData else {
             return (0, 0, 0.0, [])
         }
         
-        let total = sobrietyData.relapses.count
+        let total = cleanEatingData.relapses.count
         
         let calendar = Calendar.current
         let now = Date()
         let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start ?? now
         
-        let thisMonth = sobrietyData.relapses.filter { relapse in
+        let thisMonth = cleanEatingData.relapses.filter { relapse in
             relapse.date >= startOfMonth
         }.count
         
-        let monthsSinceQuit = max(1, calendar.dateComponents([.month], from: sobrietyData.quitDate, to: now).month ?? 1)
+        let monthsSinceQuit = max(1, calendar.dateComponents([.month], from: cleanEatingData.quitDate, to: now).month ?? 1)
         let averagePerMonth = Double(total) / Double(monthsSinceQuit)
         
         // Get top triggers
-        let triggers = sobrietyData.relapses.compactMap { $0.trigger }.filter { !$0.isEmpty }
+        let triggers = cleanEatingData.relapses.compactMap { $0.trigger }.filter { !$0.isEmpty }
         let triggerCounts = Dictionary(triggers.map { ($0, 1) }, uniquingKeysWith: +)
         let topTriggers = triggerCounts.sorted { $0.value > $1.value }.prefix(3).map { $0.key }
         
@@ -250,7 +250,7 @@ struct RelapseHistoryModal: View {
     }
     
     func getFilteredRelapses() -> [Relapse] {
-        guard let sobrietyData = dataService.sobrietyData else { return [] }
+        guard let cleanEatingData = dataService.cleanEatingData else { return [] }
         
         let calendar = Calendar.current
         let now = Date()
@@ -264,10 +264,10 @@ struct RelapseHistoryModal: View {
         case "This Year":
             startDate = calendar.dateInterval(of: .year, for: now)?.start ?? now
         default: // "All Time"
-            return sobrietyData.relapses
+            return cleanEatingData.relapses
         }
         
-        return sobrietyData.relapses.filter { $0.date >= startDate }
+        return cleanEatingData.relapses.filter { $0.date >= startDate }
     }
     
     func formatDate(_ date: Date) -> String {

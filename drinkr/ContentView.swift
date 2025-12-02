@@ -172,13 +172,13 @@ struct ContentView: View {
                 updateDataServiceWithProfile(profile)
                 
                 // Update streak before setting up notifications
-                dataService.sobrietyData?.updateStreak()
-                dataService.sobrietyData?.calculateStats()
+                dataService.cleanEatingData?.updateStreak()
+                dataService.cleanEatingData?.calculateStats()
                 
                 // Only set up viral notifications for existing users with valid subscription
-                if superwallManager.hasValidSubscription(), let sobrietyData = dataService.sobrietyData {
+                if superwallManager.hasValidSubscription(), let cleanEatingData = dataService.cleanEatingData {
                     print("✅ Existing user has valid subscription - setting up viral notifications")
-                    ViralNotificationManager.shared.setupViralNotifications(sobrietyData: sobrietyData, onboardingProfile: profile)
+                    ViralNotificationManager.shared.setupViralNotifications(cleanEatingData: cleanEatingData, onboardingProfile: profile)
                 } else {
                     print("⚠️ Existing user has no valid subscription - skipping viral notifications setup")
                 }
@@ -234,18 +234,22 @@ struct ContentView: View {
         updateDataServiceWithProfile(profile)
         
         // Update streak before setting up notifications
-        dataService.sobrietyData?.updateStreak()
-        dataService.sobrietyData?.calculateStats()
+        dataService.cleanEatingData?.updateStreak()
+        dataService.cleanEatingData?.calculateStats()
         
         // Only set up viral notifications if user has a valid subscription
-        if superwallManager.hasValidSubscription(), let sobrietyData = dataService.sobrietyData {
+        if superwallManager.hasValidSubscription(), let cleanEatingData = dataService.cleanEatingData {
             print("✅ User has valid subscription - setting up viral notifications")
-            ViralNotificationManager.shared.setupViralNotifications(sobrietyData: sobrietyData, onboardingProfile: profile)
+            ViralNotificationManager.shared.setupViralNotifications(cleanEatingData: cleanEatingData, onboardingProfile: profile)
         } else {
             print("⚠️ User has no valid subscription - skipping viral notifications setup")
         }
         
         hasCompletedOnboarding = true
+        
+        // Count the onboarding commitment as the first pledge
+        AppSettings.shared.incrementPledgeCount()
+        
         // Update atomic session state - will only allow app access if also subscribed
         updateValidSubscriptionSession()
     }
@@ -260,14 +264,23 @@ struct ContentView: View {
             // Add other profile updates as needed
         }
         
-        // Update sobriety data with quit date and preferences
-        if let sobrietyData = dataService.sobrietyData {
-            sobrietyData.quitDate = profile.quitDate
+        // Update clean eating data with quit date and preferences
+        if let cleanEatingData = dataService.cleanEatingData {
+            cleanEatingData.quitDate = profile.quitDate
+            
             // Update spending calculations based on onboarding data
             let weeklySpending = profile.weeklySpendingAmount
-            let daysAlcoholFree = Calendar.current.dateComponents([.day], from: profile.quitDate, to: Date()).day ?? 0
-            sobrietyData.moneySaved = weeklySpending * (Double(daysAlcoholFree) / 7.0)
-            sobrietyData.drinksAvoided = profile.drinksPerSessionInt * max(1, daysAlcoholFree)
+            let mealsPerWeek = profile.mealsPerWeekInt
+            
+            // Calculate and store user-specific metrics
+            let mealsPerDay = Double(mealsPerWeek) / 7.0
+            let costPerMeal = mealsPerWeek > 0 ? weeklySpending / Double(mealsPerWeek) : 15.0
+            
+            cleanEatingData.mealsPerDay = mealsPerDay
+            cleanEatingData.costPerMeal = costPerMeal
+            
+            // Recalculate stats immediately
+            cleanEatingData.calculateStats()
         }
         
         // Save to persistent storage
@@ -283,14 +296,14 @@ struct ContentView: View {
     
     private func refreshNotificationsWithCurrentStreak() {
         guard hasCompletedOnboarding,
-              let sobrietyData = dataService.sobrietyData else { return }
+              let cleanEatingData = dataService.cleanEatingData else { return }
         
         // Update streak calculations
-        sobrietyData.updateStreak()
-        sobrietyData.calculateStats()
+        cleanEatingData.updateStreak()
+        cleanEatingData.calculateStats()
         
         // Update notifications with current streak
-        ViralNotificationManager.shared.updateNotificationsWithCurrentStreak(sobrietyData: sobrietyData)
+        ViralNotificationManager.shared.updateNotificationsWithCurrentStreak(cleanEatingData: cleanEatingData)
     }
     
     private func handleDeepLink(_ url: URL) {

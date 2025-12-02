@@ -7,7 +7,7 @@ class DataService: ObservableObject {
     private var modelContext: ModelContext?
     
     @Published var currentUser: User?
-    @Published var sobrietyData: SobrietyData?
+    @Published var cleanEatingData: CleanEatingData?
     @Published var achievements: [Achievement] = []
     @Published var checkIns: [CheckIn] = []
     @Published var meditationSessions: [MeditationSession] = []
@@ -33,23 +33,24 @@ class DataService: ObservableObject {
             currentUser = newUser
         }
         
-        let sobrietyDescriptor = FetchDescriptor<SobrietyData>()
-        if let sobrietyDatas = try? modelContext.fetch(sobrietyDescriptor), let data = sobrietyDatas.first {
-            sobrietyData = data
-            sobrietyData?.updateStreak()
-            sobrietyData?.calculateStats()
+        let cleanEatingDescriptor = FetchDescriptor<CleanEatingData>()
+        if let data = try? modelContext.fetch(cleanEatingDescriptor).first {
+            cleanEatingData = data
+            cleanEatingData?.updateStreak()
+            cleanEatingData?.calculateStats()
             
             // Store quit date and last relapse in UserDefaults for notifications
-            syncSobrietyDataToUserDefaults()
+            syncCleanEatingDataToUserDefaults()
         } else {
-            let newSobrietyData = SobrietyData(quitDate: Date())
-            newSobrietyData.updateStreak()
-            newSobrietyData.calculateStats()
-            modelContext.insert(newSobrietyData)
-            sobrietyData = newSobrietyData
+            // Create initial data if none exists
+            let newCleanEatingData = CleanEatingData(quitDate: Date())
+            newCleanEatingData.updateStreak()
+            newCleanEatingData.calculateStats()
+            modelContext.insert(newCleanEatingData)
+            cleanEatingData = newCleanEatingData
             
             // Store quit date and last relapse in UserDefaults for notifications
-            syncSobrietyDataToUserDefaults()
+            syncCleanEatingDataToUserDefaults()
         }
         
         let achievementDescriptor = FetchDescriptor<Achievement>()
@@ -78,28 +79,34 @@ class DataService: ObservableObject {
     }
     
     func completePledge() {
-        // This function is now deprecated - keeping for compatibility
-        // Pledge functionality has been changed to check-in notifications
+        // Increment pledge count in AppSettings
         AppSettings.shared.incrementPledgeCount()
+        
+        // Mark pledge as completed for today in CleanEatingData
+        if let cleanEatingData = cleanEatingData {
+            cleanEatingData.pledgeCompletedToday = true
+            cleanEatingData.lastPledgeDate = Date()
+        }
+        
         saveContext()
         updateAchievementProgress()
     }
     
     func recordRelapse() {
-        guard let sobrietyData = sobrietyData else { return }
+        guard let cleanEatingData = cleanEatingData else { return }
         
         // Add the relapse
-        sobrietyData.addRelapse()
+        cleanEatingData.addRelapse()
         
         // Reset the quit date to now (starting fresh)
-        sobrietyData.quitDate = Date()
+        cleanEatingData.quitDate = Date()
         
         // Update all calculations
-        sobrietyData.updateStreak()
-        sobrietyData.calculateStats()
+        cleanEatingData.updateStreak()
+        cleanEatingData.calculateStats()
         
         // Sync to UserDefaults for notifications
-        syncSobrietyDataToUserDefaults()
+        syncCleanEatingDataToUserDefaults()
         
         saveContext()
         updateAchievementProgress()
@@ -108,18 +115,18 @@ class DataService: ObservableObject {
     func resetProgress() {
         guard let modelContext = modelContext else { return }
         
-        if let sobrietyData = sobrietyData {
-            sobrietyData.quitDate = Date()
-            sobrietyData.relapses = []
-            sobrietyData.currentStreak = 0
-            sobrietyData.longestStreak = 0
-            sobrietyData.totalDaysSober = 0
-            sobrietyData.pledgeCompletedToday = false
-            sobrietyData.lastPledgeDate = nil
-            sobrietyData.moneySaved = 0
-            sobrietyData.drinksAvoided = 0
-            sobrietyData.caloriesSaved = 0
-            sobrietyData.timeReclaimed = 0
+        if let cleanEatingData = cleanEatingData {
+            cleanEatingData.quitDate = Date()
+            cleanEatingData.relapses = []
+            cleanEatingData.currentStreak = 0
+            cleanEatingData.longestStreak = 0
+            cleanEatingData.totalDaysClean = 0
+            cleanEatingData.pledgeCompletedToday = false
+            cleanEatingData.lastPledgeDate = nil
+            cleanEatingData.moneySaved = 0
+            cleanEatingData.mealsAvoided = 0
+            cleanEatingData.caloriesSaved = 0
+            cleanEatingData.timeReclaimed = 0
         }
         
         for achievement in achievements {
@@ -131,29 +138,36 @@ class DataService: ObservableObject {
         saveContext()
     }
     
-    func updateSobrietyDate(_ date: Date) {
-        sobrietyData?.quitDate = date
-        sobrietyData?.updateStreak()
-        sobrietyData?.calculateStats()
+    func updateCleanEatingDate(_ date: Date) {
+        cleanEatingData?.quitDate = date
+        cleanEatingData?.updateStreak()
+        cleanEatingData?.calculateStats()
         
         // Sync to UserDefaults for notifications
-        syncSobrietyDataToUserDefaults()
+        syncCleanEatingDataToUserDefaults()
         
         saveContext()
         updateAchievementProgress()
     }
     
+    func refreshStats() {
+        objectWillChange.send()
+        cleanEatingData?.updateStreak()
+        cleanEatingData?.calculateStats()
+        updateAchievementProgress()
+    }
+    
     private func updateAchievementProgress() {
-        guard let sobrietyData = sobrietyData else { return }
+        guard let cleanEatingData = cleanEatingData else { return }
         
         for achievement in achievements {
             switch achievement.category {
             case .streak, .milestone:
-                achievement.checkProgress(sobrietyData.currentStreak)
+                achievement.checkProgress(cleanEatingData.currentStreak)
             case .savings:
-                achievement.checkProgress(Int(sobrietyData.moneySaved))
+                achievement.checkProgress(Int(cleanEatingData.moneySaved))
             case .health:
-                achievement.checkProgress(sobrietyData.caloriesSaved)
+                achievement.checkProgress(cleanEatingData.caloriesSaved)
             case .community:
                 if achievement.title == "Pledge Keeper" {
                     let pledgeCount = calculatePledgeCount()
@@ -248,7 +262,7 @@ class DataService: ObservableObject {
     }
     
     func getTimeComponents() -> (days: Int, hours: Int, minutes: Int, seconds: Int) {
-        guard let sobrietyData = sobrietyData else {
+        guard let cleanEatingData = cleanEatingData else {
             return (0, 0, 0, 0)
         }
         
@@ -259,7 +273,7 @@ class DataService: ObservableObject {
         let currentTime = Date()
         #endif
         
-        let interval = currentTime.timeIntervalSince(sobrietyData.quitDate)
+        let interval = currentTime.timeIntervalSince(cleanEatingData.quitDate)
         let days = Int(interval) / 86400
         let hours = Int(interval) % 86400 / 3600
         let minutes = Int(interval) % 3600 / 60
@@ -268,32 +282,68 @@ class DataService: ObservableObject {
     }
     
     func getWeekProgress() -> [Bool] {
-        guard let sobrietyData = sobrietyData else {
+        guard let cleanEatingData = cleanEatingData else {
             return Array(repeating: false, count: 7)
         }
         
-        let currentStreak = sobrietyData.currentStreak
-        return (0..<7).map { $0 < currentStreak }
+        let calendar = Calendar.current
+        let today = Date()
+        
+        // Get start of the current week (Monday)
+        // Note: weekday 1 is Sunday, 2 is Monday
+        var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)
+        components.weekday = 2 // Monday
+        guard let startOfWeek = calendar.date(from: components) else {
+            return Array(repeating: false, count: 7)
+        }
+        
+        var progress: [Bool] = []
+        
+        // Check each day of the week (Mon-Sun)
+        for dayOffset in 0..<7 {
+            guard let dateToCheck = calendar.date(byAdding: .day, value: dayOffset, to: startOfWeek) else {
+                progress.append(false)
+                continue
+            }
+            
+            // If date is in the future, it's not completed
+            if dateToCheck > today {
+                progress.append(false)
+                continue
+            }
+            
+            // Check if date is after quit date
+            let isAfterQuitDate = dateToCheck >= calendar.startOfDay(for: cleanEatingData.quitDate)
+            
+            // Check if there was a relapse on this day
+            let hasRelapse = cleanEatingData.relapses.contains { relapse in
+                calendar.isDate(relapse.date, inSameDayAs: dateToCheck)
+            }
+            
+            progress.append(isAfterQuitDate && !hasRelapse)
+        }
+        
+        return progress
     }
     
     // MARK: - UserDefaults Sync for Notifications
     
-    private func syncSobrietyDataToUserDefaults() {
-        guard let sobrietyData = sobrietyData else { return }
+    private func syncCleanEatingDataToUserDefaults() {
+        guard let cleanEatingData = cleanEatingData else { return }
         
         // Store quit date for notification calculations
-        UserDefaults.standard.set(sobrietyData.quitDate, forKey: "sobrietyQuitDate")
+        UserDefaults.standard.set(cleanEatingData.quitDate, forKey: "cleanEatingQuitDate")
         
         // Store last relapse date if any
-        if let lastRelapse = sobrietyData.relapses.last {
+        if let lastRelapse = cleanEatingData.relapses.last {
             UserDefaults.standard.set(lastRelapse.date, forKey: "lastRelapseDate")
         } else {
             UserDefaults.standard.removeObject(forKey: "lastRelapseDate")
         }
         
         // Store current streak for quick access
-        UserDefaults.standard.set(sobrietyData.currentStreak, forKey: "currentStreak")
+        UserDefaults.standard.set(cleanEatingData.currentStreak, forKey: "currentStreak")
         
-        print("✅ Synced sobriety data to UserDefaults - Quit date: \(sobrietyData.quitDate), Current streak: \(sobrietyData.currentStreak)")
+        print("✅ Synced clean eating data to UserDefaults - Quit date: \(cleanEatingData.quitDate), Current streak: \(cleanEatingData.currentStreak)")
     }
 }

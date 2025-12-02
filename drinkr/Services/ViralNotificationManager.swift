@@ -27,22 +27,22 @@ class ViralNotificationManager: ObservableObject {
     // MARK: - Public Methods
     
     /// Sets up ALL Phase 1-6 notifications using onboarding data and current user status
-    func setupViralNotifications(sobrietyData: SobrietyData, onboardingProfile: OnboardingUserProfile) {
+    func setupViralNotifications(cleanEatingData: CleanEatingData, onboardingProfile: OnboardingUserProfile) {
         print("🚀 Setting up viral notifications for \(onboardingProfile.userName)")
         
-        let daysSober = sobrietyData.currentStreak
+        let daysClean = cleanEatingData.currentStreak
         
         // Phase 1: Daily Check-In
         setupDailyCheckIn(
-            sobrietyData: sobrietyData, 
+            cleanEatingData: cleanEatingData, 
             profile: onboardingProfile, 
-            daysSober: daysSober
+            daysClean: daysClean
         )
         
         // Phase 2: Craving Crushers  
         setupCravingCrushers(
             profile: onboardingProfile, 
-            daysSober: daysSober
+            daysClean: daysClean
         )
         
         // Phase 3: Milestone Celebrations
@@ -52,13 +52,13 @@ class ViralNotificationManager: ObservableObject {
         // Phase 4: Savage Motivation
         setupSavageMotivation(
             profile: onboardingProfile,
-            daysSober: daysSober
+            daysClean: daysClean
         )
         
         // Phase 5: Fear Crusher
         setupFearCrusher(
             profile: onboardingProfile,
-            daysSober: daysSober
+            daysClean: daysClean
         )
         
         // Phase 6: Wisdom Drops
@@ -74,20 +74,20 @@ class ViralNotificationManager: ObservableObject {
     }
     
     /// Updates notifications with current streak data (call daily)
-    func updateNotificationsWithCurrentStreak(sobrietyData: SobrietyData) {
+    func updateNotificationsWithCurrentStreak(cleanEatingData: CleanEatingData) {
         guard let profile = loadOnboardingProfile() else {
             print("❌ No onboarding profile found for notification update")
             return
         }
         
-        let daysSober = sobrietyData.currentStreak
-        print("🔄 Updating notifications with current streak: \(daysSober) days")
+        let daysClean = cleanEatingData.currentStreak
+        print("🔄 Updating notifications with current streak: \(daysClean) days")
         
         // Update daily check-in with current streak
         notificationService.schedulePersonalizedDailyCheckIn(
             userName: profile.userName,
             checkInTime: profile.checkInTime,
-            daysSober: daysSober,
+            daysSober: daysClean,
             weeklySpending: profile.weeklySpending
         )
         
@@ -96,7 +96,7 @@ class ViralNotificationManager: ObservableObject {
             userName: profile.userName,
             triggers: profile.triggers,
             afterFeeling: profile.afterFeeling,
-            daysSober: daysSober
+            daysSober: daysClean
         )
         
         // Log updated notifications for testing
@@ -107,18 +107,18 @@ class ViralNotificationManager: ObservableObject {
     
     // MARK: - Private Implementation
     
-    private func setupDailyCheckIn(sobrietyData: SobrietyData, profile: OnboardingUserProfile, daysSober: Int) {
+    private func setupDailyCheckIn(cleanEatingData: CleanEatingData, profile: OnboardingUserProfile, daysClean: Int) {
         print("📅 Setting up daily check-in at \(formatTime(profile.checkInTime))")
         
         notificationService.schedulePersonalizedDailyCheckIn(
             userName: profile.userName,
             checkInTime: profile.checkInTime,
-            daysSober: daysSober,
+            daysSober: daysClean,
             weeklySpending: profile.weeklySpending
         )
     }
     
-    private func setupCravingCrushers(profile: OnboardingUserProfile, daysSober: Int) {
+    private func setupCravingCrushers(profile: OnboardingUserProfile, daysClean: Int) {
         print("💥 Setting up craving crusher notifications")
         print("📝 User triggers: \(profile.triggers.joined(separator: ", "))")
         print("😔 After feeling: \(profile.afterFeeling)")
@@ -127,7 +127,7 @@ class ViralNotificationManager: ObservableObject {
             userName: profile.userName,
             triggers: profile.triggers,
             afterFeeling: profile.afterFeeling,
-            daysSober: daysSober
+            daysSober: daysClean
         )
     }
     
@@ -136,7 +136,7 @@ class ViralNotificationManager: ObservableObject {
     
     // MARK: - Phase 4: Savage Motivation
     
-    private func setupSavageMotivation(profile: OnboardingUserProfile, daysSober: Int) {
+    private func setupSavageMotivation(profile: OnboardingUserProfile, daysClean: Int) {
         print("💪 Setting up savage motivation notifications")
         print("📝 User losses: \(profile.losses.joined(separator: ", "))")
         print("😔 After feeling: \(profile.afterFeeling)")
@@ -145,20 +145,20 @@ class ViralNotificationManager: ObservableObject {
             userName: profile.userName,
             losses: profile.losses,
             afterFeeling: profile.afterFeeling,
-            daysSober: daysSober
+            daysSober: daysClean
         )
     }
     
     // MARK: - Phase 5: Fear Crusher
     
-    private func setupFearCrusher(profile: OnboardingUserProfile, daysSober: Int) {
+    private func setupFearCrusher(profile: OnboardingUserProfile, daysClean: Int) {
         print("🦁 Setting up fear crusher notifications")
         print("😨 Biggest fear: \(profile.biggestFear)")
         
         notificationService.scheduleFearCrusherNotification(
             userName: profile.userName,
             biggestFear: profile.biggestFear,
-            daysSober: daysSober
+            daysSober: daysClean
         )
     }
     
@@ -169,7 +169,7 @@ class ViralNotificationManager: ObservableObject {
         notificationService.scheduleWisdomDropNotification()
     }
     
-    private func calculateDaysSober(from quitDate: Date) -> Int {
+    private func calculateDaysClean(from quitDate: Date) -> Int {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.day], from: quitDate, to: Date())
         return max(components.day ?? 0, 0)

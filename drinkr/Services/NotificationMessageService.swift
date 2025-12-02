@@ -18,23 +18,23 @@ struct NotificationMessageService {
         let messages = [
             (
                 title: "Good morning, \(userName)! ☀️",
-                body: "Your brain is getting clearer, and you're \(savings) richer this month ✨"
+                body: "Your body is thanking you, and you're \(savings) richer this month ✨"
             ),
             (
-                title: "\(userName), it's your check-in time 💪",
-                body: "Remember: you chose growth over guilt today. Keep proving you can do hard things!"
+                title: "\(userName), check-in time! 🥗",
+                body: "Remember: you chose health over convenience today. Keep proving you can do hard things!"
             ),
             (
                 title: "Daily victory check-in! 🏆",
-                body: "Hey \(userName), you made a promise to yourself. Today you're keeping it. That's strength."
+                body: "Hey \(userName), you made a promise to your body. Today you're keeping it. That's strength."
             ),
             (
-                title: "\(userName), your sober self is calling 📞",
-                body: "Still choosing clarity over chaos. Your future self is grateful for today's choices ❤️"
+                title: "\(userName), your healthy self is calling 📞",
+                body: "Still choosing nourishment over junk. Your future self is grateful for today's choices ❤️"
             ),
             (
                 title: "Check-in time, champion! 🌟",
-                body: "\(userName), you're not just avoiding alcohol, you're embracing life 🌈"
+                body: "\(userName), you're not just avoiding fast food, you're embracing vitality 🌈"
             )
         ]
         
@@ -52,46 +52,46 @@ struct NotificationMessageService {
         let genericMessages = [
             (
                 title: "Craving alert, \(userName)! 🚨",
-                body: "Remember: you told us alcohol makes you feel '\(afterFeeling)'. Your sober brain is trying to protect you ❤️"
+                body: "Remember: you told us fast food makes you feel '\(afterFeeling)'. Your body deserves better fuel ❤️"
             ),
             (
                 title: "Plot twist time! 💫",
-                body: "Hey \(userName), that craving? It's actually your brain rewiring itself for happiness. Day \(currentDaysSober) of building new pathways ✨"
+                body: "Hey \(userName), that craving? It's actually your taste buds resetting. Day \(currentDaysSober) of building new habits ✨"
             ),
             (
-                title: "\(userName), pause and breathe 🌬️",
-                body: "This feeling will pass. You've survived \(currentDaysSober) days without alcohol. You're stronger than any craving 💪"
+                title: "\(userName), pause and drink water 💧",
+                body: "This hunger might just be thirst. You've survived \(currentDaysSober) days without the drive-thru. You're stronger than any craving 💪"
             )
         ]
         
         // Trigger-specific messages
         var triggerMessages: [(String, String)] = []
         
-        if triggers.contains("Stress from work") {
+        if triggers.contains("Stress/Anxiety") {
             triggerMessages.append((
-                "Work stress hitting different? 💼",
-                "\(userName), you used to drink away work stress. Now you're handling it like the champion you are ⭐"
+                "Stressed out? 🧘",
+                "\(userName), you used to eat your stress. Now you're handling it like the champion you are. Breathe. ⭐"
             ))
         }
         
-        if triggers.contains("Loneliness") {
+        if triggers.contains("Convenience/Time") {
             triggerMessages.append((
-                "Feeling lonely, \(userName)? 🫂",
-                "Alcohol never fixed loneliness, it just postponed it. Keep finding real connection - starting with yourself ❤️"
+                "In a rush, \(userName)? 🏃",
+                "Fast food is quick, but feeling sluggish lasts all day. Grab a healthy snack instead! 🍎"
             ))
         }
         
         if triggers.contains("Boredom") {
             triggerMessages.append((
                 "Boredom trying to trick you? 🎭",
-                "\(userName), remember: alcohol didn't make life interesting, it made you forget how boring you felt. Keep engaging with real life ✨"
+                "\(userName), remember: food is fuel, not entertainment. Go for a walk or call a friend! ✨"
             ))
         }
         
-        if triggers.contains("Social pressure") {
+        if triggers.contains("Advertisements") {
             triggerMessages.append((
-                "Social pressure incoming! 👥",
-                "Hey \(userName), peer pressure? You're not missing out, you're standing out. That takes courage 🦁"
+                "Don't let the ads win! 📺",
+                "Hey \(userName), that burger looks good in the ad, but remember how it makes you feel? You're smarter than their marketing 🦁"
             ))
         }
         
@@ -106,59 +106,59 @@ struct NotificationMessageService {
         case 1:
             return (
                 "🎉 FIRST 24 HOURS COMPLETE! 🎉",
-                "\(userName), you did it! One full day without alcohol. Your body is already thanking you. This is just the beginning 💪"
+                "\(userName), you did it! One full day without fast food. Your digestion is already improving. This is just the beginning 💪"
             )
         case 3:
             return (
                 "🔥 72 HOURS STRONG! 🔥",
-                "\(userName), 3 days down! Your liver is celebrating, your brain is clearing, and you're proving you can do this 🌟"
+                "\(userName), 3 days down! Your energy is stabilizing, and you're proving you can do this 🌟"
             )
         case 7:
             return (
                 "🏆 ONE WEEK CHAMPION! 🏆",
-                "\(userName), 7 days sober! You've saved \(moneySaved) and reclaimed \(hoursReclaimed) hours. Screenshot this victory 📸"
+                "\(userName), 7 days clean! You've saved \(moneySaved) and avoided so much grease and salt. Screenshot this victory 📸"
             )
         case 14:
             return (
                 "💎 TWO WEEKS OF FREEDOM! 💎",
-                "\(userName), 14 days! Your sleep is improving, anxiety decreasing, and you're \(moneySaved) richer. Keep going! 🚀"
+                "\(userName), 14 days! Your skin might be clearing up, and you're \(moneySaved) richer. Keep going! 🚀"
             )
         case 30:
             return (
                 "🚨 MONTH 1 COMPLETE! 🚨",
-                "\(userName), 30 DAYS SOBER! You've saved \(moneySaved) and reclaimed \(hoursReclaimed) hours of your life. This is HUGE! 🎊"
+                "\(userName), 30 DAYS FAST FOOD FREE! You've saved \(moneySaved) and your body feels amazing. This is HUGE! 🎊"
             )
         case 60:
             return (
                 "⭐ TWO MONTHS STRONG! ⭐",
-                "\(userName), 60 days of choosing yourself! \(moneySaved) saved, \(hoursReclaimed) hours reclaimed. You're unstoppable 💫"
+                "\(userName), 60 days of choosing health! \(moneySaved) saved. You're unstoppable 💫"
             )
         case 90:
             return (
                 "🌟 90 DAYS - NEW YOU! 🌟",
-                "\(userName), THREE MONTHS SOBER! Your brain has literally rewired itself. \(moneySaved) saved. Screenshot this transformation 📱"
+                "\(userName), THREE MONTHS CLEAN! Your taste buds have changed. \(moneySaved) saved. Screenshot this transformation 📱"
             )
         case 180:
             return (
                 "🎯 HALF A YEAR HERO! 🎯",
-                "\(userName), 6 MONTHS! From rock bottom to rock solid. \(moneySaved) saved, \(hoursReclaimed) hours of real life lived 🏔️"
+                "\(userName), 6 MONTHS! From drive-thrus to home cooking. \(moneySaved) saved. You're living the healthy life 🥗"
             )
         case 365:
             return (
                 "👑 ONE YEAR LEGEND! 👑",
-                "\(userName), 365 DAYS SOBER! You've saved \(moneySaved) and gained a whole new life. Screenshot this moment forever 🎆"
+                "\(userName), 365 DAYS FREE! You've saved \(moneySaved) and gained a whole new level of health. Screenshot this moment forever 🎆"
             )
         default:
             let years = milestone / 365
             if years > 1 {
                 return (
-                    "🌈 \(years) YEARS OF FREEDOM! 🌈",
-                    "\(userName), \(years) YEARS SOBER! You're not just surviving, you're THRIVING. An inspiration to everyone 🦋"
+                    "🌈 \(years) YEARS OF HEALTH! 🌈",
+                    "\(userName), \(years) YEARS FREE! You're not just surviving, you're THRIVING. An inspiration to everyone 🦋"
                 )
             } else {
                 return (
                     "🎊 DAY \(milestone) MILESTONE! 🎊",
-                    "\(userName), \(milestone) days of strength! Every day is a victory worth celebrating 🌟"
+                    "\(userName), \(milestone) days of strength! Every healthy meal is a victory worth celebrating 🌟"
                 )
             }
         }
@@ -173,27 +173,27 @@ struct NotificationMessageService {
         let messages = [
             (
                 "Reality Check Saturday 🔥",
-                "\(userName), you used to lose entire weekends to hangovers. It's Saturday 10 AM and you're FREE. Past you could never 🌅"
+                "\(userName), you used to feel sluggish all weekend. It's Saturday 10 AM and you have ENERGY. Past you could never 🌅"
             ),
             (
                 "Friday Night Truth Bomb 💣",
-                "Remember when Friday meant blacking out? \(userName), it's Friday night and you're actually living. This is real life 🎯"
+                "Remember when Friday meant a greasy bag of regret? \(userName), it's Friday night and you're fueling your body right. This is real self-care 🎯"
             ),
             (
                 "Brutal Honesty Hour 💪",
-                "\(userName), you used to feel '\(afterFeeling)' after drinking. Now? You wake up proud. That's growth 📈"
+                "\(userName), you used to feel '\(afterFeeling)' after eating junk. Now? You wake up light. That's growth 📈"
             ),
             (
                 "Tuesday Reality Check ⚡",
-                "Hey \(userName), remember losing \(losses.first ?? "everything") to alcohol? You're getting it all back 💎"
+                "Hey \(userName), remember losing \(losses.first ?? "confidence") to bad food habits? You're getting it all back 💎"
             ),
             (
                 "Wake Up Call 📢",
-                "\(userName), you're proving everyone wrong who said you couldn't do it. Including yourself 🦁"
+                "\(userName), you're proving everyone wrong who said you couldn't eat healthy. Including yourself 🦁"
             ),
             (
                 "Savage Truth Time 🎯",
-                "Plot twist: The 'fun' you thought you were having was just borrowed happiness. This is the real thing ✨"
+                "Plot twist: The 'treat' you thought you were having was just poisoning your energy. Real food is the real treat ✨"
             )
         ]
         
@@ -207,39 +207,39 @@ struct NotificationMessageService {
         let currentDaysSober = getCurrentDaysSober()
         
         switch biggestFear.lowercased() {
-        case let fear where fear.contains("boring") || fear.contains("life will be boring"):
+        case let fear where fear.contains("hungry") || fear.contains("starving"):
             return (
-                "Sunday Fear Check: Boredom 🎭",
-                "\(userName), you feared life would be boring without alcohol. Plot twist: You're experiencing authentic joy. Boring was the blackouts 🎉"
+                "Fear Check: Hunger 🍎",
+                "\(userName), you feared being hungry. Plot twist: You're actually NOURISHED now. Empty calories were the lie 🎉"
             )
-        case let fear where fear.contains("friends") || fear.contains("lose my friends"):
+        case let fear where fear.contains("cooking") || fear.contains("hard"):
             return (
-                "Sunday Fear Check: Friends 👥",
-                "You feared losing friends, \(userName). Truth: Real friends celebrate your growth. The rest? Just drinking buddies 🤷‍♀️"
+                "Fear Check: Cooking 🍳",
+                "You feared cooking was too hard, \(userName). Look at you now, mastering your meals. You're a chef in the making! 👨‍🍳"
             )
-        case let fear where fear.contains("stress") || fear.contains("handle stress"):
+        case let fear where fear.contains("tastes bad") || fear.contains("bland"):
             return (
-                "Sunday Fear Check: Stress 🧘",
-                "\(userName), you thought you couldn't handle stress without alcohol. Now you're handling EVERYTHING. Alcohol was the stress 💪"
+                "Fear Check: Taste 👅",
+                "\(userName), you thought healthy food was boring. Now you know what REAL food tastes like. Grease was just masking the flavor 💪"
             )
         case let fear where fear.contains("fail") || fear.contains("disappoint"):
             return (
-                "Sunday Fear Check: Failure 🏆",
-                "Afraid of failing? \(userName), you're doing the hardest thing you've ever done. That's not failure, that's heroic 🦸‍♀️"
+                "Fear Check: Failure 🏆",
+                "Afraid of failing? \(userName), you're making healthy choices every day. That's not failure, that's victory 🦸‍♀️"
             )
-        case let fear where fear.contains("withdrawal") || fear.contains("symptoms"):
+        case let fear where fear.contains("social") || fear.contains("awkward"):
             return (
-                "Sunday Fear Check: Withdrawal ⚡",
-                "\(userName), you feared withdrawal symptoms. You survived them ALL and here you are, stronger. You're unstoppable 🚀"
+                "Fear Check: Social 🥗",
+                "\(userName), you feared social eating. You're showing everyone that health is cool. You're a trendsetter 🚀"
             )
-        case let fear where fear.contains("who i am") || fear.contains("identity"):
+        case let fear where fear.contains("afford") || fear.contains("expensive"):
             return (
-                "Sunday Fear Check: Identity 🦋",
-                "You feared not knowing who you are without alcohol. \(userName), you're meeting the REAL you. And they're amazing 🌟"
+                "Fear Check: Money 💰",
+                "You feared healthy food was expensive. \(userName), look at your savings from skipping the drive-thru! 🌟"
             )
         default:
             return (
-                "Sunday Fear Check 🎯",
+                "Fear Check 🎯",
                 "\(userName), remember your biggest fear about quitting? You're living proof that fear was lying to you 💫"
             )
         }
@@ -251,43 +251,43 @@ struct NotificationMessageService {
         let wisdomMessages = [
             (
                 "Daily Wisdom 🌟",
-                "You're not 'giving up' alcohol. You're choosing everything it took away: clarity, money, time, self-respect, real happiness ✨"
+                "You're not 'giving up' fast food. You're choosing everything it took away: energy, money, clear skin, self-respect ✨"
             ),
             (
                 "Truth Moment 💭",
-                "The version of you that needed alcohol to cope was doing their best with what they knew. Today's version knows better 📖"
+                "The version of you that needed junk food to cope was doing their best. Today's version knows better fuel 📖"
             ),
             (
                 "Perspective Shift 🔄",
-                "Alcohol promised to solve your problems. Instead, it became one. Sobriety isn't the hard part - drinking was 💡"
+                "Fast food promised convenience. Instead, it stole your energy. Cooking isn't the hard part - feeling sick was 💡"
             ),
             (
                 "Today's Insight 🧠",
-                "You didn't have a drinking problem. You had a problem that drinking temporarily silenced. Now you're healing the real issue 🌱"
+                "You didn't have a hunger problem. You had an emotional need that food temporarily silenced. Now you're nourishing the real you 🌱"
             ),
             (
                 "Wisdom Wednesday ✨",
-                "Rock bottom became the solid foundation on which you rebuilt your life. Sometimes you need to fall to learn how to fly 🦅"
+                "Your body is a temple, not a trash can. Treat it with the respect it deserves 🦅"
             ),
             (
                 "Daily Reframe 🎨",
-                "FOMO about not drinking? The only thing you're missing out on is hangovers, regret, and borrowed happiness. That's JOMO - Joy of Missing Out 🎉"
+                "FOMO about that burger? The only thing you're missing out on is bloating, lethargy, and regret. That's JOMO - Joy of Missing Out 🎉"
             ),
             (
                 "Truth Drop 💎",
-                "Sobriety didn't open the gates of heaven and let you in. It opened the gates of hell and let you out 🔓"
+                "Healthy eating didn't just change your body. It changed your mind. You're thinking clearer now 🔓"
             ),
             (
                 "Philosophical Friday 🤔",
-                "The opposite of addiction isn't sobriety. It's connection. Every sober day, you're reconnecting with yourself and others 🤝"
+                "The opposite of addiction isn't dieting. It's nourishment. Every healthy meal is an act of self-love 🤝"
             ),
             (
                 "Mindset Medicine 💊",
-                "You're not broken and in need of fixing. You're healing and in need of time. There's a profound difference 🕰️"
+                "You're not deprived. You're empowered. There's a profound difference 🕰️"
             ),
             (
                 "Reality Check ☄️",
-                "One day you'll tell your story of how you overcame what you went through, and it will be someone else's survival guide 📚"
+                "One day you'll look back and realize that putting down the junk food was the moment your life truly leveled up 📚"
             )
         ]
         
@@ -315,9 +315,9 @@ struct NotificationMessageService {
         
         // Generate 2-3 random times throughout the day
         let timeSlots = [
-            (10, 0),  // 10 AM
-            (2, 30),  // 2:30 PM  
-            (7, 15)   // 7:15 PM
+            (11, 30), // 11:30 AM (Lunch craving)
+            (17, 0),  // 5:00 PM (Dinner craving)
+            (21, 0)   // 9:00 PM (Late night snack)
         ]
         
         for (hour, minute) in timeSlots.shuffled().prefix(Int.random(in: 2...3)) {

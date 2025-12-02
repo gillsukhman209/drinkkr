@@ -2,44 +2,57 @@ import Foundation
 import SwiftData
 
 @Model
-final class SobrietyData {
+final class CleanEatingData {
     var id: UUID
     var quitDate: Date
     var relapses: [Relapse]
     var currentStreak: Int
     var longestStreak: Int
-    var totalDaysSober: Int
+    var totalDaysClean: Int
     var pledgeCompletedToday: Bool
     var lastPledgeDate: Date?
     var moneySaved: Double
-    var drinksAvoided: Int
+    var mealsAvoided: Int
     var caloriesSaved: Int
     var timeReclaimed: Double
+    
+    // User-specific metrics
+    // User-specific metrics
+    var costPerMeal: Double = 15.0
+    var mealsPerDay: Double = 1.0
+    var caloriesPerMeal: Int = 1000
     
     init(
         quitDate: Date = Date(),
         currentStreak: Int = 0,
         longestStreak: Int = 0,
-        totalDaysSober: Int = 0,
+        totalDaysClean: Int = 0,
         pledgeCompletedToday: Bool = false,
         lastPledgeDate: Date? = nil,
         moneySaved: Double = 0,
-        drinksAvoided: Int = 0,
+        mealsAvoided: Int = 0,
         caloriesSaved: Int = 0,
-        timeReclaimed: Double = 0
+        timeReclaimed: Double = 0,
+        costPerMeal: Double = 15.0,
+        mealsPerDay: Double = 1.0,
+        caloriesPerMeal: Int = 1000
     ) {
         self.id = UUID()
         self.quitDate = quitDate
         self.relapses = []
         self.currentStreak = currentStreak
         self.longestStreak = longestStreak
-        self.totalDaysSober = totalDaysSober
+        self.totalDaysClean = totalDaysClean
         self.pledgeCompletedToday = pledgeCompletedToday
         self.lastPledgeDate = lastPledgeDate
         self.moneySaved = moneySaved
-        self.drinksAvoided = drinksAvoided
+
+        self.mealsAvoided = mealsAvoided
         self.caloriesSaved = caloriesSaved
         self.timeReclaimed = timeReclaimed
+        self.costPerMeal = costPerMeal
+        self.mealsPerDay = mealsPerDay
+        self.caloriesPerMeal = caloriesPerMeal
     }
     
     func updateStreak() {
@@ -61,14 +74,12 @@ final class SobrietyData {
     }
     
     func calculateStats() {
-        let averageDrinksPerDay = 3.0
-        let averageCostPerDrink = 10.0
-        let averageCaloriesPerDrink = 150
-        let averageHoursWastedPerDay = 2.0
+        let averageHoursWastedPerDay = 1.0
         
-        drinksAvoided = currentStreak * Int(averageDrinksPerDay)
-        moneySaved = Double(drinksAvoided) * averageCostPerDrink
-        caloriesSaved = drinksAvoided * averageCaloriesPerDrink
+        // Use stored user metrics
+        mealsAvoided = Int(Double(currentStreak) * mealsPerDay)
+        moneySaved = Double(mealsAvoided) * costPerMeal
+        caloriesSaved = mealsAvoided * caloriesPerMeal
         timeReclaimed = Double(currentStreak) * averageHoursWastedPerDay
     }
     

@@ -36,8 +36,8 @@ struct OnboardingDataQuestionView: View {
                 .padding(.top, isCompact ? 20 : 30)
                 
                 // Multi-part questions
-                if page == .drinkingPattern {
-                    drinkingPatternQuestions
+                if page == .eatingPattern {
+                    eatingPatternQuestions
                 } else if page == .cost {
                     costQuestions
                 }
@@ -56,22 +56,22 @@ struct OnboardingDataQuestionView: View {
     }
     
     
-    private var drinkingPatternQuestions: some View {
+    private var eatingPatternQuestions: some View {
         VStack(spacing: 30) {
             // Frequency question
             questionSection(
-                title: "How often do you drink?",
-                options: OnboardingQuestions.drinkingFrequencyOptions,
-                selectedOption: viewModel.selectedDrinkingFrequency,
-                onSelect: { viewModel.selectedDrinkingFrequency = $0 }
+                title: "How often do you eat fast food?",
+                options: OnboardingQuestions.fastFoodFrequencyOptions,
+                selectedOption: viewModel.selectedFastFoodFrequency,
+                onSelect: { viewModel.selectedFastFoodFrequency = $0 }
             )
             
             // Amount question
             questionSection(
-                title: "Drinks per session",
-                options: OnboardingQuestions.drinksPerSessionOptions,
-                selectedOption: viewModel.selectedDrinksPerSession,
-                onSelect: { viewModel.selectedDrinksPerSession = $0 }
+                title: "Meals per week",
+                options: OnboardingQuestions.mealsPerWeekOptions,
+                selectedOption: viewModel.selectedMealsPerWeek,
+                onSelect: { viewModel.selectedMealsPerWeek = $0 }
             )
         }
         .padding(.horizontal, 20)
@@ -81,7 +81,7 @@ struct OnboardingDataQuestionView: View {
         VStack(spacing: 30) {
             // Money question
             questionSection(
-                title: "Weekly spending on alcohol",
+                title: "Weekly spending on fast food",
                 options: OnboardingQuestions.weeklySpendingOptions,
                 selectedOption: viewModel.selectedWeeklySpending,
                 onSelect: { viewModel.selectedWeeklySpending = $0 }
@@ -89,7 +89,7 @@ struct OnboardingDataQuestionView: View {
             
             // Time question
             questionSection(
-                title: "Hours per week lost to drinking/hangovers",
+                title: "Hours per week lost to sluggishness",
                 options: OnboardingQuestions.hoursLostOptions,
                 selectedOption: viewModel.selectedHoursLost,
                 onSelect: { viewModel.selectedHoursLost = $0 }
@@ -243,8 +243,8 @@ struct OnboardingDataQuestionView: View {
     
     private var questionTitle: String {
         switch page {
-        case .drinkingPattern:
-            return "Your drinking pattern"
+        case .eatingPattern:
+            return "Your eating pattern"
         case .cost:
             return "The real cost"
         default:
@@ -254,10 +254,10 @@ struct OnboardingDataQuestionView: View {
     
     private var questionSubtitle: String? {
         switch page {
-        case .drinkingPattern:
+        case .eatingPattern:
             return "Understanding your habits helps us calculate your progress"
         case .cost:
-            return "Let's see how much alcohol is really costing you"
+            return "Let's see how much fast food is really costing you"
         default:
             return nil
         }

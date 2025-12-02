@@ -122,7 +122,7 @@ struct OnboardingContainerView: View {
                 OnboardingEmotionalQuestionView(page: viewModel.currentPage, viewModel: viewModel)
             case .name:
                 OnboardingNameView(viewModel: viewModel)
-            case .drinkingPattern, .cost:
+            case .eatingPattern, .cost:
                 OnboardingDataQuestionView(page: viewModel.currentPage, viewModel: viewModel)
             case .motivation:
                 OnboardingMotivationView(viewModel: viewModel)

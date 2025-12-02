@@ -42,14 +42,14 @@ struct DashboardView: View {
     private let timerPublisher = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     let motivationalQuotes = [
-        "Your strength grows with every sober sunrise.",
-        "Progress, not perfection. Every moment counts.",
-        "You're not giving up alcohol, you're gaining everything.",
+        "Your energy grows with every healthy meal.",
+        "Progress, not perfection. Every choice counts.",
+        "You're not giving up food, you're gaining vitality.",
         "The hardest step was the first one. Keep going.",
         "Your future self is thanking you right now.",
-        "Sobriety delivers everything alcohol promised.",
-        "You are stronger than your strongest excuse.",
-        "One day at a time becomes a lifetime of freedom."
+        "Healthy eating delivers everything fast food promised.",
+        "You are stronger than your strongest craving.",
+        "One meal at a time becomes a lifetime of health."
     ]
     
     var isCompact: Bool {
@@ -65,7 +65,7 @@ struct DashboardView: View {
                     VStack(spacing: isCompact ? 16 : 20) {
                         // App name header
                         HStack {
-                            Text("Sobbr")
+                            Text("CleanEats")
                                 .font(.system(size: isCompact ? 30 : 34, weight: .bold, design: .rounded))
                                 .foregroundStyle(
                                     LinearGradient(
@@ -212,7 +212,7 @@ struct DashboardView: View {
 
     var sobrietyTimerView: some View {
         VStack(spacing: isCompact ? 24 : 32) {
-            Text(dataService.currentUser?.name != nil ? "\(dataService.currentUser!.name) you have been alcohol-free for" : "You have been alcohol-free for")
+            Text(dataService.currentUser?.name != nil ? "\(dataService.currentUser!.name) you have been fast food free for" : "You have been fast food free for")
                 .font(.system(size: isCompact ? 16 : 18, weight: .medium))
                 .foregroundColor(.white.opacity(0.6))
                 .tracking(0.5)
@@ -288,13 +288,26 @@ struct DashboardView: View {
     }
     
     var actionButtons: some View {
-        HStack(spacing: isCompact ? 30 : 40) {
-            circularActionButton(title: "Pledge", icon: "hand.raised.fill")
-            circularActionButton(title: "Meditate", icon: "leaf.fill")
-            circularActionButton(title: "Reset", icon: "arrow.clockwise")
-            panicButton()
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: isCompact ? 30 : 40) {
+                circularActionButton(title: "Commit", icon: "hand.raised.fill")
+                circularActionButton(title: "Meditate", icon: "leaf.fill")
+                circularActionButton(title: "Reset", icon: "arrow.clockwise")
+                panicButton()
+            }
+            .padding(.horizontal, isCompact ? 20 : 40)
+            
+            // Fallback for smaller screens
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 20) {
+                    circularActionButton(title: "Commit", icon: "hand.raised.fill")
+                    circularActionButton(title: "Meditate", icon: "leaf.fill")
+                    circularActionButton(title: "Reset", icon: "arrow.clockwise")
+                    panicButton()
+                }
+                .padding(.horizontal, 20)
+            }
         }
-        .padding(.horizontal, isCompact ? 20 : 40)
     }
     
     func circularActionButton(title: String, icon: String) -> some View {
@@ -364,11 +377,7 @@ struct DashboardView: View {
         }) {
             VStack(spacing: isCompact ? 10 : 12) {
                 ZStack {
-                    // Static glow effect (removed animation)
-                    Circle()
-                        .fill(ColorTheme.dangerRed.opacity(0.6))
-                        .frame(width: isCompact ? 80 : 90, height: isCompact ? 80 : 90)
-                        .blur(radius: 15)
+
                     
                     // Outer ring
                     Circle()
@@ -403,8 +412,9 @@ struct DashboardView: View {
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
                 }
+                .padding(2)
                 
-                Text("PANIC")
+                Text("CRAVING")
                     .font(.system(size: isCompact ? 13 : 15, weight: .bold))
                     .foregroundColor(ColorTheme.dangerRed)
                     .shadow(color: .black.opacity(0.5), radius: 1, x: 0, y: 1)
@@ -435,13 +445,13 @@ struct DashboardView: View {
     
     func handleActionButton(title: String) {
         switch title {
-        case "Pledge":
+        case "Commit":
             showingPledgeModal = true
         case "Meditate":
             showingMeditationModal = true
         case "Reset":
             showingResetModal = true
-        case "Panic":
+        case "Craving":
             showingPanicModal = true
         default:
             break
@@ -458,14 +468,14 @@ struct DashboardView: View {
             HStack(spacing: isCompact ? 10 : 15) {
                 quickStatCard(
                     title: "Money Saved",
-                    value: "$\(Int(dataService.sobrietyData?.moneySaved ?? 0))",
+                    value: "$\(Int(dataService.cleanEatingData?.moneySaved ?? 0))",
                     icon: "dollarsign.circle.fill",
                     color: ColorTheme.successGreen
                 )
                 
                 quickStatCard(
-                    title: "Days Strong",
-                    value: "\(dataService.sobrietyData?.currentStreak ?? 0)",
+                    title: "Clean Streak",
+                    value: "\(dataService.cleanEatingData?.currentStreak ?? 0)",
                     icon: "flame.fill",
                     color: ColorTheme.accentCyan
                 )
@@ -473,14 +483,14 @@ struct DashboardView: View {
             
             HStack(spacing: isCompact ? 10 : 15) {
                 quickStatCard(
-                    title: "Drinks Avoided",
-                    value: "\(dataService.sobrietyData?.drinksAvoided ?? 0)",
-                    icon: "wineglass",
+                    title: "Meals Avoided",
+                    value: "\(dataService.cleanEatingData?.mealsAvoided ?? 0)",
+                    icon: "fork.knife",
                     color: ColorTheme.accentPurple
                 )
                 
                 quickStatCard(
-                    title: "Pledges Made",
+                    title: "Commitments",
                     value: "\(AppSettings.shared.totalPledges)",
                     icon: "hand.raised.fill",
                     color: ColorTheme.accentPink
@@ -615,6 +625,9 @@ struct DashboardView: View {
             
             // Check if we've reached a new milestone
             checkForMilestone(newTimeComponents.days)
+            
+            // Refresh stats (money saved, meals avoided, etc.)
+            dataService.refreshStats()
         }
     }
     
@@ -760,7 +773,7 @@ struct DashboardView: View {
     }
     
     @ViewBuilder
-    func focusItemRow(title: String, subtitle: String, icon: String) -> some View {
+    func focusItemRow(title: String, subtitle: String, icon: String, isCompleted: Bool) -> some View {
         HStack(spacing: isCompact ? 12 : 16) {
             ZStack {
                 Circle()
@@ -784,31 +797,64 @@ struct DashboardView: View {
             
             Spacer()
             
-            Circle()
-                .stroke(ColorTheme.accentCyan.opacity(0.3), lineWidth: 2)
-                .frame(width: isCompact ? 20 : 24, height: isCompact ? 20 : 24)
+            Button(action: {
+                // Toggle completion logic here if needed
+            }) {
+                ZStack {
+                    Circle()
+                        .stroke(isCompleted ? ColorTheme.successGreen : ColorTheme.accentCyan, lineWidth: 2)
+                        .frame(width: isCompact ? 20 : 24, height: isCompact ? 20 : 24)
+                    
+                    if isCompleted {
+                        Circle()
+                            .fill(ColorTheme.successGreen)
+                            .frame(width: isCompact ? 12 : 14, height: isCompact ? 12 : 14)
+                    }
+                }
+            }
         }
+        .padding(isCompact ? 16 : 20)
     }
+
     
     var todaysFocusSection: some View {
-        VStack(spacing: isCompact ? 16 : 20) {
-            HStack {
-                Image(systemName: "target")
-                    .font(.system(size: isCompact ? 18 : 20))
-                    .foregroundColor(ColorTheme.accentPink)
-                
-                Text("Today's Focus")
-                    .font(.system(size: isCompact ? 18 : 20, weight: .bold))
-                    .foregroundColor(.white)
-                
-                Spacer()
-            }
+        VStack(alignment: .leading, spacing: 15) {
+            Text("Today's Focus")
+                .font(.system(size: isCompact ? 18 : 20, weight: .bold))
+                .foregroundColor(ColorTheme.textPrimary)
             
-            VStack(spacing: isCompact ? 12 : 16) {
-                focusItemRow(title: "Stay Hydrated", subtitle: "Drink 8 glasses of water today", icon: "drop.fill")
-                focusItemRow(title: "Move Your Body", subtitle: "Take a 20-minute walk", icon: "figure.walk")
-                focusItemRow(title: "Practice Gratitude", subtitle: "Write 3 things you're grateful for", icon: "heart.text.square.fill")
+            VStack(spacing: 0) {
+                // Dynamic focus items based on streak
+                let streak = dataService.cleanEatingData?.currentStreak ?? 0
+                
+                if streak < 3 {
+                    focusItemRow(title: "Hydrate", subtitle: "Drink 8 glasses of water", icon: "drop.fill", isCompleted: true)
+                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
+                    focusItemRow(title: "Healthy Swap", subtitle: "Replace one fast food meal", icon: "leaf.fill", isCompleted: false)
+                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
+                    focusItemRow(title: "Reflection", subtitle: "Write down your 'Why'", icon: "pencil", isCompleted: false)
+                } else if streak < 7 {
+                    focusItemRow(title: "Meal Prep", subtitle: "Plan tomorrow's lunch", icon: "calendar", isCompleted: true)
+                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
+                    focusItemRow(title: "Movement", subtitle: "15 min walk after dinner", icon: "figure.walk", isCompleted: false)
+                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
+                    focusItemRow(title: "Mindfulness", subtitle: "5 min breathing exercise", icon: "lungs.fill", isCompleted: false)
+                } else {
+                    focusItemRow(title: "New Recipe", subtitle: "Try cooking something new", icon: "fork.knife", isCompleted: true)
+                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
+                    focusItemRow(title: "Share Success", subtitle: "Tell a friend your progress", icon: "message.fill", isCompleted: false)
+                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
+                    focusItemRow(title: "Reward", subtitle: "Treat yourself (non-food)", icon: "gift.fill", isCompleted: false)
+                }
             }
+            .background(
+                RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
+                            .stroke(.white.opacity(0.1), lineWidth: 1)
+                    )
+            )
         }
         .padding(isCompact ? 20 : 24)
         .background(
@@ -974,20 +1020,26 @@ struct DashboardView: View {
     
     func getHealthBenefits(for days: Int) -> [(String, String, Bool)] {
         let allBenefits = [
-            (1, "Blood Sugar Normalized", "Your blood sugar levels are stabilizing"),
-            (2, "Better Sleep", "Sleep quality is improving significantly"),
-            (7, "Hydration Restored", "Your body is properly hydrated again"),
-            (14, "Energy Boost", "Natural energy levels are returning"),
-            (30, "Liver Recovery", "Your liver is healing and regenerating"),
-            (60, "Mental Clarity", "Brain fog has lifted, thinking is clearer"),
-            (90, "Immune System", "Your immune system is stronger"),
-            (180, "Heart Health", "Cardiovascular health greatly improved"),
-            (365, "Full Recovery", "Your body has undergone complete transformation")
+            (1, "Digestion Improving", "Your digestive system is resetting"),
+            (2, "Less Bloating", "Water retention and bloating are decreasing"),
+            (7, "Taste Buds Reset", "Natural flavors start tasting better"),
+            (14, "Energy Boost", "Stable energy without sugar crashes"),
+            (30, "Skin Clearing", "Your skin is looking healthier and brighter"),
+            (60, "Mental Clarity", "Brain fog from processed food has lifted"),
+            (90, "Metabolism", "Your metabolism is functioning optimally"),
+            (180, "Heart Health", "Cholesterol and blood pressure improving"),
+            (365, "Full Transformation", "You have built a completely new lifestyle")
         ]
         
-        return allBenefits.map { milestone, title, description in
-            (title, description, days >= milestone)
+        // Show next 3 benefits (including current if just achieved)
+        let nextBenefits = allBenefits.filter { $0.0 > days || ($0.0 <= days && days < $0.0 + 2) }.prefix(3)
+        
+        // If we have less than 3 upcoming, show some completed ones at the start
+        if nextBenefits.count < 3 {
+             return allBenefits.suffix(3).map { ($0.1, $0.2, days >= $0.0) }
         }
+        
+        return nextBenefits.map { ($0.1, $0.2, days >= $0.0) }
     }
 }
 

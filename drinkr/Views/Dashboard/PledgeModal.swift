@@ -209,6 +209,9 @@ struct PledgeModal: View {
         // Schedule the notification
         notificationService.scheduleCheckInNotification(for: selectedCheckInTime)
         
+        // Increment pledge count
+        dataService.completePledge()
+        
         withAnimation(.spring()) {
             showingSuccess = true
         }

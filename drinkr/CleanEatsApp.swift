@@ -10,14 +10,14 @@ import SwiftData
 import UserNotifications
 
 @main
-struct SobbrApp: App {
+struct CleanEatsApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appStateManager = AppStateManager.shared
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             User.self,
-            SobrietyData.self,
+            CleanEatingData.self,
             Achievement.self,
             Relapse.self,
             CheckIn.self,

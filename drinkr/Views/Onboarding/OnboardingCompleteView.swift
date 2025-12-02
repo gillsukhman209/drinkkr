@@ -89,152 +89,159 @@ struct OnboardingCompleteView: View {
                 .transition(.opacity)
             } else {
                 // Success view
-                VStack(spacing: 0) {
-                    Spacer()
-                    
-                    // Success animation
-                    ZStack {
-                        Circle()
-                            .fill(
-                                RadialGradient(
-                                    colors: [ColorTheme.successGreen.opacity(0.3), ColorTheme.accentCyan.opacity(0.1)],
-                                    center: .center,
-                                    startRadius: 0,
-                                    endRadius: 100
-                                )
-                            )
-                            .frame(width: isCompact ? 160 : 200, height: isCompact ? 160 : 200)
-                            .scaleEffect(showContent ? 1.1 : 0.9)
-                            .opacity(showContent ? 1.0 : 0.0)
-                        
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: isCompact ? 80 : 100, weight: .light))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [ColorTheme.successGreen, ColorTheme.accentCyan],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .scaleEffect(showContent ? 1.0 : 0.5)
-                            .opacity(showContent ? 1.0 : 0.0)
-                    }
-                    .padding(.bottom, isCompact ? 40 : 60)
-                    
-                    // Congratulations message
-                    VStack(spacing: 20) {
-                        Text("Perfect, \(viewModel.userName.isEmpty ? "friend" : viewModel.userName)!")
-                            .font(.system(size: isCompact ? 32 : 40, weight: .bold))
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                        
-                        Text("Your personalized recovery plan is ready.")
-                            .font(.system(size: isCompact ? 18 : 22, weight: .medium))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [ColorTheme.accentCyan, ColorTheme.accentPurple],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.horizontal, 30)
-                    .opacity(showContent ? 1.0 : 0.0)
-                    .offset(y: showContent ? 0 : 20)
-                
-                    Spacer()
-                        .frame(height: isCompact ? 40 : 60)
-                    
-                    // What's next section
-                    VStack(alignment: .leading, spacing: 25) {
-                        nextStepItem(
-                            number: "1",
-                            title: "Unlock Full Access",
-                            description: "Subscribe to access all recovery features"
-                        )
-                        
-                        nextStepItem(
-                            number: "2",
-                            title: "Start Your Timer",
-                            description: "Begin tracking your sobriety journey"
-                        )
-                        
-                        nextStepItem(
-                            number: "3",
-                            title: "Daily Check-ins",
-                            description: "Stay accountable with daily reflections"
-                        )
-                    }
-                    .padding(.horizontal, isCompact ? 30 : 50)
-                    .opacity(showContent ? 1.0 : 0.0)
-                
-                    Spacer()
-                    
-                    // Debug skip paywall button (DEBUG only)
-                    #if DEBUG
-                    Button(action: {
-                        // Also skip review in debug mode
-                        UserDefaults.standard.set(true, forKey: "hasRequestedReview")
-                        superwallManager.debugGrantSubscription()
-                        viewModel.completeOnboarding()
-                    }) {
-                        Text("🐛 Skip Paywall (Debug)")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.orange)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color.orange.opacity(0.2))
-                                    .stroke(Color.orange.opacity(0.5), lineWidth: 1)
-                            )
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .padding(.bottom, 12)
-                    .opacity(showContent ? 1.0 : 0.0)
-                    #endif
-                    
-                    // Start button
-                    Button(action: {
-                        // Show review request first, then paywall
-                        let hasRequestedReview = UserDefaults.standard.bool(forKey: "hasRequestedReview")
-                        let hasSkippedReview = UserDefaults.standard.bool(forKey: "hasSkippedReview")
-                        
-                        if !hasRequestedReview && !hasSkippedReview {
-                            showingReviewRequest = true
-                        } else {
-                            presentPaywall()
-                        }
-                    }) {
-                        HStack(spacing: 12) {
-                            Text("Start My Journey")
-                                .font(.system(size: isCompact ? 18 : 20, weight: .bold))
-                                .foregroundColor(.white)
+                GeometryReader { geometry in
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 0) {
+                            Spacer()
+                                .frame(height: isCompact ? 20 : 40)
                             
-                            Image(systemName: "arrow.right.circle.fill")
-                                .font(.system(size: isCompact ? 20 : 24))
-                                .foregroundColor(.white)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: isCompact ? 56 : 64)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [ColorTheme.accentCyan, ColorTheme.accentPurple],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
+                            // Success animation
+                            ZStack {
+                                Circle()
+                                    .fill(
+                                        RadialGradient(
+                                            colors: [ColorTheme.successGreen.opacity(0.3), ColorTheme.accentCyan.opacity(0.1)],
+                                            center: .center,
+                                            startRadius: 0,
+                                            endRadius: 100
+                                        )
                                     )
+                                    .frame(width: isCompact ? 140 : 200, height: isCompact ? 140 : 200)
+                                    .scaleEffect(showContent ? 1.1 : 0.9)
+                                    .opacity(showContent ? 1.0 : 0.0)
+                                
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: isCompact ? 70 : 100, weight: .light))
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [ColorTheme.successGreen, ColorTheme.accentCyan],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .scaleEffect(showContent ? 1.0 : 0.5)
+                                    .opacity(showContent ? 1.0 : 0.0)
+                            }
+                            .padding(.bottom, isCompact ? 30 : 60)
+                            
+                            // Congratulations message
+                            VStack(spacing: isCompact ? 15 : 20) {
+                                Text("Perfect, \(viewModel.userName.isEmpty ? "friend" : viewModel.userName)!")
+                                    .font(.system(size: isCompact ? 28 : 40, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .multilineTextAlignment(.center)
+                                
+                                Text("Your personalized recovery plan is ready.")
+                                    .font(.system(size: isCompact ? 16 : 22, weight: .medium))
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [ColorTheme.accentCyan, ColorTheme.accentPurple],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .multilineTextAlignment(.center)
+                            }
+                            .padding(.horizontal, 30)
+                            .opacity(showContent ? 1.0 : 0.0)
+                            .offset(y: showContent ? 0 : 20)
+                        
+                            Spacer()
+                                .frame(height: isCompact ? 30 : 60)
+                            
+                            // What's next section
+                            VStack(alignment: .leading, spacing: isCompact ? 20 : 25) {
+                                nextStepItem(
+                                    number: "1",
+                                    title: "Unlock Full Access",
+                                    description: "Subscribe to access all recovery features"
                                 )
-                        )
-                        .shadow(color: ColorTheme.accentCyan.opacity(0.4), radius: 15, x: 0, y: 8)
+                                
+                                nextStepItem(
+                                    number: "2",
+                                    title: "Start Your Timer",
+                                    description: "Begin tracking your healthy eating journey"
+                                )
+                                
+                                nextStepItem(
+                                    number: "3",
+                                    title: "Daily Check-ins",
+                                    description: "Stay accountable with daily reflections"
+                                )
+                            }
+                            .padding(.horizontal, isCompact ? 30 : 50)
+                            .opacity(showContent ? 1.0 : 0.0)
+                        
+                            Spacer()
+                                .frame(height: isCompact ? 30 : 60)
+                            
+                            // Debug skip paywall button (DEBUG only)
+                            #if DEBUG
+                            Button(action: {
+                                // Also skip review in debug mode
+                                UserDefaults.standard.set(true, forKey: "hasRequestedReview")
+                                superwallManager.debugGrantSubscription()
+                                viewModel.completeOnboarding()
+                            }) {
+                                Text("🐛 Skip Paywall (Debug)")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.orange)
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 8)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.orange.opacity(0.2))
+                                            .stroke(Color.orange.opacity(0.5), lineWidth: 1)
+                                    )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .padding(.bottom, 12)
+                            .opacity(showContent ? 1.0 : 0.0)
+                            #endif
+                            
+                            // Start button
+                            Button(action: {
+                                // Show review request first, then paywall
+                                let hasRequestedReview = UserDefaults.standard.bool(forKey: "hasRequestedReview")
+                                let hasSkippedReview = UserDefaults.standard.bool(forKey: "hasSkippedReview")
+                                
+                                if !hasRequestedReview && !hasSkippedReview {
+                                    showingReviewRequest = true
+                                } else {
+                                    presentPaywall()
+                                }
+                            }) {
+                                HStack(spacing: 12) {
+                                    Text("Start My Journey")
+                                        .font(.system(size: isCompact ? 18 : 20, weight: .bold))
+                                        .foregroundColor(.white)
+                                    
+                                    Image(systemName: "arrow.right.circle.fill")
+                                        .font(.system(size: isCompact ? 20 : 24))
+                                        .foregroundColor(.white)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: isCompact ? 56 : 64)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [ColorTheme.accentCyan, ColorTheme.accentPurple],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                )
+                                .shadow(color: ColorTheme.accentCyan.opacity(0.4), radius: 15, x: 0, y: 8)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .padding(.horizontal, isCompact ? 30 : 50)
+                            .padding(.bottom, isCompact ? 30 : 40)
+                            .opacity(showContent ? 1.0 : 0.0)
+                            .scaleEffect(showContent ? 1.0 : 0.9)
+                        }
+                        .frame(minHeight: geometry.size.height)
                     }
-                    .buttonStyle(PlainButtonStyle())
-                    .padding(.horizontal, isCompact ? 30 : 50)
-                    .padding(.bottom, isCompact ? 30 : 40)
-                    .opacity(showContent ? 1.0 : 0.0)
-                    .scaleEffect(showContent ? 1.0 : 0.9)
                 }
                 .transition(.opacity)
             }

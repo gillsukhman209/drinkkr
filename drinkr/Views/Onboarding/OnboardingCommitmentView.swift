@@ -277,7 +277,7 @@ struct OnboardingCommitmentView: View {
             }
             
             VStack(spacing: 12) {
-                commitmentItem(icon: "calendar", text: selectedQuitOption == 0 ? "I'm starting my alcohol-free journey right now" : "I will start my alcohol-free journey on \(formatDate(quitDate))")
+                commitmentItem(icon: "calendar", text: selectedQuitOption == 0 ? "I'm starting my fast food free journey right now" : "I will start my fast food free journey on \(formatDate(quitDate))")
                 commitmentItem(icon: "clock", text: "I will check in daily at \(formatTime(checkInTime))")
                 commitmentItem(icon: "star", text: "I will be patient and kind with myself throughout this process")
                 commitmentItem(icon: "heart", text: "I will reach out for support when I need it")
@@ -347,101 +347,109 @@ struct OnboardingPermissionView: View {
     }
     
     var body: some View {
-        VStack(spacing: isCompact ? 30 : 40) {
-            Spacer()
-            
-            // Shield icon
-            ZStack {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [ColorTheme.accentCyan.opacity(0.3), ColorTheme.accentPurple.opacity(0.1)],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 80
-                        )
-                    )
-                    .frame(width: isCompact ? 120 : 150, height: isCompact ? 120 : 150)
-                    .scaleEffect(isVisible ? 1.0 : 0.8)
-                
-                Image(systemName: "shield.checkered")
-                    .font(.system(size: isCompact ? 60 : 80, weight: .light))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [ColorTheme.accentCyan, ColorTheme.accentPurple],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .scaleEffect(isVisible ? 1.0 : 0.5)
-            }
-            
-            // Content
-            VStack(spacing: 20) {
-                Text("Stay on track with\ngentle reminders")
-                    .font(.system(size: isCompact ? 24 : 28, weight: .bold))
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                    .opacity(isVisible ? 1.0 : 0.0)
-                    .offset(y: isVisible ? 0 : 20)
-                
-                Text("We'll send you supportive notifications to help you maintain your momentum and celebrate your progress.")
-                    .font(.system(size: isCompact ? 16 : 18, weight: .medium))
-                    .foregroundColor(ColorTheme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
-                    .padding(.horizontal, 30)
-                    .opacity(isVisible ? 1.0 : 0.0)
-                    .offset(y: isVisible ? 0 : 20)
-            }
-            
-            // Benefits
-            VStack(spacing: 16) {
-                permissionBenefit(
-                    icon: "bell.badge",
-                    title: "Daily check-ins",
-                    subtitle: "Gentle reminders at your chosen time"
-                )
-                
-                permissionBenefit(
-                    icon: "heart.text.square",
-                    title: "Milestone celebrations",
-                    subtitle: "Celebrate your achievements with you"
-                )
-                
-                permissionBenefit(
-                    icon: "lightbulb",
-                    title: "Helpful tips",
-                    subtitle: "Timely advice when you need it most"
-                )
-            }
-            .padding(.horizontal, 20)
-            .opacity(isVisible ? 1.0 : 0.0)
-            .offset(y: isVisible ? 0 : 30)
-            
-            Spacer()
-            
-            // Privacy note
-            VStack(spacing: 8) {
-                HStack(spacing: 6) {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(ColorTheme.textSecondary)
+        GeometryReader { geometry in
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: isCompact ? 20 : 40) {
+                    Spacer()
+                        .frame(height: isCompact ? 20 : 40)
                     
-                    Text("Your privacy matters")
-                        .font(.system(size: isCompact ? 12 : 14, weight: .medium))
-                        .foregroundColor(ColorTheme.textSecondary)
+                    // Shield icon
+                    ZStack {
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    colors: [ColorTheme.accentCyan.opacity(0.3), ColorTheme.accentPurple.opacity(0.1)],
+                                    center: .center,
+                                    startRadius: 0,
+                                    endRadius: 80
+                                )
+                            )
+                            .frame(width: isCompact ? 100 : 150, height: isCompact ? 100 : 150)
+                            .scaleEffect(isVisible ? 1.0 : 0.8)
+                        
+                        Image(systemName: "shield.checkered")
+                            .font(.system(size: isCompact ? 50 : 80, weight: .light))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [ColorTheme.accentCyan, ColorTheme.accentPurple],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .scaleEffect(isVisible ? 1.0 : 0.5)
+                    }
+                    
+                    // Content
+                    VStack(spacing: isCompact ? 16 : 20) {
+                        Text("Stay on track with\ngentle reminders")
+                            .font(.system(size: isCompact ? 24 : 28, weight: .bold))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .opacity(isVisible ? 1.0 : 0.0)
+                            .offset(y: isVisible ? 0 : 20)
+                        
+                        Text("We'll send you supportive notifications to help you maintain your momentum and celebrate your progress.")
+                            .font(.system(size: isCompact ? 14 : 18, weight: .medium))
+                            .foregroundColor(ColorTheme.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(4)
+                            .padding(.horizontal, 30)
+                            .opacity(isVisible ? 1.0 : 0.0)
+                            .offset(y: isVisible ? 0 : 20)
+                    }
+                    
+                    // Benefits
+                    VStack(spacing: 16) {
+                        permissionBenefit(
+                            icon: "bell.badge",
+                            title: "Daily check-ins",
+                            subtitle: "Gentle reminders at your chosen time"
+                        )
+                        
+                        permissionBenefit(
+                            icon: "heart.text.square",
+                            title: "Milestone celebrations",
+                            subtitle: "Celebrate your achievements with you"
+                        )
+                        
+                        permissionBenefit(
+                            icon: "lightbulb",
+                            title: "Helpful tips",
+                            subtitle: "Timely advice when you need it most"
+                        )
+                    }
+                    .padding(.horizontal, 20)
+                    .opacity(isVisible ? 1.0 : 0.0)
+                    .offset(y: isVisible ? 0 : 30)
+                    
+                    Spacer()
+                        .frame(height: isCompact ? 20 : 40)
+                    
+                    // Privacy note
+                    VStack(spacing: 8) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "lock.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(ColorTheme.textSecondary)
+                            
+                            Text("Your privacy matters")
+                                .font(.system(size: isCompact ? 12 : 14, weight: .medium))
+                                .foregroundColor(ColorTheme.textSecondary)
+                        }
+                        
+                        Text("You can always change notification settings in the app")
+                            .font(.system(size: isCompact ? 11 : 13))
+                            .foregroundColor(ColorTheme.textSecondary.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.horizontal, 40)
+                    .opacity(isVisible ? 1.0 : 0.0)
+                    
+                    Spacer()
+                        .frame(height: isCompact ? 40 : 80)
                 }
-                
-                Text("You can always change notification settings in the app")
-                    .font(.system(size: isCompact ? 11 : 13))
-                    .foregroundColor(ColorTheme.textSecondary.opacity(0.8))
-                    .multilineTextAlignment(.center)
+                .frame(minHeight: geometry.size.height)
             }
-            .padding(.horizontal, 40)
-            .opacity(isVisible ? 1.0 : 0.0)
-            
-            Spacer()
         }
         .onAppear {
             withAnimation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.2)) {

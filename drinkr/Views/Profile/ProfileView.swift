@@ -87,7 +87,7 @@ struct ProfileView: View {
                 HStack {
                     Image(systemName: "flame.fill")
                         .foregroundColor(.orange)
-                    Text("\(dataService.sobrietyData?.currentStreak ?? 0) Day Streak")
+                    Text("\(dataService.cleanEatingData?.currentStreak ?? 0) Day Streak")
                         .font(.system(size: isCompact ? 14 : 16, weight: .semibold))
                         .foregroundColor(.orange)
                 }
@@ -101,8 +101,8 @@ struct ProfileView: View {
     
     var streakCards: some View {
         HStack(spacing: isCompact ? 12 : 15) {
-            streakCard(title: "Current", value: "\(dataService.sobrietyData?.currentStreak ?? 0)", unit: "days", color: ColorTheme.successGreen)
-            streakCard(title: "Best", value: "\(dataService.sobrietyData?.longestStreak ?? 0)", unit: "days", color: ColorTheme.accentPurple)
+            streakCard(title: "Current", value: "\(dataService.cleanEatingData?.currentStreak ?? 0)", unit: "days", color: ColorTheme.successGreen)
+            streakCard(title: "Best", value: "\(dataService.cleanEatingData?.longestStreak ?? 0)", unit: "days", color: ColorTheme.accentPurple)
         }
     }
     
@@ -160,7 +160,7 @@ struct ProfileView: View {
             let stats = getStatsForTimeFrame()
             
             statRow(label: "Money Saved", value: "$\(Int(stats.moneySaved))", icon: "dollarsign.circle.fill", color: ColorTheme.successGreen)
-            statRow(label: "Drinks Avoided", value: "\(stats.drinksAvoided)", icon: "wineglass", color: ColorTheme.accentPurple)
+            statRow(label: "Meals Avoided", value: "\(stats.mealsAvoided)", icon: "fork.knife", color: ColorTheme.accentPurple)
             statRow(label: "Calories Saved", value: "\(stats.caloriesSaved)", icon: "flame.fill", color: .orange)
             statRow(label: "Time Reclaimed", value: "\(Int(stats.timeReclaimed)) hrs", icon: "clock.fill", color: ColorTheme.accentCyan)
             
@@ -423,7 +423,7 @@ struct ProfileView: View {
     }
     
     func getUpcomingMilestones() -> [(Int, String, Int)] {
-        let currentStreak = dataService.sobrietyData?.currentStreak ?? 0
+        let currentStreak = dataService.cleanEatingData?.currentStreak ?? 0
         let milestones = [
             (1, "First Day", 1),
             (3, "3 Days Strong", 3),
@@ -444,29 +444,29 @@ struct ProfileView: View {
     }
     
     func getRelapseStats() -> (total: Int, thisMonth: Int, averagePerMonth: Double) {
-        guard let sobrietyData = dataService.sobrietyData else {
+        guard let cleanEatingData = dataService.cleanEatingData else {
             return (0, 0, 0.0)
         }
         
-        let total = sobrietyData.relapses.count
+        let total = cleanEatingData.relapses.count
         
         let calendar = Calendar.current
         let now = Date()
         let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start ?? now
         
-        let thisMonth = sobrietyData.relapses.filter { relapse in
+        let thisMonth = cleanEatingData.relapses.filter { relapse in
             relapse.date >= startOfMonth
         }.count
         
         // Calculate average per month since quit date
-        let monthsSinceQuit = max(1, calendar.dateComponents([.month], from: sobrietyData.quitDate, to: now).month ?? 1)
+        let monthsSinceQuit = max(1, calendar.dateComponents([.month], from: cleanEatingData.quitDate, to: now).month ?? 1)
         let averagePerMonth = Double(total) / Double(monthsSinceQuit)
         
         return (total, thisMonth, averagePerMonth)
     }
     
-    func getStatsForTimeFrame() -> (moneySaved: Double, drinksAvoided: Int, caloriesSaved: Int, timeReclaimed: Double, checkIns: Int, meditations: Int, achievements: Int) {
-        guard let sobrietyData = dataService.sobrietyData else {
+    func getStatsForTimeFrame() -> (moneySaved: Double, mealsAvoided: Int, caloriesSaved: Int, timeReclaimed: Double, checkIns: Int, meditations: Int, achievements: Int) {
+        guard let cleanEatingData = dataService.cleanEatingData else {
             return (0, 0, 0, 0, 0, 0, 0)
         }
         
@@ -480,20 +480,21 @@ struct ProfileView: View {
         case "This Month":
             startDate = calendar.dateInterval(of: .month, for: now)?.start ?? now
         default: // "All Time"
-            startDate = sobrietyData.quitDate
+            startDate = cleanEatingData.quitDate
         }
         
         let daysSinceStart = max(0, calendar.dateComponents([.day], from: startDate, to: now).day ?? 0)
         
         // Calculate stats based on time frame
-        let averageDrinksPerDay = 3.0
-        let averageCostPerDrink = 10.0
-        let averageCaloriesPerDrink = 150
-        let averageHoursWastedPerDay = 2.0
+        // Calculate stats based on time frame using user metrics
+        let averageMealsPerDay = cleanEatingData.mealsPerDay
+        let averageCostPerMeal = cleanEatingData.costPerMeal
+        let averageCaloriesPerMeal = cleanEatingData.caloriesPerMeal
+        let averageHoursWastedPerDay = 1.0
         
-        let drinksAvoided = daysSinceStart * Int(averageDrinksPerDay)
-        let moneySaved = Double(drinksAvoided) * averageCostPerDrink
-        let caloriesSaved = drinksAvoided * averageCaloriesPerDrink
+        let mealsAvoided = Int(Double(daysSinceStart) * averageMealsPerDay)
+        let moneySaved = Double(mealsAvoided) * averageCostPerMeal
+        let caloriesSaved = mealsAvoided * averageCaloriesPerMeal
         let timeReclaimed = Double(daysSinceStart) * averageHoursWastedPerDay
         
         // Count activities in timeframe
@@ -503,7 +504,7 @@ struct ProfileView: View {
         // For now, we'll use simplified check-in counting
         let checkInCount = daysSinceStart > 0 ? min(daysSinceStart, 30) : 0 // Estimate
         
-        return (moneySaved, drinksAvoided, caloriesSaved, timeReclaimed, checkInCount, meditationCount, achievementCount)
+        return (moneySaved, mealsAvoided, caloriesSaved, timeReclaimed, checkInCount, meditationCount, achievementCount)
     }
     
     func getMoodEmoji(_ mood: Int) -> String {

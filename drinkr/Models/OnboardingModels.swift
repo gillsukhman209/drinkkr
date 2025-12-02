@@ -17,8 +17,8 @@ struct OnboardingUserProfile: Codable {
     // Personal data
     var userName: String = ""
     var age: Int = 0
-    var drinkingFrequency: String = ""
-    var drinksPerSession: String = ""
+    var fastFoodFrequency: String = ""
+    var mealsPerWeek: String = ""
     var weeklySpending: String = ""
     var hoursLostWeekly: String = ""
     
@@ -43,23 +43,23 @@ struct OnboardingUserProfile: Codable {
         }
     }
     
-    var drinksPerSessionInt: Int {
-        switch drinksPerSession {
-        case "1-2 drinks": return 2
-        case "3-4 drinks": return 4
-        case "5-6 drinks": return 6
-        case "7+ drinks": return 8
+    var mealsPerWeekInt: Int {
+        switch mealsPerWeek {
+        case "1-2 meals": return 2
+        case "3-4 meals": return 4
+        case "5-6 meals": return 6
+        case "7+ meals": return 8
         default: return 3
         }
     }
     
     var hoursLostWeeklyInt: Int {
         switch hoursLostWeekly {
-        case "1-5 hours": return 3
-        case "6-10 hours": return 8
-        case "11-20 hours": return 15
-        case "20+ hours": return 25
-        default: return 5
+        case "1-2 hours": return 2
+        case "3-5 hours": return 4
+        case "5-10 hours": return 8
+        case "10+ hours": return 12
+        default: return 3
         }
     }
 }
@@ -113,7 +113,7 @@ enum OnboardingPage: CaseIterable {
     case biggestFear      // Q7
     case previousAttempts // Q8
     case name             // Q9 - Name collection
-    case drinkingPattern  // Q10
+    case eatingPattern  // Q10 - Now Eating Pattern
     case cost             // Q11
     case motivation
     case goals
@@ -136,7 +136,7 @@ enum OnboardingPage: CaseIterable {
         switch self {
         case .whyHere, .lifeImpact, .symptoms, .losses, .triggers,
              .afterFeeling, .biggestFear, .previousAttempts, .name,
-             .drinkingPattern, .cost, .goals:
+             .eatingPattern, .cost, .goals:
             return true
         default:
             return false
@@ -181,10 +181,10 @@ struct OnboardingQuestions {
         type: .singleChoice,
         options: [
             OnboardingOption(text: "I want to quit completely", icon: "flag.fill", color: .green),
-            OnboardingOption(text: "I need to cut back", icon: "arrow.down.circle.fill", color: .orange),
-            OnboardingOption(text: "Someone asked me to stop", icon: "person.2.fill", color: .blue),
+            OnboardingOption(text: "I need to eat healthier", icon: "leaf.fill", color: .orange),
+            OnboardingOption(text: "Doctor recommended it", icon: "stethoscope", color: .blue),
             OnboardingOption(text: "I'm just exploring", icon: "magnifyingglass", color: .purple),
-            OnboardingOption(text: "I hit rock bottom", icon: "arrow.down.to.line", color: .red)
+            OnboardingOption(text: "I feel out of control", icon: "exclamationmark.triangle.fill", color: .red)
         ],
         allowsMultiple: false,
         icon: "questionmark.circle.fill"
@@ -192,18 +192,18 @@ struct OnboardingQuestions {
     
     static let lifeImpact = OnboardingQuestion(
         id: "lifeImpact",
-        title: "How is alcohol affecting your life?",
+        title: "How is fast food affecting your life?",
         subtitle: "Select all that apply",
         type: .multipleChoice,
         options: [
-            OnboardingOption(text: "Damaging my relationships", icon: "heart.slash.fill", color: .red),
-            OnboardingOption(text: "Affecting my work/career", icon: "briefcase.fill", color: .blue),
-            OnboardingOption(text: "Harming my health", icon: "heart.text.square.fill", color: .green),
-            OnboardingOption(text: "Causing financial stress", icon: "dollarsign.circle.fill", color: .yellow),
-            OnboardingOption(text: "Making me anxious/depressed", icon: "brain.head.profile", color: .purple),
-            OnboardingOption(text: "Ruining my sleep", icon: "moon.zzz.fill", color: .indigo),
-            OnboardingOption(text: "Causing shame and guilt", icon: "person.fill.xmark", color: .orange),
-            OnboardingOption(text: "Missing important moments", icon: "calendar.badge.exclamationmark", color: .pink)
+            OnboardingOption(text: "Gaining weight", icon: "scalemass.fill", color: .red),
+            OnboardingOption(text: "Low energy/fatigue", icon: "bolt.slash.fill", color: .blue),
+            OnboardingOption(text: "Digestive issues", icon: "cross.case.fill", color: .green),
+            OnboardingOption(text: "Wasting money", icon: "dollarsign.circle.fill", color: .yellow),
+            OnboardingOption(text: "Feeling guilty", icon: "person.fill.xmark", color: .purple),
+            OnboardingOption(text: "Skin problems", icon: "face.dashed", color: .indigo),
+            OnboardingOption(text: "Poor sleep quality", icon: "moon.zzz.fill", color: .orange),
+            OnboardingOption(text: "Health concerns", icon: "heart.text.square.fill", color: .pink)
         ],
         allowsMultiple: true,
         icon: "exclamationmark.triangle.fill"
@@ -211,19 +211,18 @@ struct OnboardingQuestions {
     
     static let symptoms = OnboardingQuestion(
         id: "symptoms",
-        title: "What symptoms are you experiencing?",
+        title: "What symptoms do you experience?",
         subtitle: "Your health matters - select all that apply",
         type: .multipleChoice,
         options: [
-            OnboardingOption(text: "Morning shakes or tremors", icon: nil, color: nil),
-            OnboardingOption(text: "Constant fatigue", icon: nil, color: nil),
-            OnboardingOption(text: "Memory blackouts", icon: nil, color: nil),
-            OnboardingOption(text: "Anxiety when not drinking", icon: nil, color: nil),
-            OnboardingOption(text: "Trouble sleeping without alcohol", icon: nil, color: nil),
-            OnboardingOption(text: "Heart palpitations", icon: nil, color: nil),
-            OnboardingOption(text: "Sweating or hot flashes", icon: nil, color: nil),
+            OnboardingOption(text: "Bloating", icon: nil, color: nil),
+            OnboardingOption(text: "Sluggishness", icon: nil, color: nil),
+            OnboardingOption(text: "Brain fog", icon: nil, color: nil),
+            OnboardingOption(text: "Cravings", icon: nil, color: nil),
+            OnboardingOption(text: "Heartburn/Reflux", icon: nil, color: nil),
             OnboardingOption(text: "Mood swings", icon: nil, color: nil),
-            OnboardingOption(text: "Brain fog", icon: nil, color: nil)
+            OnboardingOption(text: "Acne/Skin issues", icon: nil, color: nil),
+            OnboardingOption(text: "Joint pain", icon: nil, color: nil)
         ],
         allowsMultiple: true,
         icon: "stethoscope"
@@ -231,17 +230,17 @@ struct OnboardingQuestions {
     
     static let losses = OnboardingQuestion(
         id: "losses",
-        title: "What have you lost to alcohol?",
-        subtitle: "It's okay to acknowledge what alcohol has cost you",
+        title: "What has fast food cost you?",
+        subtitle: "It's okay to acknowledge the impact",
         type: .multipleChoice,
         options: [
-            OnboardingOption(text: "Trust from loved ones", icon: "heart.slash.fill", color: .red),
-            OnboardingOption(text: "Job opportunities", icon: "briefcase.fill", color: .orange),
+            OnboardingOption(text: "Physical fitness", icon: "figure.run", color: .red),
+            OnboardingOption(text: "Self-confidence", icon: "person.fill.questionmark", color: .orange),
             OnboardingOption(text: "Money and savings", icon: "dollarsign.circle.fill", color: .yellow),
-            OnboardingOption(text: "Self-respect", icon: "person.fill.questionmark", color: .purple),
-            OnboardingOption(text: "Physical health", icon: "heart.text.square.fill", color: .green),
+            OnboardingOption(text: "Energy for hobbies", icon: "battery.25", color: .purple),
+            OnboardingOption(text: "Long-term health", icon: "heart.text.square.fill", color: .green),
             OnboardingOption(text: "Mental clarity", icon: "brain.head.profile", color: .blue),
-            OnboardingOption(text: "Time with family", icon: "figure.2.and.child.holdinghands", color: .pink),
+            OnboardingOption(text: "Comfort in clothes", icon: "tshirt.fill", color: .pink),
             OnboardingOption(text: "Personal goals", icon: "target", color: .cyan)
         ],
         allowsMultiple: true,
@@ -250,19 +249,19 @@ struct OnboardingQuestions {
     
     static let triggers = OnboardingQuestion(
         id: "triggers",
-        title: "What triggers your drinking?",
-        subtitle: "Understanding your triggers is the first step to managing them",
+        title: "What triggers your cravings?",
+        subtitle: "Understanding your triggers is key",
         type: .multipleChoice,
         options: [
-            OnboardingOption(text: "Stress from work", icon: "briefcase.fill", color: .red),
-            OnboardingOption(text: "Social pressure", icon: "person.3.fill", color: .orange),
-            OnboardingOption(text: "Loneliness", icon: "person.fill", color: .blue),
-            OnboardingOption(text: "Boredom", icon: "clock.fill", color: .purple),
-            OnboardingOption(text: "Celebrating", icon: "party.popper.fill", color: .yellow),
-            OnboardingOption(text: "Anger or frustration", icon: "flame.fill", color: .red),
-            OnboardingOption(text: "Sadness or depression", icon: "cloud.rain.fill", color: .gray),
-            OnboardingOption(text: "Habit/routine", icon: "repeat.circle.fill", color: .green),
-            OnboardingOption(text: "Physical cravings", icon: "heart.fill", color: .pink)
+            OnboardingOption(text: "Stress/Anxiety", icon: "brain.head.profile", color: .red),
+            OnboardingOption(text: "Convenience/Time", icon: "clock.fill", color: .orange),
+            OnboardingOption(text: "Boredom", icon: "zzz", color: .blue),
+            OnboardingOption(text: "Late night hunger", icon: "moon.stars.fill", color: .purple),
+            OnboardingOption(text: "Social gatherings", icon: "person.3.fill", color: .yellow),
+            OnboardingOption(text: "Advertisements", icon: "tv.fill", color: .red),
+            OnboardingOption(text: "Sadness/Comfort", icon: "cloud.rain.fill", color: .gray),
+            OnboardingOption(text: "Habit/Routine", icon: "repeat.circle.fill", color: .green),
+            OnboardingOption(text: "Passing a drive-thru", icon: "car.fill", color: .pink)
         ],
         allowsMultiple: true,
         icon: "exclamationmark.triangle.fill"
@@ -270,16 +269,16 @@ struct OnboardingQuestions {
     
     static let afterFeeling = OnboardingQuestion(
         id: "afterFeeling",
-        title: "How do you feel after drinking?",
-        subtitle: "Your feelings are valid and shared by many others",
+        title: "How do you feel after eating fast food?",
+        subtitle: "Be honest with yourself",
         type: .singleChoice,
         options: [
-            OnboardingOption(text: "Ashamed and guilty", icon: nil, color: nil),
-            OnboardingOption(text: "Anxious and worried", icon: nil, color: nil),
+            OnboardingOption(text: "Bloated and heavy", icon: nil, color: nil),
+            OnboardingOption(text: "Guilty and ashamed", icon: nil, color: nil),
+            OnboardingOption(text: "Tired and lethargic", icon: nil, color: nil),
             OnboardingOption(text: "Physically sick", icon: nil, color: nil),
-            OnboardingOption(text: "Depressed", icon: nil, color: nil),
-            OnboardingOption(text: "Angry at myself", icon: nil, color: nil),
-            OnboardingOption(text: "Hopeless", icon: nil, color: nil)
+            OnboardingOption(text: "Disappointed", icon: nil, color: nil),
+            OnboardingOption(text: "Satisfied briefly, then bad", icon: nil, color: nil)
         ],
         allowsMultiple: false,
         icon: "heart.slash.fill"
@@ -288,15 +287,15 @@ struct OnboardingQuestions {
     static let biggestFear = OnboardingQuestion(
         id: "biggestFear",
         title: "What's your biggest fear about quitting?",
-        subtitle: "These fears are normal - we'll help you overcome them",
+        subtitle: "These fears are normal",
         type: .singleChoice,
         options: [
-            OnboardingOption(text: "I'll lose my friends", icon: nil, color: nil),
-            OnboardingOption(text: "I can't handle stress without it", icon: nil, color: nil),
-            OnboardingOption(text: "Life will be boring", icon: nil, color: nil),
-            OnboardingOption(text: "I'll fail and disappoint everyone", icon: nil, color: nil),
-            OnboardingOption(text: "Withdrawal symptoms", icon: nil, color: nil),
-            OnboardingOption(text: "I don't know who I am without it", icon: nil, color: nil)
+            OnboardingOption(text: "I'll be hungry all the time", icon: nil, color: nil),
+            OnboardingOption(text: "Cooking is too hard/time consuming", icon: nil, color: nil),
+            OnboardingOption(text: "Healthy food tastes bad", icon: nil, color: nil),
+            OnboardingOption(text: "I'll fail again", icon: nil, color: nil),
+            OnboardingOption(text: "Social situations will be awkward", icon: nil, color: nil),
+            OnboardingOption(text: "I can't afford healthy food", icon: nil, color: nil)
         ],
         allowsMultiple: false,
         icon: "exclamationmark.shield.fill"
@@ -305,32 +304,32 @@ struct OnboardingQuestions {
     static let previousAttempts = OnboardingQuestion(
         id: "previousAttempts",
         title: "Have you tried to quit before?",
-        subtitle: "Every attempt is a step forward, regardless of the outcome",
+        subtitle: "Every attempt is a lesson learned",
         type: .singleChoice,
         options: [
             OnboardingOption(text: "Never tried", icon: nil, color: nil),
             OnboardingOption(text: "Once or twice", icon: nil, color: nil),
             OnboardingOption(text: "Several times", icon: nil, color: nil),
             OnboardingOption(text: "Many times", icon: nil, color: nil),
-            OnboardingOption(text: "I've lost count", icon: nil, color: nil)
+            OnboardingOption(text: "I'm always on and off", icon: nil, color: nil)
         ],
         allowsMultiple: false,
         icon: "clock.arrow.circlepath"
     )
     
     
-    static let drinkingFrequencyOptions = [
+    static let fastFoodFrequencyOptions = [
         OnboardingOption(text: "Daily", icon: "calendar.circle.fill", color: .red),
         OnboardingOption(text: "Few times a week", icon: "calendar.badge.clock", color: .orange),
         OnboardingOption(text: "Weekly", icon: "calendar", color: .yellow),
         OnboardingOption(text: "Occasionally", icon: "calendar.badge.plus", color: .green)
     ]
     
-    static let drinksPerSessionOptions = [
-        OnboardingOption(text: "1-2 drinks", icon: "1.circle.fill", color: .green),
-        OnboardingOption(text: "3-4 drinks", icon: "3.circle.fill", color: .yellow),
-        OnboardingOption(text: "5-6 drinks", icon: "5.circle.fill", color: .orange),
-        OnboardingOption(text: "7+ drinks", icon: "plus.circle.fill", color: .red)
+    static let mealsPerWeekOptions = [
+        OnboardingOption(text: "1-2 meals", icon: "1.circle.fill", color: .green),
+        OnboardingOption(text: "3-4 meals", icon: "3.circle.fill", color: .yellow),
+        OnboardingOption(text: "5-6 meals", icon: "5.circle.fill", color: .orange),
+        OnboardingOption(text: "7+ meals", icon: "plus.circle.fill", color: .red)
     ]
     
     
@@ -342,20 +341,20 @@ struct OnboardingQuestions {
     ]
     
     static let hoursLostOptions = [
-        OnboardingOption(text: "1-5 hours", icon: "clock", color: .green),
-        OnboardingOption(text: "6-10 hours", icon: "clock.fill", color: .yellow),
-        OnboardingOption(text: "11-20 hours", icon: "timer", color: .orange),
-        OnboardingOption(text: "20+ hours", icon: "alarm.fill", color: .red)
+        OnboardingOption(text: "1-2 hours", icon: "clock", color: .green),
+        OnboardingOption(text: "3-5 hours", icon: "clock.fill", color: .yellow),
+        OnboardingOption(text: "5-10 hours", icon: "timer", color: .orange),
+        OnboardingOption(text: "10+ hours", icon: "alarm.fill", color: .red)
     ]
 
     static let goals = [
         OnboardingGoal(icon: "🧠", title: "Clear mind", description: "Better focus and mental clarity", color: .blue),
-        OnboardingGoal(icon: "❤️", title: "Rebuild trust", description: "Strengthen relationships", color: .red),
-        OnboardingGoal(icon: "💪", title: "Get healthy", description: "Improve physical fitness", color: .green),
+        OnboardingGoal(icon: "❤️", title: "Self Love", description: "Treating my body right", color: .red),
+        OnboardingGoal(icon: "💪", title: "Get fit", description: "Improve physical fitness", color: .green),
         OnboardingGoal(icon: "😴", title: "Sleep better", description: "Peaceful, restful nights", color: .indigo),
         OnboardingGoal(icon: "💰", title: "Save money", description: "Financial freedom", color: .yellow),
-        OnboardingGoal(icon: "🎯", title: "Achieve goals", description: "Reach your potential", color: .orange),
-        OnboardingGoal(icon: "😊", title: "Find happiness", description: "Joy without alcohol", color: .pink),
-        OnboardingGoal(icon: "🏆", title: "Prove myself", description: "Show I can do this", color: .purple)
+        OnboardingGoal(icon: "⚡️", title: "More Energy", description: "No more food comas", color: .orange),
+        OnboardingGoal(icon: "😊", title: "Feel good", description: "Confidence and happiness", color: .pink),
+        OnboardingGoal(icon: "🍳", title: "Cook more", description: "Learn to make healthy meals", color: .purple)
     ]
 }

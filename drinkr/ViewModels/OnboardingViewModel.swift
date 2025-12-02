@@ -20,8 +20,8 @@ class OnboardingViewModel: ObservableObject {
     @Published var selectedPreviousAttempts: OnboardingOption?
     @Published var userName: String = ""
     @Published var userAge: Int = 0
-    @Published var selectedDrinkingFrequency: OnboardingOption?
-    @Published var selectedDrinksPerSession: OnboardingOption?
+    @Published var selectedFastFoodFrequency: OnboardingOption?
+    @Published var selectedMealsPerWeek: OnboardingOption?
     @Published var selectedWeeklySpending: OnboardingOption?
     @Published var selectedHoursLost: OnboardingOption?
     @Published var selectedGoals: Set<OnboardingGoal> = []
@@ -92,7 +92,7 @@ class OnboardingViewModel: ObservableObject {
             .store(in: &cancellables)
         
         
-        $selectedDrinkingFrequency
+        $selectedFastFoodFrequency
             .sink { [weak self] _ in 
                 DispatchQueue.main.async {
                     self?.updateCanProceed()
@@ -100,7 +100,7 @@ class OnboardingViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         
-        $selectedDrinksPerSession
+        $selectedMealsPerWeek
             .sink { [weak self] _ in 
                 DispatchQueue.main.async {
                     self?.updateCanProceed()
@@ -188,8 +188,8 @@ class OnboardingViewModel: ObservableObject {
             canProceed = selectedPreviousAttempts != nil
         case .name:
             canProceed = !userName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        case .drinkingPattern:
-            canProceed = selectedDrinkingFrequency != nil && selectedDrinksPerSession != nil
+        case .eatingPattern:
+            canProceed = selectedFastFoodFrequency != nil && selectedMealsPerWeek != nil
         case .cost:
             canProceed = selectedWeeklySpending != nil && selectedHoursLost != nil
         case .motivation:
@@ -261,8 +261,8 @@ class OnboardingViewModel: ObservableObject {
         case .previousAttempts:
             currentPage = .name
         case .name:
-            currentPage = .drinkingPattern
-        case .drinkingPattern:
+            currentPage = .eatingPattern
+        case .eatingPattern:
             currentPage = .cost
         case .cost:
             currentPage = .motivation
@@ -305,10 +305,10 @@ class OnboardingViewModel: ObservableObject {
             currentPage = .biggestFear
         case .name:
             currentPage = .previousAttempts
-        case .drinkingPattern:
+        case .eatingPattern:
             currentPage = .name
         case .cost:
-            currentPage = .drinkingPattern
+            currentPage = .eatingPattern
         case .motivation:
             currentPage = .cost
         case .goals:
@@ -341,9 +341,9 @@ class OnboardingViewModel: ObservableObject {
         case .name:
             userProfile.userName = userName
             userProfile.age = userAge
-        case .drinkingPattern:
-            userProfile.drinkingFrequency = selectedDrinkingFrequency?.text ?? ""
-            userProfile.drinksPerSession = selectedDrinksPerSession?.text ?? ""
+        case .eatingPattern:
+            userProfile.fastFoodFrequency = selectedFastFoodFrequency?.text ?? ""
+            userProfile.mealsPerWeek = selectedMealsPerWeek?.text ?? ""
         case .cost:
             userProfile.weeklySpending = selectedWeeklySpending?.text ?? ""
             userProfile.hoursLostWeekly = selectedHoursLost?.text ?? ""

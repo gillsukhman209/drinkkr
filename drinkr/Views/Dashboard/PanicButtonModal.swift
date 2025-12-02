@@ -115,7 +115,7 @@ struct PanicButtonModal: View {
                     .multilineTextAlignment(.center)
                     .tracking(1)
                 
-                Text("Side effects of drinking:")
+                Text("Side effects of fast food:")
                     .font(.system(size: isCompact ? 18 : 20, weight: .medium))
                     .foregroundColor(.white.opacity(0.8))
             }
@@ -124,27 +124,27 @@ struct PanicButtonModal: View {
             // Effects list
             VStack(spacing: 20) {
                 effectItem(
-                    icon: "bed.double.fill",
-                    title: "SLEEP DISRUPTION",
-                    subtitle: "Poor sleep quality for days, waking up exhausted and anxious."
+                    icon: "bolt.slash.fill",
+                    title: "ENERGY CRASH",
+                    subtitle: "Sluggishness and brain fog that ruins your productivity and mood."
                 )
                 
                 effectItem(
-                    icon: "eye.slash.fill",
-                    title: "SHAME SPIRAL",
-                    subtitle: "Immediate regret, self-hatred, and breaking promises to yourself."
+                    icon: "arrow.up.left.and.arrow.down.right",
+                    title: "PHYSICAL BLOATING",
+                    subtitle: "Feeling heavy, bloated, and uncomfortable in your own skin."
                 )
                 
                 effectItem(
                     icon: "heart.slash.fill",
-                    title: "RELATIONSHIP DAMAGE",
-                    subtitle: "Hurting people you love and losing their trust and respect."
+                    title: "HEALTH RISKS",
+                    subtitle: "Increased risk of heart disease, diabetes, and long-term health issues."
                 )
                 
                 effectItem(
                     icon: "arrow.counterclockwise",
                     title: "RESET YOUR PROGRESS",
-                    subtitle: "Throwing away all your hard work and starting from day zero."
+                    subtitle: "Breaking your streak and undoing the healthy habits you've built."
                 )
             }
             .padding(.horizontal, 20)
@@ -285,11 +285,11 @@ struct PanicButtonModal: View {
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                 
-                Text("Alcohol solves nothing.")
+                Text("Fast food solves nothing.")
                     .font(.system(size: isCompact ? 24 : 28, weight: .semibold))
                     .foregroundColor(.purple)
                 
-                Text("It won't fix your problems, reduce your stress, or make you happy. It will only add shame, regret, and reset your progress. The person you'll be tomorrow is counting on the choice you make right now.")
+                Text("It won't fix your stress or make you happy. It will only add bloating, regret, and reset your progress. The person you'll be tomorrow is counting on the choice you make right now.")
                     .font(.system(size: isCompact ? 16 : 18))
                     .foregroundColor(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
@@ -359,7 +359,7 @@ struct PanicButtonModal: View {
                     .font(.system(size: isCompact ? 24 : 28, weight: .semibold))
                     .foregroundColor(.green)
                 
-                Text("Every day you've stayed sober is proof of your strength. You didn't come this far just to come this far. Choose the version of yourself you're becoming, not the one you're leaving behind.")
+                Text("Every day you've eaten clean is proof of your strength. You didn't come this far just to come this far. Choose the version of yourself you're becoming, not the one you're leaving behind.")
                     .font(.system(size: isCompact ? 16 : 18))
                     .foregroundColor(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
@@ -417,7 +417,7 @@ struct PanicButtonModal: View {
                 triggerOption(icon: "cloud.bolt.fill", title: "Stress", subtitle: "Work, life, or pressure", color: .red)
                 triggerOption(icon: "brain.head.profile", title: "Anxiety", subtitle: "Worry or nervousness", color: .purple)
                 triggerOption(icon: "moon.zzz.fill", title: "Boredom", subtitle: "Nothing to do", color: .indigo)
-                triggerOption(icon: "person.2.fill", title: "Social", subtitle: "Others drinking around me", color: .orange)
+                triggerOption(icon: "person.2.fill", title: "Social", subtitle: "Others eating junk food", color: .orange)
                 triggerOption(icon: "clock.fill", title: "Habit", subtitle: "It's my usual time", color: .green)
                 triggerOption(icon: "heart.slash.fill", title: "Emotional", subtitle: "Sadness or loneliness", color: .pink)
             }
@@ -536,7 +536,7 @@ struct PanicButtonModal: View {
                         Text("The craving passed!")
                             .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
                             .foregroundColor(.white)
-                        Text("I don't want to drink anymore")
+                        Text("I don't want to eat junk anymore")
                             .font(.system(size: isCompact ? 14 : 16))
                             .foregroundColor(.white.opacity(0.7))
                     }

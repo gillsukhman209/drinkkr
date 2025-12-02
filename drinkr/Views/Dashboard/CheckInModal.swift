@@ -207,7 +207,7 @@ struct CheckInModal: View {
                         .foregroundColor(ColorTheme.textSecondary)
                         .multilineTextAlignment(.center)
                     
-                    if let streak = dataService.sobrietyData?.currentStreak, streak > 0 {
+                    if let streak = dataService.cleanEatingData?.currentStreak, streak > 0 {
                         Text("Current streak: \(streak) days")
                             .font(.system(size: isCompact ? 18 : 20, weight: .semibold))
                             .foregroundColor(ColorTheme.accentCyan)

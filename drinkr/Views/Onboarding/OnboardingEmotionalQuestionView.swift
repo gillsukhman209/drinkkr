@@ -162,7 +162,7 @@ struct OnboardingEmotionalQuestionView: View {
                     .foregroundColor(ColorTheme.accentCyan)
             }
             
-            Text("Thousands of people have shared similar experiences and are now living alcohol-free lives.")
+            Text("Thousands of people have shared similar experiences and are now living healthy lives.")
                 .font(.system(size: isCompact ? 12 : 14))
                 .foregroundColor(ColorTheme.textSecondary)
                 .multilineTextAlignment(.center)
@@ -188,15 +188,15 @@ struct OnboardingEmotionalQuestionView: View {
         case .whyHere:
             return "Why are you here today?"
         case .lifeImpact:
-            return "How is alcohol affecting your life?"
+            return "How is fast food affecting your life?"
         case .symptoms:
             return "What symptoms are you experiencing?"
         case .losses:
-            return "What have you lost to alcohol?"
+            return "What has fast food cost you?"
         case .triggers:
-            return "What triggers your drinking?"
+            return "What triggers your cravings?"
         case .afterFeeling:
-            return "How do you feel after drinking?"
+            return "How do you feel after eating fast food?"
         case .biggestFear:
             return "What's your biggest fear about quitting?"
         case .previousAttempts:
@@ -215,7 +215,7 @@ struct OnboardingEmotionalQuestionView: View {
         case .symptoms:
             return "Your health matters - select all that apply"
         case .losses:
-            return "It's okay to acknowledge what alcohol has cost you"
+            return "It's okay to acknowledge the impact"
         case .triggers:
             return "Understanding your triggers is the first step to managing them"
         case .afterFeeling:
