@@ -29,7 +29,7 @@ struct ContentView: View {
     
     var body: some View {
         Group {
-            if !hasValidSubscriptionSession {
+            if false { // !hasValidSubscriptionSession {
                 // Show onboarding until BOTH completion AND subscription are done
                 OnboardingContainerView(isPresented: $showingOnboarding)
                     .preferredColorScheme(.dark)
@@ -77,56 +77,7 @@ struct ContentView: View {
                 }
             }
         }
-        #if DEBUG
-        .overlay(
-            // Debug controls (DEBUG only) - Only show when not in main app
-            Group {
-                if !hasValidSubscriptionSession {
-                    VStack {
-                        HStack {
-                            Spacer()
-                            VStack(spacing: 8) {
-                                if superwallManager.isSubscribed {
-                                    Button("🔓 Remove Sub") {
-                                        superwallManager.debugRemoveSubscription()
-                                    }
-                                    .font(.caption)
-                                    .foregroundColor(.red)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.red.opacity(0.2))
-                                    .cornerRadius(8)
-                                } else {
-                                    Button("🔓 Grant Sub") {
-                                        superwallManager.debugGrantSubscription()
-                                    }
-                                    .font(.caption)
-                                    .foregroundColor(.green)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.green.opacity(0.2))
-                                    .cornerRadius(8)
-                                }
-                                
-                                Button("🔄 Reset") {
-                                    debugResetApp()
-                                }
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.orange.opacity(0.2))
-                                .cornerRadius(8)
-                            }
-                            .padding(.trailing, 16)
-                        }
-                        Spacer()
-                    }
-                    .padding(.top, 50)
-                }
-            }
-        )
-        #endif
+
         .onAppear {
             if !hasInitialized {
                 hasInitialized = true

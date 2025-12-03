@@ -11,6 +11,7 @@ class DataService: ObservableObject {
     @Published var achievements: [Achievement] = []
     @Published var checkIns: [CheckIn] = []
     @Published var meditationSessions: [MeditationSession] = []
+    @Published var dailyTasks: [FocusTask] = []
     
     init() {
         
@@ -28,7 +29,7 @@ class DataService: ObservableObject {
         if let users = try? modelContext.fetch(userDescriptor), let user = users.first {
             currentUser = user
         } else {
-            let newUser = User(name: "John Doe")
+            let newUser = User(name: "Singh")
             modelContext.insert(newUser)
             currentUser = newUser
         }
@@ -66,9 +67,10 @@ class DataService: ObservableObject {
         
         updateAchievementProgress()
         
-        // Load check-ins and meditation sessions
+        // Load check-ins, meditation sessions, and daily tasks
         loadCheckIns()
         loadMeditationSessions()
+        loadDailyTasks()
         
         try? modelContext.save()
     }
@@ -262,6 +264,70 @@ class DataService: ObservableObject {
         if let fetchedSessions = try? modelContext.fetch(descriptor) {
             meditationSessions = fetchedSessions
         }
+    }
+    
+    func loadDailyTasks() {
+        guard let modelContext = modelContext else { return }
+        
+        // Fetch tasks for today
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: Date())
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        let descriptor = FetchDescriptor<FocusTask>(
+            predicate: #Predicate<FocusTask> { task in
+                task.date >= startOfDay && task.date < endOfDay
+            }
+        )
+        
+        if let tasks = try? modelContext.fetch(descriptor), !tasks.isEmpty {
+            dailyTasks = tasks
+        } else {
+            generateDailyTasks()
+        }
+    }
+    
+    func generateDailyTasks() {
+        guard let modelContext = modelContext else { return }
+        
+        // Clear old tasks from memory (optional: could delete from DB if we don't want history)
+        dailyTasks = []
+        
+        let streak = cleanEatingData?.currentStreak ?? 0
+        var newTasks: [FocusTask] = []
+        
+        if streak < 3 {
+            newTasks = [
+                FocusTask(title: "Hydrate", subtitle: "Drink 8 glasses of water", icon: "drop.fill"),
+                FocusTask(title: "Healthy Swap", subtitle: "Replace one fast food meal", icon: "leaf.fill"),
+                FocusTask(title: "Reflection", subtitle: "Write down your 'Why'", icon: "pencil")
+            ]
+        } else if streak < 7 {
+            newTasks = [
+                FocusTask(title: "Meal Prep", subtitle: "Plan tomorrow's lunch", icon: "calendar"),
+                FocusTask(title: "Movement", subtitle: "15 min walk after dinner", icon: "figure.walk"),
+                FocusTask(title: "Mindfulness", subtitle: "5 min breathing exercise", icon: "lungs.fill")
+            ]
+        } else {
+            newTasks = [
+                FocusTask(title: "New Recipe", subtitle: "Try cooking something new", icon: "fork.knife"),
+                FocusTask(title: "Share Success", subtitle: "Tell a friend your progress", icon: "message.fill"),
+                FocusTask(title: "Reward", subtitle: "Treat yourself (non-food)", icon: "gift.fill")
+            ]
+        }
+        
+        for task in newTasks {
+            modelContext.insert(task)
+            dailyTasks.append(task)
+        }
+        
+        saveContext()
+    }
+    
+    func toggleTask(_ task: FocusTask) {
+        task.isCompleted.toggle()
+        saveContext()
+        objectWillChange.send()
     }
     
     private func saveContext() {

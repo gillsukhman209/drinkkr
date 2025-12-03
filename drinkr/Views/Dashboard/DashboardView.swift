@@ -38,8 +38,7 @@ struct DashboardView: View {
     @State private var currentQuoteIndex = 0
     @State private var todaysReflection = ""
     
-    // Continuous timer that doesn't stop when switching tabs
-    private let timerPublisher = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    // Timer removed in favor of TimelineView
     
     let motivationalQuotes = [
         "Your energy grows with every healthy meal.",
@@ -118,10 +117,7 @@ struct DashboardView: View {
                 updateTimeComponents() // Initialize on first appearance
             }
         }
-        .onReceive(timerPublisher) { _ in
-            // This runs every second and doesn't stop when switching tabs
-            updateTimeComponents()
-        }
+
         #if DEBUG
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ForceMilestone"))) { notification in
             if let userInfo = notification.userInfo,
@@ -218,18 +214,65 @@ struct DashboardView: View {
                 .tracking(0.5)
             
             // Smart timer display that adapts based on duration
-            Text(getSmartTimeDisplay())
-                .font(.system(size: isCompact ? 72 : 96, weight: .black, design: .rounded))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.white, ColorTheme.accentCyan.opacity(0.8)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+            TimelineView(.periodic(from: .now, by: 1.0)) { context in
+                Text(getSmartTimeDisplay(for: context.date))
+                    .font(.system(size: isCompact ? 72 : 96, weight: .black, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.white, ColorTheme.accentCyan.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                )
-                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                    .onChange(of: context.date) { _, _ in
+                        updateTimeComponents()
+                    }
+            }
         }
         .padding(.vertical, isCompact ? 20 : 30)
+    }
+    
+    func getSmartTimeDisplay(for date: Date) -> String {
+        guard let quitDate = dataService.cleanEatingData?.quitDate else { return "0s" }
+        
+        let interval = date.timeIntervalSince(quitDate)
+        let totalSeconds = Int(interval)
+        
+        // Less than 60 seconds: show seconds
+        if totalSeconds < 60 {
+            return "\(totalSeconds)s"
+        }
+        // Less than 60 minutes: show minutes and seconds
+        else if totalSeconds < 3600 {
+            let totalMinutes = totalSeconds / 60
+            let remainingSeconds = totalSeconds % 60
+            if remainingSeconds == 0 {
+                return "\(totalMinutes)m"
+            } else {
+                return "\(totalMinutes)m \(remainingSeconds)s"
+            }
+        }
+        // Less than 24 hours: show hours and minutes
+        else if totalSeconds < 86400 {
+            let totalHours = totalSeconds / 3600
+            let remainingMinutes = (totalSeconds % 3600) / 60
+            if remainingMinutes == 0 {
+                return "\(totalHours)h"
+            } else {
+                return "\(totalHours)h \(remainingMinutes)m"
+            }
+        }
+        // 24 hours or more: show days and hours
+        else {
+            let days = totalSeconds / 86400
+            let hours = (totalSeconds % 86400) / 3600
+            if hours == 0 {
+                return "\(days)d"
+            } else {
+                return "\(days)d \(hours)h"
+            }
+        }
     }
     
     func timeComponent(value: Int, unit: String) -> some View {
@@ -554,44 +597,7 @@ struct DashboardView: View {
         }
     }
     
-    func getSmartTimeDisplay() -> String {
-        let totalSeconds = timeComponents.days * 24 * 3600 + timeComponents.hours * 3600 + timeComponents.minutes * 60 + timeComponents.seconds
-        
-        // Less than 60 seconds: show seconds
-        if totalSeconds < 60 {
-            return "\(timeComponents.seconds)s"
-        }
-        // Less than 60 minutes: show minutes and seconds
-        else if totalSeconds < 3600 {
-            let totalMinutes = totalSeconds / 60
-            let remainingSeconds = totalSeconds % 60
-            if remainingSeconds == 0 {
-                return "\(totalMinutes)m"
-            } else {
-                return "\(totalMinutes)m \(remainingSeconds)s"
-            }
-        }
-        // Less than 24 hours: show hours and minutes
-        else if totalSeconds < 86400 {
-            let totalHours = totalSeconds / 3600
-            let remainingMinutes = (totalSeconds % 3600) / 60
-            if remainingMinutes == 0 {
-                return "\(totalHours)h"
-            } else {
-                return "\(totalHours)h \(remainingMinutes)m"
-            }
-        }
-        // 24 hours or more: show days and hours
-        else {
-            let days = timeComponents.days
-            let hours = timeComponents.hours
-            if hours == 0 {
-                return "\(days)d"
-            } else {
-                return "\(days)d \(hours)h"
-            }
-        }
-    }
+
     
     
     
@@ -773,24 +779,24 @@ struct DashboardView: View {
     }
     
     @ViewBuilder
-    func focusItemRow(title: String, subtitle: String, icon: String, isCompleted: Bool) -> some View {
+    func focusItemRow(task: FocusTask) -> some View {
         HStack(spacing: isCompact ? 12 : 16) {
             ZStack {
                 Circle()
                     .fill(ColorTheme.accentCyan.opacity(0.2))
                     .frame(width: isCompact ? 36 : 42, height: isCompact ? 36 : 42)
                 
-                Image(systemName: icon)
+                Image(systemName: task.icon)
                     .font(.system(size: isCompact ? 16 : 18))
                     .foregroundColor(ColorTheme.accentCyan)
             }
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(task.title)
                     .font(.system(size: isCompact ? 14 : 16, weight: .semibold))
                     .foregroundColor(.white)
                 
-                Text(subtitle)
+                Text(task.subtitle)
                     .font(.system(size: isCompact ? 12 : 14))
                     .foregroundColor(.white.opacity(0.7))
             }
@@ -798,14 +804,16 @@ struct DashboardView: View {
             Spacer()
             
             Button(action: {
-                // Toggle completion logic here if needed
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    dataService.toggleTask(task)
+                }
             }) {
                 ZStack {
                     Circle()
-                        .stroke(isCompleted ? ColorTheme.successGreen : ColorTheme.accentCyan, lineWidth: 2)
+                        .stroke(task.isCompleted ? ColorTheme.successGreen : ColorTheme.accentCyan, lineWidth: 2)
                         .frame(width: isCompact ? 20 : 24, height: isCompact ? 20 : 24)
                     
-                    if isCompleted {
+                    if task.isCompleted {
                         Circle()
                             .fill(ColorTheme.successGreen)
                             .frame(width: isCompact ? 12 : 14, height: isCompact ? 12 : 14)
@@ -824,27 +832,14 @@ struct DashboardView: View {
                 .foregroundColor(ColorTheme.textPrimary)
             
             VStack(spacing: 0) {
-                // Dynamic focus items based on streak
-                let streak = dataService.cleanEatingData?.currentStreak ?? 0
-                
-                if streak < 3 {
-                    focusItemRow(title: "Hydrate", subtitle: "Drink 8 glasses of water", icon: "drop.fill", isCompleted: true)
-                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
-                    focusItemRow(title: "Healthy Swap", subtitle: "Replace one fast food meal", icon: "leaf.fill", isCompleted: false)
-                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
-                    focusItemRow(title: "Reflection", subtitle: "Write down your 'Why'", icon: "pencil", isCompleted: false)
-                } else if streak < 7 {
-                    focusItemRow(title: "Meal Prep", subtitle: "Plan tomorrow's lunch", icon: "calendar", isCompleted: true)
-                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
-                    focusItemRow(title: "Movement", subtitle: "15 min walk after dinner", icon: "figure.walk", isCompleted: false)
-                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
-                    focusItemRow(title: "Mindfulness", subtitle: "5 min breathing exercise", icon: "lungs.fill", isCompleted: false)
-                } else {
-                    focusItemRow(title: "New Recipe", subtitle: "Try cooking something new", icon: "fork.knife", isCompleted: true)
-                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
-                    focusItemRow(title: "Share Success", subtitle: "Tell a friend your progress", icon: "message.fill", isCompleted: false)
-                    Divider().background(Color.white.opacity(0.1)).padding(.leading, 50)
-                    focusItemRow(title: "Reward", subtitle: "Treat yourself (non-food)", icon: "gift.fill", isCompleted: false)
+                ForEach(Array(dataService.dailyTasks.enumerated()), id: \.element.id) { index, task in
+                    focusItemRow(task: task)
+                    
+                    if index < dataService.dailyTasks.count - 1 {
+                        Divider()
+                            .background(Color.white.opacity(0.1))
+                            .padding(.leading, 50)
+                    }
                 }
             }
             .background(
