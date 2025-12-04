@@ -64,7 +64,7 @@ struct DashboardView: View {
                     VStack(spacing: isCompact ? 16 : 20) {
                         // App name header
                         HStack {
-                            Text("CleanEats")
+                            Text("NoBite")
                                 .font(.system(size: isCompact ? 30 : 34, weight: .bold, design: .rounded))
                                 .foregroundStyle(
                                     LinearGradient(
@@ -98,8 +98,7 @@ struct DashboardView: View {
                         quickStatsCards
                             .padding(.horizontal)
                         
-                        todaysFocusSection
-                            .padding(.horizontal)
+
                         
                         recentAchievementsSection
                             .padding(.horizontal)
@@ -778,90 +777,10 @@ struct DashboardView: View {
         }
     }
     
-    @ViewBuilder
-    func focusItemRow(task: FocusTask) -> some View {
-        HStack(spacing: isCompact ? 12 : 16) {
-            ZStack {
-                Circle()
-                    .fill(ColorTheme.accentCyan.opacity(0.2))
-                    .frame(width: isCompact ? 36 : 42, height: isCompact ? 36 : 42)
-                
-                Image(systemName: task.icon)
-                    .font(.system(size: isCompact ? 16 : 18))
-                    .foregroundColor(ColorTheme.accentCyan)
-            }
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(task.title)
-                    .font(.system(size: isCompact ? 14 : 16, weight: .semibold))
-                    .foregroundColor(.white)
-                
-                Text(task.subtitle)
-                    .font(.system(size: isCompact ? 12 : 14))
-                    .foregroundColor(.white.opacity(0.7))
-            }
-            
-            Spacer()
-            
-            Button(action: {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                    dataService.toggleTask(task)
-                }
-            }) {
-                ZStack {
-                    Circle()
-                        .stroke(task.isCompleted ? ColorTheme.successGreen : ColorTheme.accentCyan, lineWidth: 2)
-                        .frame(width: isCompact ? 20 : 24, height: isCompact ? 20 : 24)
-                    
-                    if task.isCompleted {
-                        Circle()
-                            .fill(ColorTheme.successGreen)
-                            .frame(width: isCompact ? 12 : 14, height: isCompact ? 12 : 14)
-                    }
-                }
-            }
-        }
-        .padding(isCompact ? 16 : 20)
-    }
+
 
     
-    var todaysFocusSection: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            Text("Today's Focus")
-                .font(.system(size: isCompact ? 18 : 20, weight: .bold))
-                .foregroundColor(ColorTheme.textPrimary)
-            
-            VStack(spacing: 0) {
-                ForEach(Array(dataService.dailyTasks.enumerated()), id: \.element.id) { index, task in
-                    focusItemRow(task: task)
-                    
-                    if index < dataService.dailyTasks.count - 1 {
-                        Divider()
-                            .background(Color.white.opacity(0.1))
-                            .padding(.leading, 50)
-                    }
-                }
-            }
-            .background(
-                RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
-                            .stroke(.white.opacity(0.1), lineWidth: 1)
-                    )
-            )
-        }
-        .padding(isCompact ? 20 : 24)
-        .background(
-            RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
-                .fill(.ultraThinMaterial)
-                .overlay(
-                    RoundedRectangle(cornerRadius: isCompact ? 20 : 24)
-                        .stroke(.white.opacity(0.1), lineWidth: 1)
-                )
-        )
-        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-    }
+
     
     @ViewBuilder
     func achievementRow(_ achievement: Achievement) -> some View {

@@ -46,7 +46,7 @@ struct OnboardingWelcomeView: View {
                                 .opacity(animationPhase >= 2 ? 1.0 : 0.0)
                         }
                         
-                        Text("CleanEats")
+                        Text("NoBite")
                             .font(.system(size: isCompact ? 36 : 52, weight: .bold, design: .rounded))
                             .foregroundStyle(
                                 LinearGradient(

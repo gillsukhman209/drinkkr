@@ -119,7 +119,7 @@ struct OnboardingMotivationView: View {
                         .font(.system(size: isCompact ? 20 : 24, weight: .bold))
                         .foregroundColor(.white)
                     
-                    Text("People with your profile have an 87% success rate in their first 30 days with CleanEats")
+                    Text("People with your profile have an 87% success rate in their first 30 days with NoBite")
                         .font(.system(size: isCompact ? 14 : 16, weight: .medium))
                         .foregroundColor(ColorTheme.textSecondary)
                         .multilineTextAlignment(.center)

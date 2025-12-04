@@ -21,8 +21,7 @@ struct CleanEatsApp: App {
             Achievement.self,
             Relapse.self,
             CheckIn.self,
-            MeditationSession.self,
-            FocusTask.self
+            MeditationSession.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
